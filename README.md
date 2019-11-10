@@ -37,4 +37,6 @@ MySQL Setup:
 	- $ use SIRS26;
 	- $ CREATE USER 'SIRSGROUP26'@'localhost' IDENTIFIED BY 'group26';
 	- $ GRANT ALL PRIVILEGES ON SIRS26 TO 'SIRSGROUP26'@'localhost';
+	- Caso peça permissões também para tables específicas (Apenas mudar Users para outra table criada):
+	- $ GRANT ALL PRIVILEGES ON SIRS26.Users TO 'SIRSGROUP26'@'localhost';
 
