@@ -5,3 +5,5 @@ Virtual Machine Setup:
 - Clone the virtual machine to have Server and Client versions.
 - Default password: osboxes.org
 
+MySQL Setup:
+- Download python MySQL module: $ python pip install mysql-connector-python
