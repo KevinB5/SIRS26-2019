@@ -21,6 +21,8 @@ MySQL Setup:
 - Import Database:
 	- $ mysql -u root
 	- $ CREATE DATABASE SIRS26;
+	- $ quit
+	- You have to leave MySQL to import.
 	- $ mysql -u root -p SIRS26 < SIRS26.sql
 - Export Database:
 	- $ mysql -u root -p SIRS26 > SIRS26.sql
