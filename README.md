@@ -6,7 +6,8 @@ Virtual Machine Setup:
 - Default password: osboxes.org
 
 MySQL Setup:
-- Download python MySQL module: $ python pip install mysql-connector-python
+- Download python MySQL module: 
+	- $ python pip install mysql-connector-python
 - Install MySQL Server on Ubuntu: 
 	- $ apt-get install apache2
 	- $ /etc/init.d/apache2 start
@@ -17,5 +18,12 @@ MySQL Setup:
 	- $ apt-get install mariadb-server
 	- $ apt-get install mysql-server
 	- $ /etc/init.d/mysql start
-- 
+- Import Database:
+	- $ mysql -u root
+	- $ CREATE DATABASE SIRS26;
+	- $ mysql -u root -p SIRS26 < SIRS26.sql
+- Export Database:
+	- $ mysql -u root -p SIRS26 > SIRS26.sql
+- Remove Database:
+	- $ drop database SIRS26;
 
