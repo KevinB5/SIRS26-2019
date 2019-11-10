@@ -15,8 +15,8 @@ MySQL Setup:
 	- $ /etc/init.d/mysql start
 - (ALTERNATIVE) Install MySQL Server on Kali: 
 	- $ apt-get install apache2
+	- $ /etc/init.d/apache2 start
 	- $ apt-get install mariadb-server
-	- $ apt-get install mysql-server
 	- $ /etc/init.d/mysql start
 - Import Database:
 	- $ mysql -u root
