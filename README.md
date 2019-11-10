@@ -27,5 +27,14 @@ MySQL Setup:
 - Export Database:
 	- $ mysqldump -u root -pmysql SIRS26 > SIRS26.sql
 - Remove Database:
+	- $ mysql -u root
 	- $ drop database SIRS26;
+- Setup Database User (If it is not created on import):
+	- $ mysql -u root
+	Check users with:
+	- $ SELECT Host,User FROM mysql.user;
+	Create user:
+	- $ use SIRS26;
+	- $ CREATE USER 'SIRSGROUP26'@'localhost' IDENTIFIED BY 'group26';
+	- $ GRANT ALL PRIVILEGES ON SIRS26 TO 'SIRSGROUP26'@'localhost';
 
