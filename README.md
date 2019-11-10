@@ -7,3 +7,15 @@ Virtual Machine Setup:
 
 MySQL Setup:
 - Download python MySQL module: $ python pip install mysql-connector-python
+- Install MySQL Server on Ubuntu: 
+	- $ apt-get install apache2
+	- $ /etc/init.d/apache2 start
+	- $ apt-get install mysql-server
+	- $ /etc/init.d/mysql start
+- (ALTERNATIVE) Install MySQL Server on Kali: 
+	- $ apt-get install apache2
+	- $ apt-get install mariadb-server
+	- $ apt-get install mysql-server
+	- $ /etc/init.d/mysql start
+- 
+
