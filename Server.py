@@ -44,7 +44,10 @@ class ServerSocket:
 			print (">>>Mensagem Recebida : %s" % self.data)
 			
 			#autenticar
-			MySQL.authenticate(self.data)
+			if(MySQL.authenticate("user","user")):
+				print("USER AUTHENTICATED")
+			else:
+				print("USER NOT AUTHENTICATED")
 			#self.imageOut = open( "C:\\Users\\Documents\\Projecto\\demo_out.jpg", "wb" )
 			#self.imageOut.write(self.data)
 			#self.imageOut.close()
