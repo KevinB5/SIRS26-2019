@@ -25,6 +25,7 @@ class ServerSocket:
 			print (">>!!Este Utilizador nao tem permissao!!\n")
 			print(err)
 	
+	
 		print (">>Conexao Recebida")
 		print ( ">>>IP Remoto: %s" % self.clientSocket[0] )
 		print ( ">>>Porta Remota: %d" % self.clientSocket[1] )
