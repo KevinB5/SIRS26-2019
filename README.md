@@ -6,31 +6,34 @@ Virtual Machine Setup:
 - Default password: osboxes.org
 
 MySQL Setup:
+- Download python3 & pip3:
+	- $ sudo apt install python3
+	- $ sudo apt install python3-pip 
 - Download python MySQL module: 
-	- $ python pip install mysql-connector-python
+	- $ sudo pip3 install mysql-connector-python
 - Install MySQL Server on Ubuntu: 
-	- $ apt-get install apache2
-	- $ /etc/init.d/apache2 start
-	- $ apt-get install mysql-server
-	- $ /etc/init.d/mysql start
+	- $ sudo apt-get install apache2
+	- $ sudo /etc/init.d/apache2 start
+	- $ sudo apt-get install mysql-server
+	- $ sudo /etc/init.d/mysql start
 - (ALTERNATIVE) Install MySQL Server on Kali: 
-	- $ apt-get install apache2
-	- $ /etc/init.d/apache2 start
-	- $ apt-get install mariadb-server
-	- $ /etc/init.d/mysql start
+	- $ sudo apt-get install apache2
+	- $ sudo /etc/init.d/apache2 start
+	- $ sudo apt-get install mariadb-server
+	- $ sudo /etc/init.d/mysql start
 - Import Database:
-	- $ mysql -u root
+	- $ sudo mysql -u root
 	- $ CREATE DATABASE SIRS26;
 	- $ quit
 	- You have to leave MySQL to import.
-	- $ mysqldump -u root -pmysql SIRS26 < SIRS26.sql
+	- $ sudo mysqldump -u root -pmysql SIRS26 < SIRS26.sql
 - Export Database:
-	- $ mysqldump -u root -pmysql SIRS26 > SIRS26.sql
+	- $ sudo mysqldump -u root -pmysql SIRS26 > SIRS26.sql
 - Remove Database:
-	- $ mysql -u root
+	- $ sudo mysql -u root
 	- $ drop database SIRS26;
 - Setup Database User (If it is not created on import):
-	- $ mysql -u root
+	- $ sudo mysql -u root
 	- Check users with:
 	- $ SELECT Host,User FROM mysql.user;
 	- Create user:
@@ -39,4 +42,5 @@ MySQL Setup:
 	- $ GRANT ALL PRIVILEGES ON SIRS26 TO 'SIRSGROUP26'@'localhost';
 	- Caso peça permissões também para tables específicas (Apenas mudar Users para outra table criada):
 	- $ GRANT ALL PRIVILEGES ON SIRS26.Users TO 'SIRSGROUP26'@'localhost';
-
+- Create Table Users:
+	- Check Commands.txt
