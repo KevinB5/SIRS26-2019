@@ -28,8 +28,9 @@ def authenticate(user, password):
 			# print('Login Successful')
 			return True;
 		else:
-			sys.exit()
 			return False;
+			# sys.exit()
+
 
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
