@@ -44,3 +44,18 @@ MySQL Setup:
 	- $ GRANT ALL PRIVILEGES ON SIRS26.Users TO 'SIRSGROUP26'@'localhost';
 - Create Table Users:
 	- Check Commands.txt
+	
+	
+	
+	
+
+Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-echo-test-with-self-signed-certificate/ 
+
+- Create certificates:
+	- openssl genrsa -des3 -out server.orig.key 2048
+	- openssl rsa -in server.orig.key -out server.key
+	- openssl req -new -key server.key -out server.csr
+	- openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+
+
