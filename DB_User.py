@@ -1,15 +1,18 @@
 import mysql.connector
 import sys
 
-def authenticate(user, password):
-	try:
-		db = mysql.connector.connect(
+def connect():
+	db = mysql.connector.connect(
 			host="localhost",
 			user="SIRSGROUP26",
 			passwd="group26",
-			database="SIRS26"
+			database="SIRS26USERS"
 		)
+	return db
 
+def authenticate(user, password):
+	try:
+		
 		# UNCOMENT FOR USER & PASS CONSOLE INPUT
 		# username = raw_input("Insert your username:")
 		# password = raw_input("Insert your password:")

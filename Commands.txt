@@ -1,12 +1,63 @@
+create database SIRS26USERS;
+use SIRS26USERS;
+
 CREATE TABLE Users (
-id int(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-type INT(6),
+user_id int(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+auth_type INT(6) NOT NULL,
+group_id INT(6) NOT NULL,
 username VARCHAR(30) NOT NULL,
 password VARCHAR(30) NOT NULL,
 reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
 )
 ;
 
-INSERT INTO Users (username,password,type) VALUES ('user','user',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('Admin',1,'admin',1);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('Kevin',1,'kevin',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('TiagoM',1,'tiagom',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('TiagoS',1,'tiagos',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('Admin2',2,'admin2',1);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('Kevin2',2,'kevin2',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('TiagoM2',2,'tiagom',2);
+INSERT INTO Users (username,group_id,password,auth_type) VALUES ('TiagoS2',2,'tiagos',2);
 
-GRANT ALL PRIVILEGES ON SIRS26.Users TO 'SIRSGROUP26'@'localhost';
+GRANT ALL PRIVILEGES ON SIRS26USERS.Users TO 'SIRSGROUP26'@'localhost';
+_______________________________________________________________
+
+create database SIRS26SCOREBOARD;
+use SIRS26SCOREBOARD;
+
+CREATE TABLE Scoreboard (
+user_id int(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+group_id INT(6) NOT NULL,
+points INT(15) (DEFAULT 0),
+num_vul INT(10) (DEFAULT 0),
+last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
+)
+;
+
+INSERT INTO Users (user_id,group_id) VALUES (2,1);
+INSERT INTO Users (user_id,group_id) VALUES (3,1);
+INSERT INTO Users (user_id,group_id) VALUES (4,1);
+INSERT INTO Users (user_id,group_id) VALUES (6,2);
+INSERT INTO Users (user_id,group_id) VALUES (7,2);
+INSERT INTO Users (user_id,group_id) VALUES (8,2);
+
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (2,1,0,0);
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (3,1,0,0);
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (4,1,0,0);
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (6,2,0,0);
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (7,2,0,0);
+INSERT INTO Users (user_id,group_id,points,num_vul) VALUES (8,2,0,0);
+
+
+CREATE TABLE Vulnerability (
+id_vul int(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+user_id INT(6) NOT NULL,
+fingerprint VARCHAR(30) NOT NULL,
+name_vul VARCHAR(60) NOT NULL,
+insert_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
+)
+;
+
+
+
