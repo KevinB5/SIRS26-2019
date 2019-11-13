@@ -13,9 +13,12 @@ MySQL Setup:
 	- $ sudo pip3 install mysql-connector-python
 - Install MySQL Server on Ubuntu: 
 	- $ sudo apt-get install apache2
+	- On Mac: brew install httpd
 	- $ sudo /etc/init.d/apache2 start
+	- On Mac: sudo /usr/sbin/apachectl start
 	- $ sudo apt-get install mysql-server
 	- $ sudo /etc/init.d/mysql start
+	- On Mac:  mysql.server start
 - (ALTERNATIVE) Install MySQL Server on Kali: 
 	- $ sudo apt-get install apache2
 	- $ sudo /etc/init.d/apache2 start
