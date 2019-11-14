@@ -12,7 +12,8 @@ def connect():
 
 def authenticate(user, password):
 	try:
-		
+		db = connect()
+
 		# UNCOMENT FOR USER & PASS CONSOLE INPUT
 		# username = raw_input("Insert your username:")
 		# password = raw_input("Insert your password:")

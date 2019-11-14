@@ -26,25 +26,28 @@ MySQL Setup:
 	- $ sudo /etc/init.d/mysql start
 - Import Database:
 	- $ sudo mysql -u root
-	- $ CREATE DATABASE SIRS26;
+	- $ CREATE DATABASE SIRS26USERS;
 	- $ quit
 	- You have to leave MySQL to import.
-	- $ sudo mysqldump -u root -pmysql SIRS26 < SIRS26.sql
+	- $ sudo mysqldump -u root -pmysql SIRS26USERS < SIRS26USERS.sql
 - Export Database:
-	- $ sudo mysqldump -u root -pmysql SIRS26 > SIRS26.sql
+	- $ sudo mysqldump -u root -pmysql SIRS26USERS > SIRS26USERS.sql
 - Remove Database:
 	- $ sudo mysql -u root
-	- $ drop database SIRS26;
+	- $ drop database SIRS26USERS;
 - Setup Database User (If it is not created on import):
 	- $ sudo mysql -u root
 	- Check users with:
 	- $ SELECT Host,User FROM mysql.user;
 	- Create user:
-	- $ use SIRS26;
+	- $ use SIRS26USERS;
 	- $ CREATE USER 'SIRSGROUP26'@'localhost' IDENTIFIED BY 'group26';
-	- $ GRANT ALL PRIVILEGES ON SIRS26 TO 'SIRSGROUP26'@'localhost';
+	- $ GRANT ALL PRIVILEGES ON SIRS26USERS TO 'SIRSGROUP26'@'localhost';
+	- $ GRANT ALL PRIVILEGES ON SIRS26SCOREBOARD TO 'SIRSGROUP26'@'localhost';
 	- Caso peça permissões também para tables específicas (Apenas mudar Users para outra table criada):
-	- $ GRANT ALL PRIVILEGES ON SIRS26.Users TO 'SIRSGROUP26'@'localhost';
+	- $ GRANT ALL PRIVILEGES ON SIRS26USERS.Users TO 'SIRSGROUP26'@'localhost';
+	- $ GRANT ALL PRIVILEGES ON SIRS26SCOREBOARD.Scoreboard TO 'SIRSGROUP26'@'localhost';
+	- $ GRANT ALL PRIVILEGES ON SIRS26SCOREBOARD.Vulnerability TO 'SIRSGROUP26'@'localhost';
 - Create Table Users:
 	- Check Commands.txt
 	

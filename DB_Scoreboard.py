@@ -9,14 +9,9 @@ def connect():
 			database="SIRS26SCOREBOARD"
 		)
 
-def authenticate(user, password):
+def get_scoreboard(user, password):
 	try:
-		db = mysql.connector.connect(
-			host="localhost",
-			user="SIRSGROUP26",
-			passwd="group26",
-			database="SIRS26SCOREBOARD"
-		)
+		db = connect()
 
 		# UNCOMENT FOR USER & PASS CONSOLE INPUT
 		# username = raw_input("Insert your username:")
