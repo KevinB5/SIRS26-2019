@@ -30,6 +30,7 @@ MySQL Setup:
 	- $ quit
 	- You have to leave MySQL to import.
 	- $ sudo mysqldump -u root -pmysql SIRS26USERS < SIRS26USERS.sql
+	- On Mac : sudo mysqldump -u root mysql SIRS26USERS < SIRS26USERS.sql
 - Export Database:
 	- $ sudo mysqldump -u root -pmysql SIRS26USERS > SIRS26USERS.sql
 - Remove Database:
