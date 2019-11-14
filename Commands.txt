@@ -28,6 +28,7 @@ use SIRS26SCOREBOARD;
 
 CREATE TABLE Scoreboard (
 user_id int(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+username VARCHAR(30) NOT NULL,
 group_id INT(6) NOT NULL,
 points INT(15) DEFAULT 0,
 num_vul INT(10) DEFAULT 0,
@@ -35,19 +36,19 @@ last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 ;
 
-INSERT INTO Scoreboard (user_id,group_id) VALUES (2,1);
-INSERT INTO Scoreboard (user_id,group_id) VALUES (3,1);
-INSERT INTO Scoreboard (user_id,group_id) VALUES (4,1);
-INSERT INTO Scoreboard (user_id,group_id) VALUES (6,2);
-INSERT INTO Scoreboard (user_id,group_id) VALUES (7,2);
-INSERT INTO Scoreboard (user_id,group_id) VALUES (8,2);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (2,'Kevin',1);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (3,'TiagoM',1);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (4,'TiagoS',1);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (6,'Kevin2',2);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (7,'TiagoM2',2);
+INSERT INTO Scoreboard (user_id,username,group_id) VALUES (8,'TiagoS2',2);
 
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (2,1,0,0);
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (3,1,0,0);
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (4,1,0,0);
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (6,2,0,0);
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (7,2,0,0);
-INSERT INTO Scoreboard (user_id,group_id,points,num_vul) VALUES (8,2,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (2,'Kevin',1,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (3,'TiagoM',1,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (4,'TiagoS2',1,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (6,'Kevin2',2,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (7,'TiagoM2',2,0,0);
+INSERT INTO Scoreboard (user_id,username,group_id,points,num_vul) VALUES (8,'TiagoS2',2,0,0);
 
 
 CREATE TABLE Vulnerability (

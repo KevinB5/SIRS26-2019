@@ -8,31 +8,21 @@ def connect():
 			passwd="group26",
 			database="SIRS26SCOREBOARD"
 		)
+	return db
 
-def get_scoreboard(user, password):
+def get_group_scoreboard(group_id):
 	try:
 		db = connect()
 
-		# UNCOMENT FOR USER & PASS CONSOLE INPUT
-		# username = raw_input("Insert your username:")
-		# password = raw_input("Insert your password:")
-
-		# Username and Password coming from Server.py
-		username = user
-		password = password
+		group_id = str(group_id)
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username FROM Users WHERE username=%s AND password=%s;"
-		parameters = (username,password)
+		query = "SELECT username,points,num_vul FROM Scoreboard WHERE group_id=%s ORDER BY points DESC LIMIT 10"
+		parameters = (group_id)
 		cursor.execute(query,parameters)
-		result = cursor.fetchone()
+		result = cursor.fetchall()
 
-		if result != None:
-			# UNCOMENT FOR DATABASE LOGIN DEBUG
-			# print('Login Successful')
-			return True;
-		else:
-			return False;
-			# sys.exit()
+		print(result)
+		return result;
 
 
 	except Exception as e:
@@ -44,3 +34,4 @@ def get_scoreboard(user, password):
 		if db.is_connected():
 			cursor.close()
 			db.close()
+

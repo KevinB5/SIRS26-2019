@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS `Scoreboard`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Scoreboard` (
   `user_id` int(6) NOT NULL AUTO_INCREMENT,
+  `username` varchar(30) NOT NULL,
   `group_id` int(6) NOT NULL,
   `points` int(15) DEFAULT 0,
   `num_vul` int(10) DEFAULT 0,
@@ -38,7 +39,7 @@ CREATE TABLE `Scoreboard` (
 
 LOCK TABLES `Scoreboard` WRITE;
 /*!40000 ALTER TABLE `Scoreboard` DISABLE KEYS */;
-INSERT INTO `Scoreboard` VALUES (2,1,0,0,'2019-11-14 15:22:57'),(3,1,0,0,'2019-11-14 15:22:57'),(4,1,0,0,'2019-11-14 15:22:57'),(6,2,0,0,'2019-11-14 15:22:57'),(7,2,0,0,'2019-11-14 15:22:58'),(8,2,0,0,'2019-11-14 15:22:58');
+INSERT INTO `Scoreboard` VALUES (2,'Kevin',1,0,0,'2019-11-14 15:38:49'),(3,'TiagoM',1,0,0,'2019-11-14 15:38:49'),(4,'TiagoS',1,0,0,'2019-11-14 15:38:49'),(6,'Kevin2',2,0,0,'2019-11-14 15:38:49'),(7,'TiagoM2',2,0,0,'2019-11-14 15:38:49'),(8,'TiagoS2',2,0,0,'2019-11-14 15:38:50');
 /*!40000 ALTER TABLE `Scoreboard` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -77,4 +78,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-11-14 15:25:46
+-- Dump completed on 2019-11-14 15:39:15
