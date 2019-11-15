@@ -1,5 +1,6 @@
 import logging
 from imp import reload
+import hashlib
 
 
 
@@ -15,6 +16,7 @@ def configUserLog(logging_level):
 def writeUserLog(user_id,username,action, sql_table, acceptance,type_of_message):
 	try:
 		# SQL table should be hashed 
+		sql_table = password = hashlib.sha256(sql_table.encode()).hexdigest()
 		message = """USER_ID:{user_id}; USERNAME:{username}; ACTION:{action}; \
 SQL_TABLE:{sql_table}; ACCEPTANCE:{acceptance};""".format(user_id=user_id,username=username, \
 	action=action,sql_table=sql_table,acceptance=acceptance)

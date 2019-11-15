@@ -84,3 +84,7 @@ def vulnerability_exist(fingerprint):
 		if db.is_connected():
 			cursor.close()
 			db.close()
+
+
+#TODO: update score from user
+#TODO: add vulnerability

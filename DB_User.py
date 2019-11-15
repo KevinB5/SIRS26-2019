@@ -20,7 +20,7 @@ def authenticate(user, password):
 
 		# Username and Password coming from Server.py
 		username = user
-		password = password
+		password = hashlib.sha256(password.encode()).hexdigest()
 		cursor = db.cursor(prepared=True)
 		query = "SELECT username FROM Users WHERE username=%s AND password=%s;"
 		parameters = (username,password)

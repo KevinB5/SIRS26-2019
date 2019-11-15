@@ -45,4 +45,11 @@ def authenticate(user, password):
 			cursor.close()
 			db.close()
 
-
+print('admin:',hashlib.sha256('admin'.encode()).hexdigest())
+print('kevin:',hashlib.sha256('kevin'.encode()).hexdigest())
+print('tiagom:',hashlib.sha256('tiagom'.encode()).hexdigest())
+print('tiagos:',hashlib.sha256('tiagos'.encode()).hexdigest())
+print('admin2:',hashlib.sha256('admin2'.encode()).hexdigest())
+print('kevin2:',hashlib.sha256('kevin2'.encode()).hexdigest())
+print('tiagom2:',hashlib.sha256('tiagom2'.encode()).hexdigest())
+print('tiagos2:',hashlib.sha256('tiagos2'.encode()).hexdigest())
