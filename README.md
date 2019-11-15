@@ -69,4 +69,4 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 	- openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 
-
+- File Server.py uses package re. No need to install comes with python3 already
