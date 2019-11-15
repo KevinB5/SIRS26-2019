@@ -1,0 +1,18 @@
+# Contéudo para escrever no report
+
+MySQL:
+	- Porque MySQL
+	- Métodos de segurança
+	- Prepared Statements
+	- Como foi estruturado a BD
+	- Porque dois BD's
+
+Log:
+	- Porque usar logs
+	- Como foram organizados os logs
+	- Quem pode aceder os logs
+	- Métodos de segurança
+
+
+	
+
