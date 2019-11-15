@@ -1,9 +1,11 @@
 import logging
 from imp import reload
 
+
+
 def configUserLog(logging_level):
 	reload(logging)
-	logging.basicConfig(filename='./log/user.log'
+	logging.basicConfig(filename="./log/user.log"
 		, level= logging_level\
 	#	,filemode='w' \
 		,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s' \
@@ -17,22 +19,26 @@ def writeUserLog(user_id,username,action, sql_table, acceptance,type_of_message)
 SQL_TABLE:{sql_table}; ACCEPTANCE:{acceptance};""".format(user_id=user_id,username=username, \
 	action=action,sql_table=sql_table,acceptance=acceptance)
 
-		if(type_of_message.lower() == 'info' ):
+		if(type_of_message.lower() == "info" ):
 			configUserLog(logging.INFO)
 			logging.info(message)
-		elif(type_of_message.lower() == 'warning' ):
+		elif(type_of_message.lower() == "warning" ):
 			configUserLog(logging.WARNING)
 			logging.warning(message)
-		elif(type_of_message.lower() == 'error' ):
+		elif(type_of_message.lower() == "error" ):
 			configUserLog(logging.ERROR)
 			logging.error(message)
-		elif(type_of_message.lower() == 'critical' ):
+		elif(type_of_message.lower() == "critical" ):
 			configUserLog(logging.CRITICAL)
 			logging.critical(message)
 		
 	except Exception as e:
 		print(e)
 
+						
+#
+#
+#
 def configSystemLog(logging_level):
 	reload(logging)
 	logging.basicConfig(filename='./log/system.log'
@@ -48,22 +54,23 @@ def writeSystemLog(topic, event,type_of_message):
 		message = """TOPIC:{topic}; EVENT:{event};""".\
 		format(topic=topic,event=event)
 
-		if(type_of_message.lower() == 'info' ):
+		if(type_of_message.lower() == "info" ):
 			configSystemLog(logging.INFO)
 			logging.info(message)
-		elif(type_of_message.lower() == 'warning' ):
+		elif(type_of_message.lower() == "warning" ):
 			configSystemLog(logging.WARNING)
 			logging.warning(message)
-		elif(type_of_message.lower() == 'error' ):
+		elif(type_of_message.lower() == "error" ):
 			configSystemLog(logging.ERROR)
 			logging.error(message)
-		elif(type_of_message.lower() == 'critical' ):
+		elif(type_of_message.lower() == "critical" ):
 			configSystemLog(logging.CRITICAL)
 			logging.critical(message)
 		
 	except Exception as e:
 		print(e)
 
+						
 '''
 # To test the log
 writeUserLog('2','Kevin','Login','Users','Accept','info')
