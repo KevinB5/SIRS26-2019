@@ -51,10 +51,14 @@ MySQL Setup:
 	- $ GRANT ALL PRIVILEGES ON SIRS26SCOREBOARD.Vulnerability TO 'SIRSGROUP26'@'localhost';
 - Create Table Users:
 	- Check Commands.txt
-	
-	
-	
-	
+
+- How to use log (python):
+	- After importing file:
+		- import System_log.py
+	- User action (Type of message must be one of these: 'info','warning','error','critical'):
+		- System_log.writeUserLog('user_id', 'username', 'action', 'sql_table', 'acceptance', 'type_of_message')
+	- System event (Type of message must be one of these: 'info','warning','error','critical'):
+		- System_log.writeSystemLog('topic', 'event','type_of_message')
 
 Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-echo-test-with-self-signed-certificate/ 
 
