@@ -1,0 +1,7 @@
+11/15/2019 09:36:29 AM - root - WARNING - user_id:; username:Unknow; action:Login; sql_table:Users; acceptance:Reject;
+11/15/2019 09:36:41 AM - root - INFO - user_id:2; username:Kevin; action:Login; sql_table:Users; acceptance:Accept;
+11/15/2019 09:36:41 AM - root - WARNING - user_id:; username:Unknow; action:Login; sql_table:Users; acceptance:Reject;
+11/15/2019 09:37:25 AM - root - INFO - USER_ID:2; USERNAME:Kevin; ACTION:Login; SQL_TABLE:Users; ACCEPTANCE:Accept;
+11/15/2019 09:37:25 AM - root - WARNING - USER_ID:; USERNAME:Unknow; ACTION:Login; SQL_TABLE:Users; ACCEPTANCE:Reject;
+11/15/2019 09:37:35 AM - root - INFO - USER_ID:2; USERNAME:Kevin; ACTION:Login; SQL_TABLE:Users; ACCEPTANCE:Accept;
+11/15/2019 09:37:35 AM - root - WARNING - USER_ID:; USERNAME:Unknow; ACTION:Login; SQL_TABLE:Users; ACCEPTANCE:Reject;

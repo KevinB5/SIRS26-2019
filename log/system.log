@@ -1,0 +1,3 @@
+11/15/2019 09:37:25 AM - root - CRITICAL - TOPIC:Server; EVENT:Server crashed;
+11/15/2019 09:37:35 AM - root - ERROR - TOPIC:Database; EVENT:Connection to database failed;
+11/15/2019 09:37:35 AM - root - CRITICAL - TOPIC:Server; EVENT:Server crashed;
