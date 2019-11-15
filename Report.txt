@@ -13,6 +13,9 @@ Log:
 	- Quem pode aceder os logs
 	- Métodos de segurança
 
+Python Security Issues:
+
+	- Read this https://linuxgazette.net/issue83/evans.html and add to report
 
 	
 
