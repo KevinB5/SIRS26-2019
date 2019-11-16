@@ -143,4 +143,4 @@ def vulnerability_exist(fingerprint):
 			db.close()
 
 
-print(add_score_vulnerability(2,100,'vuln2'))
+
