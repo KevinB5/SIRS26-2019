@@ -78,5 +78,6 @@ insert_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 ;
 
+INSERT INTO Vulnerability (user_id,fingerprint,name_vul) VALUES (2,'caed0ac82c8208f953fef555efd6fc9e03a6737384c31332830ab197013e228a','vuln1');
 
 
