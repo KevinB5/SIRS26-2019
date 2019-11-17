@@ -1,0 +1,3 @@
+Podemos usar TLS para certificar comunicação?
+
+Podem todas as key pairs serem já predefinadamente criados?
