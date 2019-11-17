@@ -1,3 +1,12 @@
-Podemos usar TLS para certificar comunicação?
+	- Podemos usar TLS para certificar comunicação?
 
-Podem todas as key pairs serem já predefinadamente criados?
+	- Podem todas as key pairs serem já predefinadamente criados?
+
+
+	- Vulnerability Detection System (A intenção é o nosso sistema conseguir 
+		detetar tentativas de hack e bloquear? Tornar o sistema seguro?)
+	
+	- A nivel de autorização (read, write, delete) estamos a validar através de um valor associado a cada user na BD,
+		existe a necessidade de configurar o user "root" nessa BD que tem acesso a tudo?
+		Pros: Controlo a nível de apenas o root tem essa autorização
+		Cons: Identity theft do root permite acesso total ao sistema
