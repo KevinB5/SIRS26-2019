@@ -82,7 +82,7 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 
 	- Step 2 --- Configure Firewall in Ubuntu: ( https://www.geektechlab.com/6-simple-steps-to-configure-firewall-on-ubuntu-18-04/ )
 		
-		- Install ufw - apt-get install ufw
+		- Install ufw : apt-get install ufw
 		
 		- Setup default policies : 
 				- sudo ufw default deny incoming
