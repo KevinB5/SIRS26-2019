@@ -85,7 +85,9 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 		- Install ufw : apt-get install ufw
 		
 		- Setup default policies : 
+		
 				- sudo ufw default deny incoming
+				
 				- sudo ufw default allow outgoing
 				
 		- Allow SSH Connections :
