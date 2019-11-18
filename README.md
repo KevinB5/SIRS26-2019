@@ -82,23 +82,24 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 
 	- Step 2 --- Configure Firewall in Ubuntu: ( https://www.geektechlab.com/6-simple-steps-to-configure-firewall-on-ubuntu-18-04/ )
 		
-		- Install ufw : apt-get install ufw
+		- Install ufw : apt-get install ufw ( Step 2.1 --- must be done )
 		
-		- Setup default policies : 
+		- Setup default policies : ( Step 2.2 --- must be done )
 		
 				- sudo ufw default deny incoming
 				
 				- sudo ufw default allow outgoing
 				
-		- Allow SSH Connections :
+		- Allow SSH Connections : 
 		
-				- sudo ufw allow ssh ( port 22 )
+				- sudo ufw allow ssh ( port 22 ) ( Step 2.3 --- must be done )
 
 				(If SSH daemon is configured on a port other than the default, we can specify that for
 				listening to that port in our command. If we configure SSH on it, 
 				the following command listens to port 2244.)
 				
-				- sudo ufw allow 2244 
+				( Step 2.4 --- not to be done this and the others below are just for documentation purposes )
+				- sudo ufw allow 2244  
 				
 				( We will use the following commands to specify the rule for UFW to allow incoming connections
 				  on a specific port. For example, if we want our server to listen to HTTP on port 82,
