@@ -46,7 +46,7 @@ def authenticate(user, password):
 			cursor.close()
 			db.close()
 
-def authorizated(username, auth_type):
+def authorization(username, auth_type):
 	try:
 		db = connect()
 
@@ -81,3 +81,39 @@ def authorizated(username, auth_type):
 		if db.is_connected():
 			cursor.close()
 			db.close()
+
+def getUsersList():
+	try:
+		db = connect()
+		cursor = db.cursor(prepared=True)
+		query = "SELECT username FROM Users"
+		cursor.execute(query)
+		result = cursor.fetchall()
+		return result;
+
+	except Exception as e:
+		print(e)
+
+	finally:
+		if db.is_connected():
+			cursor.close()
+			db.close()
+
+def getGroupIDList():
+	try:
+		db = connect()
+		cursor = db.cursor(prepared=True)
+		query = "SELECT group_id FROM Users"
+		cursor.execute(query)
+		result = cursor.fetchall()
+		return result;
+
+
+	except Exception as e:
+		print(e)
+
+	finally:
+		if db.is_connected():
+			cursor.close()
+			db.close()
+
