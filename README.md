@@ -70,3 +70,61 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 
 
 - File Server.py uses package re. No need to install comes with python3 already
+
+
+
+
+- FIREWALL DEPLOYMENT AND TESTS
+
+	- Step 1 --- Make Virtual Machines talk to each other :
+
+		- https://www.youtube.com/watch?v=8V4Ez4NUHAk
+
+	- Step 2 --- Configure Firewall in Ubuntu: ( https://www.geektechlab.com/6-simple-steps-to-configure-firewall-on-ubuntu-18-04/ )
+		
+		- Install ufw - apt-get install ufw
+		
+		- Setup default policies : 
+				- sudo ufw default deny incoming
+				- sudo ufw default allow outgoing
+				
+		- Allow SSH Connections :
+		
+				- sudo ufw allow ssh ( port 22 )
+
+				(If SSH daemon is configured on a port other than the default, we can specify that for
+				listening to that port in our command. If we configure SSH on it, 
+				the following command listens to port 2244.)
+				
+				- sudo ufw allow 2244 
+				
+				( We will use the following commands to specify the rule for UFW to allow incoming connections
+				  on a specific port. For example, if we want our server to listen to HTTP on port 82,
+				  the command to execute is below. )
+				  
+				- sudo ufw allow http
+				- sudo ufw allow 82
+			
+				( For https we do )
+				
+				- sudo ufw allow https
+			
+				( We can also give a particular range of ports, which means more than one port. 
+				  One thing to note is that we have to specify protocol in the command (tcp or udp).)
+				  
+				- sudo ufw allow 5000:5004/tcp
+				- sudo ufw allow 5000:5004/udp
+
+				( Sometimes we want to deny specific connections using IP address of the source. )
+
+				- sudo ufw deny from 113.105.203.97
+
+				With the following command, we can check the status of UFW.
+
+				- sudo ufw status verbose
+			
+ 		Another way to setup firewall :  ( https://www.geeksforgeeks.org/how-to-setup-firewall-in-linux/ )
+		
+	
+
+
