@@ -86,7 +86,7 @@ class ServerSocket:
 	# Receive Message
 	#
 	def messageTransfer(self, command="default"):
-
+		global userAuthenticated
 		try:
 			self.data = b""
 			string_data=""
@@ -98,6 +98,7 @@ class ServerSocket:
 			
 			split_decoded=decoded.split("!-!")
 			command=split_decoded[0]
+			print(command)
 
 			# deal with different possible received messages
 			try:
@@ -191,6 +192,7 @@ class ServerSocket:
 	# Autenticar user
 	#
 	def userLogin(self, user, pw, goodInput):
+		global userAuthenticated
 		if( goodInput ):
 			
 			if(MySQL.authenticate(user,pw)):
@@ -210,6 +212,7 @@ class ServerSocket:
 
 x = ServerSocket()
 x.socketConnect()
+userAuthenticated=False
 
 while(1):
 	x.messageTransfer()
