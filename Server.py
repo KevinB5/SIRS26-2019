@@ -60,11 +60,22 @@ class ServerSocket:
 
 
 	#
-	# Sanitize the Input
+	# Sanitize the Input for username
 	#
-	def sanitize_input(self, username):
+	def sanitize_input_username(self, username):
 
 		if( re.match("^[A-Za-z0-9_]*$", username) ):
+			# username only uses letters, numbers and "_"
+			return 1
+		else:
+			return 0
+
+	#
+	# Sanitize the Input for commands
+	#
+	def sanitize_input_command(self, command):
+
+		if( re.match("^[A-Za-z_]*$", command) ):
 			# username only uses letters, numbers and "_"
 			return 1
 		else:
@@ -75,7 +86,7 @@ class ServerSocket:
 	# Receive Message
 	#
 	def messageTransfer(self, command="default"):
-
+		global userAuthenticated
 		try:
 			self.data = b""
 			string_data=""
@@ -87,6 +98,7 @@ class ServerSocket:
 			
 			split_decoded=decoded.split("!-!")
 			command=split_decoded[0]
+			print(command)
 
 			# deal with different possible received messages
 			try:
@@ -96,11 +108,72 @@ class ServerSocket:
 					password = split_decoded[2]
 					
 					# sanitizing input ....
-					sanitizeOutput = self.sanitize_input(username)
+					sanitizeOutput = self.sanitize_input_username(username)
 					
 					self.userLogin(username,password, sanitizeOutput)
-			
+
+				elif(command == "scoreboardMenu"):
+					if(userAuthenticated==True):
+						print("SENDING SCOREBOARDMENU TO USER\n")
+						self.connssl.send(b"SCOREBOARDMENU")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")											
+
+
+				elif(command == "submitMenu" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("SENDING SUBMIT MENU TO USER\n")
+						self.connssl.send(b"SUBMITMENU")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")						
+
+
+				elif(command == "checkScore" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("SENDING USER SCORE\n")
+						self.connssl.send(b"CHECKSCORE")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")						
+
+
+				elif(command == "checkVulnerability" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("SENDING USER VULNERABILITIES\n")
+						self.connssl.send(b"CHECKVULNERABILITY")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")						
+
+				elif(command == "checkFingerprint" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("SENDING USER FINGERPRINTS\n")
+						self.connssl.send(b"CHECKFINGERPRINTS")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")
+
+				elif(command == "submitVulnerability" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("ASKING USER FOR VULNERABILITY\n")
+						self.connssl.send(b"SUBMITVULNERABILITY")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")		
+
+				elif(command == "submitFingerprint" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						print("ASKING USER FOR FINGERPRINT\n")
+						self.connssl.send(b"SUBMITFINGERPRINT")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTH")		
+
 				elif(command == "exit"):
+
+
 					self.socketClose()
 				
 				else:
@@ -119,15 +192,18 @@ class ServerSocket:
 	# Autenticar user
 	#
 	def userLogin(self, user, pw, goodInput):
+		global userAuthenticated
 		if( goodInput ):
 			
 			if(MySQL.authenticate(user,pw)):
 				print("USER AUTHENTICATED!!!\n")
 				self.connssl.send(b"USER AUTHENTICATED!!!")
+				userAuthenticated=True
 	
 			else:
 				print("USER NOT AUTHENTICATED!!!\n")
 				self.connssl.send(b"USER NOT AUTHENTICATED!!!")
+				userAuthenticated=False
 		else:
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
 			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
@@ -136,6 +212,7 @@ class ServerSocket:
 
 x = ServerSocket()
 x.socketConnect()
+userAuthenticated=False
 
 while(1):
 	x.messageTransfer()
