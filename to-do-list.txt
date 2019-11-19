@@ -1,0 +1,5 @@
+Server Error Handling ideas:
+	- Analisar a existência de DOS
+	- Detectar tentativa de SQL Injection
+	- Detectar brute force 
+	- Inserir ficheiros com scripts mal intencionados

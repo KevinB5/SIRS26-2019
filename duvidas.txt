@@ -10,3 +10,8 @@
 		existe a necessidade de configurar o user "root" nessa BD que tem acesso a tudo?
 		Pros: Controlo a nível de apenas o root tem essa autorização
 		Cons: Identity theft do root permite acesso total ao sistema
+
+	- Detecção de ataques no servidor: criar uma blacklist antes de bloquear? Ou bloquear instantaneamente? O bloqueio é 			temporário ou permanente?
+
+	- Se server cair, temos que garantir o continuamente do funcionamento do sistema? (Byzantino) 
+		Ou chega reiniciar o server (Ignorar este caso)
