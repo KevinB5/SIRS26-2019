@@ -1,17 +1,22 @@
-	- Podemos usar TLS para certificar comunicação?
+	- Podemos usar SSL para certificar comunicação?
+	Sim
 
-	- Podem todas as key pairs serem já predefinadamente criados?
+	#- Podem todas as key pairs serem já predefinadamente criados?
+	PKI comunica diretamente com Server e Cliente.	
 
-
-	- Vulnerability Detection System (A intenção é o nosso sistema conseguir 
-		detetar tentativas de hack e bloquear? Tornar o sistema seguro?)
+	- Vulnerability Detection System (A intenção é o nosso sistema conseguir detetar tentativas de hack e bloquear? Tornar o sistema seguro?)
 	
-	- A nivel de autorização (read, write, delete) estamos a validar através de um valor associado a cada user na BD,
-		existe a necessidade de configurar o user "root" nessa BD que tem acesso a tudo?
+	- A nivel de autorização (read, write, delete) estamos a validar através de um valor associado a cada user na BD, existe a necessidade de configurar o user "root" nessa BD que tem acesso a tudo?
 		Pros: Controlo a nível de apenas o root tem essa autorização
-		Cons: Identity theft do root permite acesso total ao sistema
+		Cons: Identity theft do root permite acesso total ao sistema	
 
 	- Detecção de ataques no servidor: criar uma blacklist antes de bloquear? Ou bloquear instantaneamente? O bloqueio é 			temporário ou permanente?
+	
 
 	- Se server cair, temos que garantir o continuamente do funcionamento do sistema? (Byzantino) 
 		Ou chega reiniciar o server (Ignorar este caso)
+	Basta reboot
+	
+
+	- Password tem que ter salt? Fazemos hash mais que uma vez?
+	
