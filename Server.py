@@ -1,9 +1,14 @@
-import socket, ssl, MySQL, re
+import socket, ssl, MySQL, re, AuthManager
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
+#Global Variables
+
+userAuthenticated=False
+userAuthorized=False
+username=''
 
 class ServerSocket:
 	
@@ -87,6 +92,8 @@ class ServerSocket:
 	#
 	def messageTransfer(self, command="default"):
 		global userAuthenticated
+		global username
+		global userAuthorized
 		try:
 			self.data = b""
 			string_data=""
@@ -132,41 +139,75 @@ class ServerSocket:
 
 				elif(command == "checkScore" and userAuthenticated==True ):
 					if(userAuthenticated==True):
-						print("SENDING USER SCORE\n")
-						self.connssl.send(b"CHECKSCORE")
+						self.getAuthorization(1, username)
+						if(userAuthorized==True):
+							print("SENDING USER SCORE\n")
+							self.connssl.send(b"CHECKSCORE")
+						else:
+							print("USER NOT AUTHORIZED\n")
+							self.connssl.send(b"NO AUTHORIZATION")
 					else:
 						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")						
+						self.connssl.send(b"NO AUTHENTICATION")
+
+				elif(command == "checkTeamScore" and userAuthenticated==True ):
+					if(userAuthenticated==True):
+						self.getAuthorization(2, username)
+						if(userAuthorized==True):
+							print("SENDING TEAM SCORE\n")
+							self.connssl.send(b"CHECKTEAMSCORE")
+						else:
+							print("USER NOT AUTHORIZED\n")
+							self.connssl.send(b"NO AUTHORIZATION")
+					else:
+						print("USER NOT AUTHENTICATED\n")
+						self.connssl.send(b"NO AUTHENTICATION")					
 
 
 				elif(command == "checkVulnerability" and userAuthenticated==True ):
 					if(userAuthenticated==True):
-						print("SENDING USER VULNERABILITIES\n")
-						self.connssl.send(b"CHECKVULNERABILITY")
+						self.getAuthorization(3, username)
+						if(userAuthorized==True):
+							print("SENDING TEAM VULNERABILITIES\n")
+							self.connssl.send(b"CHECKVULNERABILITY")
+						else:
+							print("USER NOT AUTHORIZED\n")
+							self.connssl.send(b"NO AUTHORIZATION")
+						
 					else:
 						print("USER NOT AUTHENTICATED\n")
 						self.connssl.send(b"NO AUTH")						
 
 				elif(command == "checkFingerprint" and userAuthenticated==True ):
 					if(userAuthenticated==True):
-						print("SENDING USER FINGERPRINTS\n")
-						self.connssl.send(b"CHECKFINGERPRINTS")
+						self.getAuthorization(4, username)
+						if(userAuthorized==True):
+							print("SENDING TEAM FINGERPRINTS\n")
+							self.connssl.send(b"CHECKFINGERPRINTS")
+						else:
+							print("USER NOT AUTHORIZED\n")
+							self.connssl.send(b"NO AUTHORIZATION")
 					else:
 						print("USER NOT AUTHENTICATED\n")
 						self.connssl.send(b"NO AUTH")
 
 				elif(command == "submitVulnerability" and userAuthenticated==True ):
 					if(userAuthenticated==True):
-						print("ASKING USER FOR VULNERABILITY\n")
-						self.connssl.send(b"SUBMITVULNERABILITY")
+						self.getAuthorization(5, username)
+						if(userAuthorized==True):
+							print("ASKING USER FOR VULNERABILITY\n")
+							self.connssl.send(b"SUBMITVULNERABILITY")
 					else:
 						print("USER NOT AUTHENTICATED\n")
 						self.connssl.send(b"NO AUTH")		
 
 				elif(command == "submitFingerprint" and userAuthenticated==True ):
 					if(userAuthenticated==True):
-						print("ASKING USER FOR FINGERPRINT\n")
-						self.connssl.send(b"SUBMITFINGERPRINT")
+						self.getAuthorization(6, username)
+						if(userAuthorized==True):
+							print("ASKING USER FOR FINGERPRINT\n")
+							self.connssl.send(b"SUBMITFINGERPRINT")
+
 					else:
 						print("USER NOT AUTHENTICATED\n")
 						self.connssl.send(b"NO AUTH")		
@@ -208,11 +249,18 @@ class ServerSocket:
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
 			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
 
-
+	def getAuthorization(self, operation, user):
+		global userAuthorized
+		if(AuthManager.getAuthorizationValues(operation, user)):
+			userAuthorized=True
+			return userAuthorized
+		else:
+			userAuthorized=False
+			return userAuthorized
 
 x = ServerSocket()
 x.socketConnect()
-userAuthenticated=False
+
 
 while(1):
 	x.messageTransfer()

@@ -8,9 +8,11 @@ ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs = ssl.CERT_REQUI
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
+# Global Variables
+username =''
 
 def mainMenu():
-		
+	global username
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: LOGIN")
 	print("0: EXIT")
@@ -69,6 +71,8 @@ def secondMenu():
 	if (command=="1"):
 		command_as_string = "scoreboardMenu"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -84,6 +88,8 @@ def secondMenu():
 	elif (command=="2"):
 		command_as_string = "submitMenu"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -91,7 +97,7 @@ def secondMenu():
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="SUBMITMENU"):
-			scoreboardMenu()
+			submitMenu()
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu()
@@ -110,6 +116,7 @@ def scoreboardMenu():
 	print("1: CHECK SCORE")
 	print("2: CHECK VULNERABILITIES")
 	print("3: CHECK FINGERPRINTS")
+	print("4: CHECK TEAM SCORE")
 	print("0: LAST MENU")
 	# ask user for input
 	command=input()
@@ -117,6 +124,8 @@ def scoreboardMenu():
 	if (command=="1"):
 		command_as_string = "checkScore"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 		# message received from server
@@ -134,6 +143,8 @@ def scoreboardMenu():
 	elif (command=="2"):
 		command_as_string = "checkVulnerability"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -153,6 +164,8 @@ def scoreboardMenu():
 	elif (command=="3"):
 		command_as_string = "checkFingerprint"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -162,6 +175,27 @@ def scoreboardMenu():
 
 		if(str(mess, "utf-8")=="CHECKFINGERPRINTS"):
 			print("THERE IS NO FINGERPRINTS")
+			scoreboardMenu()
+
+		else:
+			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
+			scoreboardMenu()
+
+	elif (command=="4"):
+		command_as_string = "checkTeamScore"+"!-!"
+		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
+		EOF = b"\n\r##"
+		ssl_sock.send(EOF)
+		# message received from server
+		mess = ssl_sock.recv(1024)
+		print( "\n>>", str(mess, "utf-8") )
+
+		if(str(mess, "utf-8")=="CHECKTEAMSCORE"):
+			print("USER 1 SCORE IS 20")
+			print("USER 2 SCORE IS 200")
+			print("USER 3 SCORE IS 500")
 			scoreboardMenu()
 
 		else:
@@ -189,6 +223,8 @@ def submitMenu():
 	if (command=="1"):
 		command_as_string = "submitVulnerability"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -208,6 +244,8 @@ def submitMenu():
 	elif (command=="2"):
 		command_as_string = "submitFingerprint"+"!-!"
 		ssl_sock.send(command_as_string.encode())
+		username_as_string = username+"!-!"
+		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
