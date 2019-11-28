@@ -127,7 +127,11 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 				- sudo ufw status verbose
 			
  		Another way to setup firewall :  ( https://www.geeksforgeeks.org/how-to-setup-firewall-in-linux/ )
-		
+
+Python package to encrypt:
+- $pip install pycrypto
+- How to use: https://www.novixys.com/blog/using-aes-encryption-decryption-python-pycrypto/
+- https://stackoverflow.com/questions/30056762/rsa-encryption-and-decryption-in-python
 	
 
 
