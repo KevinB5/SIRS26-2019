@@ -10,6 +10,9 @@ class Client_NS:
 		self.id = my_id
 		self.my_key_pair = None
 		self.shared_keys = None
+		self.session_key = None
+        self.iv = None
+		self.server = None
 
     def get_public_key(entity):
     	if self.shared_keys.hasOwnProperty(entity):
@@ -20,7 +23,7 @@ class Client_NS:
     def save_public_key(entity,public_key):
     	self.shared_keys[entity] = public_key
 
-    def generate_key_pair():
+    	def generate_key_pair():
 		self.my_key_pair = RSA.generate(1024, Random.new().read)
 
     def round1_server():
@@ -28,55 +31,45 @@ class Client_NS:
     		my_public_key = None
     	else
     		my_public_key = self.my_key_pair.publickey
+
     	message = {'source_public_key':my_public_key,'source':self.id}
     	return message
 
     def round2_trustmanager(server_response):
+    	if self.my_key_pair == None:
+    		my_public_key = None
+    	else
+    		my_public_key = self.my_key_pair.publickey
+
     	server_response = JSON.parse(server_response)
-    	destination = server_response['source']
+    	self.server = server_response['source']
+    	response = server_response['response']
+        server_public_key = server_response['source_public_key']
+        
+        if server_public_key != None and server_public_key != get_public_key(self.server):
+            save_public_key(self.server,server_public_key)
 
-    	message = {'source_public_key':my_public_key,'source':self.id,'destination':}
-    	pass
+    	nonce = uuid.uuid4().hex
 
+    	message = {'source_public_key':my_public_key,'source':self.id,'destination':self.server,'response':response}
+    	return message
 
+    def round3_server(trustmanager_response):
+    	response_decrypted = self.my_key_pair.privatekey.decrypt(trustmanager_response, 32)
+    	response = JSON.parse(response_decrypted)
+    	self.session_key=response['session_key']
+        self.iv=response['iv']
+    	final_response = response['response']
+    	message = {'response':final_response}
+    	return message
 
+    def round4_server(server_response):
+        aes = AES.new(self.session_key, AES.MODE_CBC, self.iv)
+        response = aes.decrypt(server_response)
+    	#calculate nonce
+    	response = {'nonce':nonce}
+        final_response = aes.encrypt(response)
 
+    	message = {'response':final_response}
+    	return message
 
-
-
-'''
-	def receive_and_respond(message):
-		message = JSON.parse(message)
-		source = message['source']
-		destination = message['destination']
-		nonce = message['nonce']
-		source_public_key = message['source_public_key']
-
-		server_response = message['response']
-		destination_public_key = server_response['destination_public_key']
-
-		if source_public_key == None:
-			source_public_key = self.get_public_key(source)
-				if source_public_key == None:
-					raise Exception('Source Public Key not known')
-
-		if destination_public_key == None:
-			destination_public_key = self.get_public_key(destination)
-				if destination_public_key == None:
-					raise Exception('Destination Public Key not known')
-
-		server_response_decrypted = JSON.parse(destination_public_key.decrypt(server_response))
-
-		nonce = uuid.uuid4().hex
-		key = os.urandom(16)
-		iv = ''.join([chr(random.randint(0, 0xFF)) for i in range(16)])
-		session_key = AES.new(key, AES.MODE_CBC, iv)
-		
-		server_response_decrypted['session_key'] = session_key
-		server_response_encrypted = destination_public_key.encrypt(server_response_decrypted)
-		response_message = {'nonce':nonce,'destination':destination,'session_key':session_key,'server_response':server_response_encrypted}
-		final_response = source_public_key.encrypt(response_message, 32)
-
-		self.save_public_key(source,source_public_key)
-		self.save_public_key(destination,destination_public_key)
-		return final_response
