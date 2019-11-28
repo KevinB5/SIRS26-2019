@@ -12,6 +12,7 @@ class Server_NS:
 		self.shared_keys = None
 		self.session_key = None
 		self.iv = None
+        self.nonce
 
     def get_public_key(entity):
     	if self.shared_keys.hasOwnProperty(entity):
@@ -49,6 +50,7 @@ class Server_NS:
     	message_decrypted = self.my_key_pair.privatekey.decrypt(client_message, 32)
     	message = JSON.parse(message_decrypted)
     	
+        self.nonce = message['nonce']
         self.session_key=message['session_key']
         self.iv=message['iv']
         nonce = uuid.uuid4().hex
@@ -59,7 +61,7 @@ class Server_NS:
     	return final_response
 
     def round4_client(client_message):
-        #calculate nonce
+        server_nonce = self.nonce- 1
         aes = AES.new(self.session_key, AES.MODE_CBC, self.iv)
         message = aes.decrypt(client_message)
         client_nonce = message['nonce']
@@ -70,5 +72,5 @@ class Server_NS:
         
 
         response = {'result':result}
-        return final_response
+        return response
     

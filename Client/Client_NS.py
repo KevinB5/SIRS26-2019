@@ -66,7 +66,7 @@ class Client_NS:
     def round4_server(server_response):
         aes = AES.new(self.session_key, AES.MODE_CBC, self.iv)
         response = aes.decrypt(server_response)
-    	#calculate nonce
+        nonce = response['nonce'] - 1
     	response = {'nonce':nonce}
         final_response = aes.encrypt(response)
 
