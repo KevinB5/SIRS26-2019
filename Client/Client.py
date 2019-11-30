@@ -1,8 +1,9 @@
-import socket, ssl
-import getpass
+import socket, ssl, getpass
+import Hash
+
 
 sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs = ssl.CERT_REQUIRED)
+ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -30,6 +31,7 @@ def mainMenu():
 		username_as_string = username+"!-!"
 		ssl_sock.send(username_as_string.encode())
 		
+		# hashing the password ....
 		password_as_string = password+"!-!"
 		ssl_sock.send(password_as_string.encode())
 		
@@ -58,6 +60,9 @@ def mainMenu():
 	else:
 		print("WRONG COMMAND\n")
 		mainMenu()
+
+
+
 
 def secondMenu():
 		
@@ -108,6 +113,9 @@ def secondMenu():
 	else:
 		print("WRONG COMMAND\n")
 		secondMenu()
+
+
+
 
 
 def scoreboardMenu():
@@ -211,6 +219,10 @@ def scoreboardMenu():
 		print("WRONG COMMAND\n")
 		scoreboardMenu()
 
+
+
+
+
 def submitMenu():
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
@@ -270,6 +282,9 @@ def submitMenu():
 		submitMenu()
 
 
+
+
+""" start the client side """
 try:
 	ssl_sock.connect((HOST, PORT))
 	print( "\n>> CONNECTION ESTABLISHED !" )
@@ -277,7 +292,15 @@ try:
 except:
 	print( "\n>> CONNECTION LOST!" )
 
+
 mainMenu()
+
+
+'''
+if __name__ == "__main__":
+
+	start()
+'''
 
 
 # f = open( "C:\\Users\\Documents\\Projecto\\demo.jpg", "rb" )

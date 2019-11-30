@@ -10,6 +10,8 @@ def connect():
 		)
 	return db
 
+
+
 def authenticate(user, password):
 	try:
 		db = connect()
@@ -82,6 +84,8 @@ def authorization(username, auth_type):
 			cursor.close()
 			db.close()
 
+
+
 def getUsersList():
 	try:
 		db = connect()
@@ -103,6 +107,8 @@ def getUsersList():
 			cursor.close()
 			db.close()
 
+
+
 def getGroupIDList():
 	try:
 		db = connect()
@@ -120,6 +126,8 @@ def getGroupIDList():
 		if db.is_connected():
 			cursor.close()
 			db.close()
+
+
 
 def getUserGroupID(username):
 	try:
@@ -156,6 +164,8 @@ def getUserGroupID(username):
 			cursor.close()
 			db.close()
 
+
+
 def getUserAuthType(username):
 	try:
 		db = connect()
@@ -189,3 +199,7 @@ def getUserAuthType(username):
 		if db.is_connected():
 			cursor.close()
 			db.close()
+
+
+
+

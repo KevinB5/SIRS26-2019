@@ -1,4 +1,4 @@
-import socket, ssl, MySQL, re, AuthManager
+import socket, ssl, DB_User, re, AuthManager
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -8,7 +8,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 userAuthenticated=False
 userAuthorized=False
-username=''
+username=""
 
 class ServerSocket:
 	
@@ -249,6 +249,7 @@ class ServerSocket:
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
 			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
 
+
 	def getAuthorization(self, operation, user):
 		global userAuthorized
 		if(AuthManager.getAuthorizationValues(operation, user)):
@@ -257,6 +258,8 @@ class ServerSocket:
 		else:
 			userAuthorized=False
 			return userAuthorized
+
+
 
 x = ServerSocket()
 x.socketConnect()
