@@ -67,6 +67,12 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 	- openssl rsa -in server.orig.key -out server.key
 	- openssl req -new -key server.key -out server.csr
 	- openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+	
+	https://www.portugal-a-programar.pt/forums/topic/51606-socket-ssl/
+	
+	1 - genrsa -out server.key 1024
+	2 - req -new -key server.key -out server.csr
+	3 - x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 
 - File Server.py uses package re. No need to install comes with python3 already
