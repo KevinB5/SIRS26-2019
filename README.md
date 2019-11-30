@@ -135,3 +135,10 @@ Python package to encrypt:
 	
 
 
+Hash of password:
+- pip3 install py-bcrypt
+- pip3 install datetime
+- why work factor of 14: https://cptwin.netlify.com/post/2019-03-02-password-hashing-work-factor-recommendations-in-2019/
+
+
+
