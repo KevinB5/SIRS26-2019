@@ -6,6 +6,12 @@ Virtual Machine Setup:
 - Default password: osboxes.org
 
 MySQL Setup:
+
+	-STEPS FOR MAC:
+		- brew services start mysql ( might be needed )
+		- mysql.server start
+		- sudo mysql -u root
+		
 - Download python3 & pip3:
 	- $ sudo apt install python3
 	- $ sudo apt install python3-pip 
