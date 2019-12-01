@@ -12,6 +12,8 @@ MySQL Setup:
 		- mysql.server start
 		- sudo mysql -u root
 		- use SIRS26USERS;
+		- ALTER TABLE Users MODIFY password varchar(500);
+		- UPDATE Users SET password='$2b$14$hErDfgnwRJo3KqKlh8TMz.QPFHw.Dcz.XWe3I6LbiWqZV1fOd6F5y' WHERE user_id=3;
 		
 - Download python3 & pip3:
 	- $ sudo apt install python3
