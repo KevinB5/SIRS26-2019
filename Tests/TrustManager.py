@@ -3,6 +3,8 @@ import uuid
 import os
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from base64 import b64decode,b64encode
 
 class TrustManagerNS:
 	def __init__(self):
@@ -25,7 +27,7 @@ class TrustManagerNS:
 		source_public_key = message['source_public_key']
 
 		response = message['response']
-		destination_public_key = response['destination_public_key']
+		destination_public_key = message['destination_public_key']
 
 		if source_public_key == None:
 			source_public_key = self.get_public_key(source)
@@ -37,7 +39,12 @@ class TrustManagerNS:
 			if destination_public_key == None:
 				raise Exception('Destination Public Key not known')
 
-		response_decrypted = json.loads(destination_public_key.decrypt(response))
+		print(type(destination_public_key))
+		print(destination_public_key)
+		destination_public_key = RSA.importKey(str(destination_public_key))
+		decryptor = PKCS1_OAEP.new(destination_public_key)
+		response_decrypted = json.loads(decryptor.decrypt(response))
+		print(response_decrypted)
 
 		nonce = uuid.uuid4().hex
 		key = os.urandom(16)
