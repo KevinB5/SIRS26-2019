@@ -11,6 +11,7 @@ MySQL Setup:
 		- brew services start mysql ( might be needed )
 		- mysql.server start
 		- sudo mysql -u root
+		- use SIRS26USERS;
 		
 - Download python3 & pip3:
 	- $ sudo apt install python3
