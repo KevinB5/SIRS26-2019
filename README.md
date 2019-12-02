@@ -15,7 +15,12 @@ MySQL Setup:
 		- ALTER TABLE Users MODIFY password varchar(500);
 		- UPDATE Users SET password='$2b$14$hErDfgnwRJo3KqKlh8TMz.QPFHw.Dcz.XWe3I6LbiWqZV1fOd6F5y' WHERE user_id=3;
 		- $ mysql -u root -h localhost SIRS26SCOREBOARD < SIRS26SCOREBOARD.sql
+		- INSERT INTO Vulnerability ( id_vul, user_id, fingerprint, name_vul, insert_date ) VALUES ( '1', '3', 'b660931c82376a6bfc852930ea1c6c0d451069baec3c1f51cf15b07982091496be27212030d88c182685c80229232e41f738094b4424eec2c104061233c61aff', 'BufferOverflow' , '2019-11-15 23:18:47');
 		
+		-https://stackoverflow.com/questions/17658856/file-not-found-error-in-python file not found
+		
+		- mysql -u root -h localhost SIRS26SCOREBOARD < SIRS26SCOREBOARD.sql 
+		- mysql -u root -p -h localhost SIRS26USERS < SIRS26USERS_hash.sql
 		
 - Download python3 & pip3:
 	- $ sudo apt install python3
