@@ -5,7 +5,7 @@ import hashlib
 
 class TrustManagerLog:
 	def __init__(self):
-		self.filename= "./log/trustmanager.log"
+		self.filename= "log/trustmanager.log"
 
 	def configTrustManagerLog(self,logging_level):
 		reload(logging)
@@ -23,17 +23,19 @@ class TrustManagerLog:
 		nonce=nonce,action=action,acceptance=acceptance)
 
 			if(type_of_message.lower() == "info" ):
-				configUserLog(logging.INFO)
+				self.configTrustManagerLog(logging.INFO)
 				logging.info(message)
 			elif(type_of_message.lower() == "warning" ):
-				configUserLog(logging.WARNING)
+				self.configTrustManagerLog(logging.WARNING)
 				logging.warning(message)
 			elif(type_of_message.lower() == "error" ):
-				configUserLog(logging.ERROR)
+				self.configTrustManagerLog(logging.ERROR)
 				logging.error(message)
 			elif(type_of_message.lower() == "critical" ):
-				configUserLog(logging.CRITICAL)
+				self.configTrustManagerLog(logging.CRITICAL)
 				logging.critical(message)
+
+			#print('LOG WRITTEN')
 			
 		except Exception as e:
 			print(e)

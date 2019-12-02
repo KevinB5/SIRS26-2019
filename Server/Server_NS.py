@@ -70,9 +70,9 @@ class ServerNS:
         #print('DECRYPTED R3: ',decrypted_response)
 
         first_coma = decrypted_response.index("source")
-        print('PLEASE ',decrypted_response[first_coma:])
+        #print('PLEASE ',decrypted_response[first_coma:])
         temporary_fix = '{'+decrypted_response[first_coma-1:]
-        print('TEMPORARY ',temporary_fix)
+        #print('TEMPORARY ',temporary_fix)
         temporary_fix = json.loads(temporary_fix)
         
         #self.nonce = temporary_fix['nonce']

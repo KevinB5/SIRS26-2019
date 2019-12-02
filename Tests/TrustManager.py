@@ -16,31 +16,56 @@ unpad = lambda s : s[0:-ord(s[-1])]
 
 class TrustManagerNS:
 	def __init__(self):
-		self.keys = None
 		self.log = TrustManagerLog()
+
+	def encrypt_shared_keys(self):
+		key,iv = self.get_key('Keys/trustmanager.key')
+		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
+		try:
+			with open('Keys/shared_keys_temp','r') as fp:
+				with open('Keys/shared_keys','a') as write_file:
+					for line in fp:
+						content = base64.encodestring(aes_key.encrypt(pad(line)))
+						print content
+						#write_file.write(content)
+						#write_file.flush()
+		finally:
+			write_file.close()
+			fp.close()
 
 	def read_shared_key(self,entity):
 		filename='Keys/'
+		key,iv = self.get_key('Keys/trustmanager.key')
+		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
 		try:
 			with open('Keys/shared_keys') as fp:
 				for line in fp:
+					line = base64.decodestring(line)
+					line = unpad(aes_key.decrypt(line))
 					split = line.split(':')
 					if split[0]==entity:
 						filename += split[1].rstrip("\n")
+						#print(filename)
+						return self.get_key(filename)
 		finally:
 			fp.close()
+		return None
+
+		
+
+	def get_key(self,filename):
 		key = None
 		iv = None
 		try:
-			with open(filename) as fp:
-				for line in fp:
+			with open(filename) as f:
+				for line in f:
 					split = line.split('=')
 					if split[0]=='key':
 						key= split[1].rstrip("\n")
 					elif split[0]=='iv ':
 						iv= split[1].rstrip("\n")
 		finally:
-			fp.close()
+			f.close()
 		return key,iv
 
 	# round1 is done on server side

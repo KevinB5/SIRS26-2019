@@ -6,6 +6,8 @@ client = ClientNS('Admin','Keys/admin.key')
 server = ServerNS('Server','Keys/server.key')
 trustmanager = TrustManagerNS()
 
+#trustmanager.encrypt_shared_keys()
+
 print('1 client -> server')
 result = client.round1_server()
 print(result)
