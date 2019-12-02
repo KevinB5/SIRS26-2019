@@ -4,67 +4,79 @@ import os
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto import Random
+from base64 import b64decode,b64encode
+import base64
+
+BS = 16
+pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
+unpad = lambda s : s[0:-ord(s[-1])]
 
 class ClientNS:
-	def __init__(self, my_id):
+	def __init__(self, my_id,key_file):
 		self.id = my_id
-		self.my_key_pair = None
-		self.shared_keys = {}
+		self.trustmanager_key = None
+		self.trustmanager_iv = None
+		self.key_file = key_file
 		self.session_key = None
-		self.iv = None
+		self.session_iv = None
 		self.server = None
+		self.read_trustmanager_key()
 
-	def get_public_key(self,entity):
-		if entity in self.shared_keys:
-			return self.shared_keys[entity]
-		return None
 
-	def save_public_key(self,entity,public_key):
-		self.shared_keys[entity] = public_key
-
-	def generate_key_pair(self):
-		self.my_key_pair = RSA.generate(1024, Random.new().read)
+	def read_trustmanager_key(self):
+		try:
+			with open(self.key_file) as fp:
+				for line in fp:
+					split = line.split('=')
+					if split[0]=='key':
+						self.trustmanager_key= split[1].rstrip("\n")
+					elif split[0]=='iv ':
+						self.trustmanager_iv= split[1].rstrip("\n")
+		finally:
+			fp.close()
 
 	def round1_server(self):
-		if self.my_key_pair is None:
-			self.generate_key_pair()
-		my_public_key = self.my_key_pair.publickey
-		
-		message = {'source_public_key':my_public_key,'source':self.id}
+		message = {'source':self.id}
 		return message
 
 	def round2_trustmanager(self,server_response):
-		if self.my_key_pair is None:
-			self.generate_key_pair()
-		my_public_key = self.my_key_pair.publickey
-		
 		self.server = server_response['source']
 		response = server_response['response']
-		server_public_key = server_response['source_public_key']
-		
-		if server_public_key != None and server_public_key != self.get_public_key(self.server):
-			self.save_public_key(self.server,server_public_key)
+		#nonce = uuid.uuid4().hex
+		nonce = os.urandom(16)
 
-		nonce = uuid.uuid4().hex
-
-		message = {'source_public_key':my_public_key,'destination_public_key':server_public_key,'source':self.id,'destination':self.server,'nonce':nonce,'response':response}
+		message = {'source':self.id,'destination':self.server,'nonce':base64.encodestring(nonce).rstrip('\n'),'response':response}
 		return message
 
 	def round3_server(self,trustmanager_response):
-		response_decrypted = self.my_key_pair.privatekey.decrypt(trustmanager_response, 32)
-		response = JSON.parse(response_decrypted)
-		self.session_key=response['session_key']
-		self.iv=response['iv']
-		final_response = response['response']
+		decryptor = AES.new(pad(self.trustmanager_key)[:16], AES.MODE_CBC, pad(self.trustmanager_iv)[:16])
+		decrypted_response = json.loads(unpad(decryptor.decrypt(trustmanager_response)))
+		#print(decrypted_response)
+
+		for key,value in decrypted_response.iteritems():
+			decrypted_response.pop(key)
+			decrypted_response[str(key)] = str(value)
+		#print(decrypted_response)
+
+		self.session_key= base64.decodestring(decrypted_response['session_key'])
+		self.session_iv=base64.decodestring(decrypted_response['iv'])
+		final_response = base64.decodestring(decrypted_response['response'])
+
+		#print('final ',base64.decodestring(final_response))
 		message = {'response':final_response}
 		return message
 
 	def round4_server(self,server_response):
-		aes = AES.new(self.session_key, AES.MODE_CBC, self.iv)
-		response = aes.decrypt(server_response)
-		nonce = response['nonce'] - 1
-		response = {'nonce':nonce}
-		final_response = aes.encrypt(response)
-
-		message = {'response':final_response}
-		return message
+		aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
+		response = unpad(aes.decrypt(server_response))
+		#print('ROUND 4 SERVER ',response)
+		response = json.loads(response)
+		nonce = base64.decodestring(response['nonce'])
+		nonce = ''.join(str(ord(c)) for c in nonce)
+		calculated_nonce = int(nonce) - 1
+		#print('estimated nonce ',calculated_nonce)
+		response = {'nonce1':calculated_nonce,'nonce':calculated_nonce}
+		response = json.dumps(response)
+		#print(response)
+		final_response = aes.encrypt(pad(response))
+		return final_response

@@ -8,6 +8,7 @@ from base64 import b64decode,b64encode
 import random
 import hashlib
 import base64
+from TrustManager_log import TrustManagerLog
 
 BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
@@ -16,15 +17,16 @@ unpad = lambda s : s[0:-ord(s[-1])]
 class TrustManagerNS:
 	def __init__(self):
 		self.keys = None
+		self.log = TrustManagerLog()
 
 	def read_shared_key(self,entity):
-		filename=None
+		filename='Keys/'
 		try:
-			with open('shared_keys') as fp:
+			with open('Keys/shared_keys') as fp:
 				for line in fp:
 					split = line.split(':')
 					if split[0]==entity:
-						filename = split[1].rstrip("\n")
+						filename += split[1].rstrip("\n")
 		finally:
 			fp.close()
 		key = None
@@ -47,6 +49,8 @@ class TrustManagerNS:
 		destination = message['destination']
 		nonce = message['nonce']
 		response = message['response']
+
+		self.log.writeLog(source,destination,nonce,'Received connection request','ACCEPTED','info')
 		
 		server_key,server_iv = self.read_shared_key(destination)
 		server_encryptor = AES.new(pad(server_key)[:16], AES.MODE_CBC, pad(server_iv)[:16])
@@ -61,14 +65,14 @@ class TrustManagerNS:
 		#iv = ''.join([chr(random.randint(0, 0xFF)) for i in range(16)])
 
 		#session_key = AES.new(key, AES.MODE_CBC, iv)
-		print('nonce ',decrypted_response['nonce'])
+		#print('nonce ',decrypted_response['nonce'])
 
 		new_reponse = {'nonce1':decrypted_response['nonce'],'source':source\
         ,'session_key':base64.encodestring(key).rstrip("\n"),'session_iv':base64.encodestring(iv).rstrip("\n"),'nonce':decrypted_response['nonce']}
         
-		print(new_reponse)
+		#print(new_reponse)
 		content_bytes = json.dumps(new_reponse)
-		print('TEST ',content_bytes)
+		#print('TEST ',content_bytes)
 		encrypted_response = server_encryptor.encrypt(pad(content_bytes))
 
 		#print(encrypted_response)

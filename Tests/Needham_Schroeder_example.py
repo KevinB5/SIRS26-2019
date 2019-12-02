@@ -2,8 +2,8 @@ from Client_NS import ClientNS
 from Server_NS import ServerNS
 from TrustManager import TrustManagerNS
 
-client = ClientNS('kevin','kevin.key')
-server = ServerNS('server','server.key')
+client = ClientNS('Admin','Keys/admin.key')
+server = ServerNS('Server','Keys/server.key')
 trustmanager = TrustManagerNS()
 
 print('1 client -> server')
@@ -31,7 +31,7 @@ result = server.round3_client(result)
 print(result)
 print('')
 print('4 client -> server')
-result = client.round4_client(result)
+result = client.round4_server(result)
 print(result)
 print('')
 print('4 server -> client')

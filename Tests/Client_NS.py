@@ -42,9 +42,10 @@ class ClientNS:
 	def round2_trustmanager(self,server_response):
 		self.server = server_response['source']
 		response = server_response['response']
-		nonce = uuid.uuid4().hex
+		#nonce = uuid.uuid4().hex
+		nonce = os.urandom(16)
 
-		message = {'source':self.id,'destination':self.server,'nonce':nonce,'response':response}
+		message = {'source':self.id,'destination':self.server,'nonce':base64.encodestring(nonce).rstrip('\n'),'response':response}
 		return message
 
 	def round3_server(self,trustmanager_response):
@@ -68,12 +69,14 @@ class ClientNS:
 	def round4_server(self,server_response):
 		aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
 		response = unpad(aes.decrypt(server_response))
-		print('ROUND 4 SERVER ',response)
+		#print('ROUND 4 SERVER ',response)
 		response = json.loads(response)
-		nonce = response['nonce'] - 1
-		response = {'nonce':nonce}
+		nonce = base64.decodestring(response['nonce'])
+		nonce = ''.join(str(ord(c)) for c in nonce)
+		calculated_nonce = int(nonce) - 1
+		#print('estimated nonce ',calculated_nonce)
+		response = {'nonce1':calculated_nonce,'nonce':calculated_nonce}
 		response = json.dumps(response)
+		#print(response)
 		final_response = aes.encrypt(pad(response))
-
-		message = {'response':final_response}
-		return message
+		return final_response
