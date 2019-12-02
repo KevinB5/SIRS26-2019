@@ -13,6 +13,13 @@ Log:
 	- Quem pode aceder os logs
 	- Métodos de segurança
 
+Trust Manager:
+	- Protocol
+	- Confidentiality
+	- Authenticity
+	- Assimetric (communication)
+	- Simmetric (key session)
+
 Python Security Issues:
 
 	- Read this https://linuxgazette.net/issue83/evans.html and add to report
