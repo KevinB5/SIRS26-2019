@@ -23,13 +23,12 @@ DROP TABLE IF EXISTS `Scoreboard`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Scoreboard` (
-  `user_id` int(6) NOT NULL AUTO_INCREMENT,
-  `username` varchar(30) NOT NULL,
+  `username` varchar(100) NOT NULL,
   `group_id` int(6) NOT NULL,
   `points` int(15) DEFAULT '0',
   `num_vul` int(10) DEFAULT '0',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -39,7 +38,7 @@ CREATE TABLE `Scoreboard` (
 
 LOCK TABLES `Scoreboard` WRITE;
 /*!40000 ALTER TABLE `Scoreboard` DISABLE KEYS */;
-INSERT INTO `Scoreboard` VALUES (2,'Kevin',1,0,0,'2019-11-15 23:18:47'),(3,'TiagoM',1,0,0,'2019-11-15 23:18:47'),(4,'TiagoS',1,0,0,'2019-11-15 23:18:47'),(6,'Kevin2',2,0,0,'2019-11-15 23:18:47'),(7,'TiagoM2',2,0,0,'2019-11-15 23:18:47'),(8,'TiagoS2',2,0,0,'2019-11-15 23:18:47');
+INSERT INTO `Scoreboard` VALUES ('Kevin',1,0,0,'2019-11-15 23:18:47'),('TiagoM',1,0,0,'2019-11-15 23:18:47'),('TiagoS',1,0,0,'2019-11-15 23:18:47'),('Kevin2',2,0,0,'2019-11-15 23:18:47'),('TiagoM2',2,0,0,'2019-11-15 23:18:47'),('TiagoS2',2,0,0,'2019-11-15 23:18:47');
 /*!40000 ALTER TABLE `Scoreboard` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -51,12 +50,11 @@ DROP TABLE IF EXISTS `Vulnerability`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Vulnerability` (
-  `id_vul` int(6) NOT NULL AUTO_INCREMENT,
-  `user_id` int(6) NOT NULL,
-  `fingerprint` varchar(100) NOT NULL,
-  `name_vul` varchar(60) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `fingerprint` varchar(500) NOT NULL,
+  `name_vul` varchar(100) NOT NULL,
   `insert_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_vul`)
+  PRIMARY KEY (`username`, `fingerprint`, `name_vul` )
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -66,6 +64,7 @@ CREATE TABLE `Vulnerability` (
 
 LOCK TABLES `Vulnerability` WRITE;
 /*!40000 ALTER TABLE `Vulnerability` DISABLE KEYS */;
+INSERT INTO `Vulnerability` VALUES ('TiagoM','b660931c82376a6bfc852930ea1c6c0d451069baec3c1f51cf15b07982091496be27212030d88c182685c80229232e41f738094b4424eec2c104061233c61aff','BufferOverflow','2019-11-15 23:18:47'),('TiagoM','b660931c82376a6bfc852930ea1c6c0d451069baec3c1f51cf15b07982091496be27212030d88c182685c80229232e41f738094b4424eec2c104061233c61aff','RaceCondition','2019-11-16 23:18:47');
 /*!40000 ALTER TABLE `Vulnerability` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

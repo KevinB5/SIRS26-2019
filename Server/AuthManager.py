@@ -3,7 +3,7 @@ import DB_Scoreboard
 
 # Global Variables
 
-validOperations = [1,2,3,4,5,6]
+validOperations = [1,2,3,4]
 validUser=DB_User.getUsersList()
 validGroupID=DB_User.getGroupIDList()
 validGroupIDList=[]
@@ -20,53 +20,52 @@ def getAuthorizationValues(operation, user):
 
 	if(operation!=None and user!=None):
 		userGroupID=DB_User.getUserGroupID(user)
-		userGroupIDInt=userGroupID[0]
 		userAuthType=DB_User.getUserAuthType(user)
-		userAuthTypeInt=userAuthType[0]
+		
 		if(userGroupID!=None and userAuthType!=None):
+			
+			userGroupIDInt=userGroupID[0]
+			userAuthTypeInt=userAuthType[0]
+
 			# checkAuthorization(operation,user,userGroupIDInt,userAuthTypeInt)
 			for elm in validGroupID:
 				validGroupIDList.append(elm[0])
+			
 			if( (userGroupIDInt in validGroupIDList) and (userAuthTypeInt in validAuthType) ):
 				if(operation not in validOperations):
 					return False
 				else:
 					if (operation==1):
-						#readScoreboard
-						if(userAuthTypeInt<1 or userAuthTypeInt>2):
+						#read User Score
+						if(userAuthTypeInt not in validAuthType):
 							return False
 						else:
 							return True
 					elif (operation==2):
-						#readTeamScoreboard
-						if(authtype!=2):
+						#read Scores of all the Team
+						if(userAuthTypeInt not in validAuthType):
 							return False
 						else:
 							return True
 					elif (operation==3):
-						#readTeamVulnerabilities
-						if(authtype!=2):
+						#read User Vulnerabilities and Fingerprints
+						if(userAuthTypeInt not in validAuthType):
 							return False
 						else:
 							return True
 					elif (operation==4):
-						#readTeamFingerprinting
-						if(authtype!=2):
+						#submit Vulnerabilities and Fingerprint
+						if(userAuthTypeInt not in validAuthType):
 							return False
 						else:
 							return True
-					elif (operation==5):
-						#submitFingerprint
-						if(userAuthTypeInt<1 or userAuthTypeInt>2):
+					elif (operation==4):
+						#for admin: read vulns and fing of all team
+						if(userAuthTypeInt != 2):
 							return False
 						else:
 							return True
-					elif (operation==6):
-						#submitVulnerability
-						if(userAuthTypeInt<1 or userAuthTypeInt>2):
-							return False
-						else:
-							return True
+
 					else:
 						return False
 			else:

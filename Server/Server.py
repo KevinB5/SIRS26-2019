@@ -1,4 +1,4 @@
-import socket, ssl, DB_User, re, AuthManager
+import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -9,6 +9,8 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 userAuthenticated=False
 userAuthorized=False
 username=""
+
+
 
 class ServerSocket:
 	
@@ -86,7 +88,141 @@ class ServerSocket:
 		else:
 			return 0
 
-	
+
+
+	def login(self, split_decoded):
+		global username
+		
+		username = split_decoded[1]
+		password = split_decoded[2]
+				
+		# sanitizing input ....
+		sanitizeOutput = self.sanitize_input_username(username)
+					
+		self.userLogin(username,password, sanitizeOutput)
+
+
+
+	def scoreboardMenu(self):
+		global userAuthenticated
+		
+		if(userAuthenticated==True):
+			print("SENDING SCOREBOARDMENU TO USER\n")
+			self.connssl.send(b"SCOREBOARDMENU")
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTH")
+
+
+
+	def submitMenu(self):
+		global userAuthenticated
+		
+		if(userAuthenticated==True):
+			print("SENDING SUBMITMENU TO USER\n")
+			self.connssl.send(b"SUBMITMENU")
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTH")
+
+
+
+	def checkScore(self):
+		global userAuthenticated
+		global username
+		
+		if(userAuthenticated==True):
+			
+			if(self.getAuthorization(1, username)):
+				print("SENDING USER SCORE\n")
+				points = DB_Scoreboard.get_user_score(username)
+				self.connssl.send(bytes(str(points),"utf-8"))
+			else:
+				print("USER NOT AUTHORIZED\n")
+				self.connssl.send(b"NO AUTHORIZATION")
+
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTHENTICATION")
+
+
+
+	def checkVulnerabilityandFingerprint(self):
+		global userAuthenticated
+		global username
+		
+		if(userAuthenticated==True):
+			
+			if(self.getAuthorization(2, username)):
+				print("SENDING USER VULNERABILITIES AND FINGERPRINTS\n")
+				self.connssl.send(b"CHECKVULNERABILITY")
+			else:
+				print("USER NOT AUTHORIZED\n")
+				self.connssl.send(b"NO AUTHORIZATION")
+			
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTH")
+
+
+
+	def submitVulnerability(self):
+		global userAuthenticated
+		global username
+
+		if(userAuthenticated==True):
+			
+			self.getAuthorization(3, username)
+			if(userAuthorized==True):
+			
+				print("ASKING USER FOR VULNERABILITY\n")
+				self.connssl.send(b"SUBMITVULNERABILITY")
+					
+				print (">>A Decorrer Transferencia")
+						
+				# receiving the binary file
+				binFile = b""
+				while (binFile[-4:] != b"\n\r##"):
+					binFile += self.connssl.recv(1024)
+			
+				binFile = binFile.replace(b"\n\r##", b"")
+					
+				print (">>Transferencia Concluida \n\n>>A Decorrer Transferencia")
+				
+				# receiving the vulnerabilities file
+				vulnFile = b""
+				while (vulnFile[-4:] != b"\n\r##"):
+					vulnFile += self.connssl.recv(1024)
+			
+				vulnFile = vulnFile.replace(b"\n\r##", b"")
+				
+				print (">>Transferencia Concluida")
+				
+				splitLines = vulnFile.split()
+				vulns = []
+				
+				for i in range(len(splitLines)):
+					if( splitLines[i] == b"Vulnerability:"):
+						vulns.append(str(splitLines[i+1], "utf-8"))
+				
+				# Adding vulnerabilities to DB
+				bool = DB_Scoreboard.add_score_vulnerability(binFile, vulns, username)
+		
+				if( bool ):
+					print("ADDED NEW VULNS")
+		
+				else:
+					print("ALREADY HAVE THIS VULNS")
+					
+					
+			else:
+				print("USER NOT AUTHENTICATED\n")
+				self.connssl.send(b"NO AUTH")
+
+
+
+
+
 	#
 	# Receive Message
 	#
@@ -94,6 +230,7 @@ class ServerSocket:
 		global userAuthenticated
 		global username
 		global userAuthorized
+		
 		try:
 			self.data = b""
 			string_data=""
@@ -110,111 +247,24 @@ class ServerSocket:
 			# deal with different possible received messages
 			try:
 				if(command=="login"):
-					
-					username = split_decoded[1]
-					password = split_decoded[2]
-					
-					# sanitizing input ....
-					sanitizeOutput = self.sanitize_input_username(username)
-					
-					self.userLogin(username,password, sanitizeOutput)
+					self.login(split_decoded)
 
 				elif(command == "scoreboardMenu"):
-					if(userAuthenticated==True):
-						print("SENDING SCOREBOARDMENU TO USER\n")
-						self.connssl.send(b"SCOREBOARDMENU")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")											
-
+					self.scoreboardMenu()
 
 				elif(command == "submitMenu" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						print("SENDING SUBMIT MENU TO USER\n")
-						self.connssl.send(b"SUBMITMENU")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")						
-
+					self.submitMenu()
 
 				elif(command == "checkScore" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(1, username)
-						if(userAuthorized==True):
-							print("SENDING USER SCORE\n")
-							self.connssl.send(b"CHECKSCORE")
-						else:
-							print("USER NOT AUTHORIZED\n")
-							self.connssl.send(b"NO AUTHORIZATION")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTHENTICATION")
-
-				elif(command == "checkTeamScore" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(2, username)
-						if(userAuthorized==True):
-							print("SENDING TEAM SCORE\n")
-							self.connssl.send(b"CHECKTEAMSCORE")
-						else:
-							print("USER NOT AUTHORIZED\n")
-							self.connssl.send(b"NO AUTHORIZATION")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTHENTICATION")					
-
+					self.checkScore()
 
 				elif(command == "checkVulnerability" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(3, username)
-						if(userAuthorized==True):
-							print("SENDING TEAM VULNERABILITIES\n")
-							self.connssl.send(b"CHECKVULNERABILITY")
-						else:
-							print("USER NOT AUTHORIZED\n")
-							self.connssl.send(b"NO AUTHORIZATION")
-						
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")						
-
-				elif(command == "checkFingerprint" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(4, username)
-						if(userAuthorized==True):
-							print("SENDING TEAM FINGERPRINTS\n")
-							self.connssl.send(b"CHECKFINGERPRINTS")
-						else:
-							print("USER NOT AUTHORIZED\n")
-							self.connssl.send(b"NO AUTHORIZATION")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")
+					self.checkVulnerabilityandFingerprint()
 
 				elif(command == "submitVulnerability" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(5, username)
-						if(userAuthorized==True):
-							print("ASKING USER FOR VULNERABILITY\n")
-							self.connssl.send(b"SUBMITVULNERABILITY")
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")		
-
-				elif(command == "submitFingerprint" and userAuthenticated==True ):
-					if(userAuthenticated==True):
-						self.getAuthorization(6, username)
-						if(userAuthorized==True):
-							print("ASKING USER FOR FINGERPRINT\n")
-							self.connssl.send(b"SUBMITFINGERPRINT")
-
-					else:
-						print("USER NOT AUTHENTICATED\n")
-						self.connssl.send(b"NO AUTH")		
+					self.submitVulnerability()
 
 				elif(command == "exit"):
-
-
 					self.socketClose()
 				
 				else:
@@ -234,9 +284,10 @@ class ServerSocket:
 	#
 	def userLogin(self, user, pw, goodInput):
 		global userAuthenticated
+		
 		if( goodInput ):
 			
-			if(MySQL.authenticate(user,pw)):
+			if(DB_User.authenticate(user,pw)):
 				print("USER AUTHENTICATED!!!\n")
 				self.connssl.send(b"USER AUTHENTICATED!!!")
 				userAuthenticated=True
@@ -250,8 +301,10 @@ class ServerSocket:
 			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
 
 
+
 	def getAuthorization(self, operation, user):
 		global userAuthorized
+		
 		if(AuthManager.getAuthorizationValues(operation, user)):
 			userAuthorized=True
 			return userAuthorized

@@ -1,6 +1,6 @@
-import mysql.connector
-import sys
-import hashlib
+import mysql.connector, sys, hashlib
+from datetime import datetime
+
 
 def connect():
 	db = mysql.connector.connect(
@@ -10,6 +10,8 @@ def connect():
 			database="SIRS26SCOREBOARD"
 		)
 	return db
+
+
 
 def get_group_scoreboard(group_id):
 	try:
@@ -36,19 +38,22 @@ def get_group_scoreboard(group_id):
 			cursor.close()
 			db.close()
 
-def get_user_score(user_id):
+
+
+def get_user_score(username):
 	try:
 		db = connect()
 
-		user_id = str(user_id)
+		# TODO check if username is present in Scoreboard
+ 
+		# retrieve points of the username
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username,points,num_vul FROM Scoreboard WHERE user_id=%s LIMIT 1"
-		parameters = (user_id)
+		query = "SELECT points FROM Scoreboard WHERE username=%s"
+		parameters = [username]
 		cursor.execute(query,parameters)
 		result = cursor.fetchone()
 
-		print(result)
-		return result;
+		return result[0];
 
 
 	except Exception as e:
@@ -61,47 +66,42 @@ def get_user_score(user_id):
 			cursor.close()
 			db.close()
 
-def add_score_vulnerability(user_id,points,name_vul):
-	# When private key system is done, use:  user_id+private_key+name_vul
-	content = str(user_id)+name_vul
-	fingerprint = hashlib.sha256(content.encode()).hexdigest()
 
-	if(vulnerability_exist(fingerprint)):
+
+def add_score_vulnerability(binFile, vulns, username):
+	# When private key system is done, use:  user_id+private_key+name_vul
+
+	# calculate the fingerprint of the file
+	hash_object = hashlib.sha512(binFile)
+	fingerprint = hash_object.hexdigest()
+	
+	result = vulnerability_exist(fingerprint, binFile, vulns, username)
+
+	if(result == False):
 		return False
 
 	else:
 		try:
 			db = connect()
 
-			user_id = str(user_id)
-			name_vul = str(name_vul)
-
-			cursor = db.cursor(prepared=True)
-			query = "SELECT points,num_vul FROM Scoreboard WHERE user_id=%s"
-			parameters = (user_id)
-			cursor.execute(query,parameters)
-			result = cursor.fetchone()
-			print(result)
-
-			updated_points=result[0]+points
-			updated_num_vul=result[1]+1
-			print(user_id,' update ',updated_points,' ',updated_num_vul)
+			# Updated Points and Number of Vulnerabilities
+			updated_points = len(result)*10
+			updated_numVul = len(result)
 			
 			cursor = db.cursor(prepared=True)
-			query = "UPDATE Scoreboard SET points=%s,num_vul=%s WHERE user_id=%s"
-			parameters = [updated_points,updated_num_vul,user_id]
+			query = "UPDATE Scoreboard SET points=points+%s, num_vul=num_vul+%s WHERE username=%s"
+			parameters = [updated_points,updated_numVul,username]
 			cursor.execute(query,parameters)
 			db.commit()
-			#print('updated')
-			#print(cursor.rowcount,' records affected')
 			
-			cursor = db.cursor(prepared=True)
-			query = "INSERT INTO Vulnerability (user_id,fingerprint,name_vul) VALUES (%s,%s,%s)"
-			parameters = [user_id,fingerprint,name_vul]
-			cursor.execute(query,parameters)
-			db.commit()
-			print('inserted')
-			#print(cursor.rowcount,' records affected')
+			# Insert the new vulnerabilities
+			for nameVuln in result:
+				cursor = db.cursor(prepared=True)
+				query = "INSERT INTO Vulnerability (username,fingerprint,name_vul) VALUES (%s,%s,%s)"
+				parameters = [username,fingerprint,nameVuln]
+				cursor.execute(query,parameters)
+				db.commit()
+			
 			
 			return True
 
@@ -115,21 +115,38 @@ def add_score_vulnerability(user_id,points,name_vul):
 				cursor.close()
 				db.close()
 
-def vulnerability_exist(fingerprint):
+
+
+def vulnerability_exist(fingerprint, binFile, vulns, username):
 	try:
 		db = connect()
-
-		fingerprint = str(fingerprint)
-
-		print(fingerprint)
+		
+		# query the scoreboard to check if vuln was already submitted
 		cursor = db.cursor(prepared=True)
-		query = "SELECT id_vul FROM Vulnerability WHERE fingerprint=%s"
-		parameters = [fingerprint]
+		query = "SELECT name_vul FROM Vulnerability WHERE fingerprint=%s AND username=%s"
+		parameters = [fingerprint, username]
 		cursor.execute(query,parameters)
-		result = cursor.fetchone()
+		result = cursor.fetchall()
 
-		print(result)
-		return result;
+		notRepeated = []
+		
+		for vuln in vulns:
+			repeated = False
+			
+			for storedVuln in result:
+				if( storedVuln[0] == vuln ):
+					repeated = True
+					break
+	
+			if( not repeated ):
+				notRepeated.append(vuln)
+	
+		# Return the vulns to be added to DB , else return False
+		if( len(notRepeated) != 0 ):
+			return notRepeated
+
+		else:
+			return False
 
 
 	except Exception as e:

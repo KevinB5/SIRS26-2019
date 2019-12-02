@@ -1,4 +1,4 @@
-import bcrypt, datetime
+import bcrypt, datetime, sys
 
 
 BCRYPT_DEFAULT_COST = 14
@@ -21,7 +21,7 @@ def work_factor(userPriviliges):
 
 	diffMonth = diff_month(year1, year2, month1, month2)
 	
-	if( userPriviliges == "admin"):
+	if( userPriviliges == "Admin"):
 		return (diffMonth//18) + BCRYPT_ADMIN_COST
 	else:
 		return (diffMonth//18) + BCRYPT_DEFAULT_COST
@@ -45,6 +45,24 @@ def check_password(plain_text_password, hashed_password):
 
 
 
-passs = get_hashed_password(b"MYPASSWORD", "admin")
-print( check_password(b"MYPASSWORD", passs)  )
+if __name__ == "__main__":
+	
+	if(len(sys.argv) < 1):
+		print ("\nUSAGE:\t  <PASSWORD_TO_HASH> \n")
+		sys.exit(1)
+
+	else:
+		passs = bytes(sys.argv[1], "utf-8")
+		print("PASSWORD GIVEN:", passs)
+
+		passs = get_hashed_password(passs, "user")
+		print("PASSWORD HASHED (STARTS IN $, IGNORE THE SPACE):", str(passs, "utf-8") )
+
+
+
+
+
+
+
+
 

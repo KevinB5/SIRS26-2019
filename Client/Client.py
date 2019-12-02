@@ -1,5 +1,4 @@
-import socket, ssl, getpass
-import Hash
+import socket, ssl, getpass, os
 
 
 sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
@@ -21,8 +20,7 @@ def mainMenu():
 	command=input()
 	if (command=="1"):
 	
-		username=input("Insert your username:")
-		print("Insert your password:")
+		username=input("Username:")
 		password=getpass.getpass()
 
 		command_as_string = "login"+"!-!"
@@ -31,7 +29,6 @@ def mainMenu():
 		username_as_string = username+"!-!"
 		ssl_sock.send(username_as_string.encode())
 		
-		# hashing the password ....
 		password_as_string = password+"!-!"
 		ssl_sock.send(password_as_string.encode())
 		
@@ -43,8 +40,10 @@ def mainMenu():
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="USER AUTHENTICATED!!!"):
 			secondMenu()
+		
 		elif((str(mess, "utf-8")=="USER NOT AUTHENTICATED!!!")):
 			mainMenu()
+		
 		else:
 			print("SOMETHING WENT WRONG\n")
 
@@ -101,10 +100,11 @@ def secondMenu():
 		# message received from server
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
+		
 		if(str(mess, "utf-8")=="SUBMITMENU"):
 			submitMenu()
 		else:
-			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
+			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu()
 
 	elif (command=="0"):
@@ -122,8 +122,7 @@ def scoreboardMenu():
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: CHECK SCORE")
-	print("2: CHECK VULNERABILITIES")
-	print("3: CHECK FINGERPRINTS")
+	print("2: CHECK VULNERABILITIES AND FINGERPRINTS")
 	print("4: CHECK TEAM SCORE")
 	print("0: LAST MENU")
 	# ask user for input
@@ -138,15 +137,10 @@ def scoreboardMenu():
 		ssl_sock.send(EOF)
 		# message received from server
 		mess = ssl_sock.recv(1024)
-		print( "\n>>", str(mess, "utf-8") )
 
-		if(str(mess, "utf-8")=="CHECKSCORE"):
-			print("USER SCORE IS 20")
-			scoreboardMenu()
+		print("\n\nUSER SCORE IS", str(mess, "utf-8"),"\n" )
+		scoreboardMenu()
 
-		else:
-			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			scoreboardMenu()
 
 	elif (command=="2"):
 		command_as_string = "checkVulnerability"+"!-!"
@@ -170,26 +164,6 @@ def scoreboardMenu():
 
 
 	elif (command=="3"):
-		command_as_string = "checkFingerprint"+"!-!"
-		ssl_sock.send(command_as_string.encode())
-		username_as_string = username+"!-!"
-		ssl_sock.send(username_as_string.encode())
-		EOF = b"\n\r##"
-		ssl_sock.send(EOF)
-
-		# message received from server
-		mess = ssl_sock.recv(1024)
-		print( "\n>>", str(mess, "utf-8") )
-
-		if(str(mess, "utf-8")=="CHECKFINGERPRINTS"):
-			print("THERE IS NO FINGERPRINTS")
-			scoreboardMenu()
-
-		else:
-			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			scoreboardMenu()
-
-	elif (command=="4"):
 		command_as_string = "checkTeamScore"+"!-!"
 		ssl_sock.send(command_as_string.encode())
 		username_as_string = username+"!-!"
@@ -226,9 +200,9 @@ def scoreboardMenu():
 def submitMenu():
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
-	print("1: VULNERABILITY")
-	print("2: FINGERPRINT")
+	print("1: BINARY AND VULNERABILITIES")
 	print("0: LAST MENU")
+	
 	# ask user for input
 	command=input()
 	
@@ -245,30 +219,33 @@ def submitMenu():
 		print( "\n>>", str(mess, "utf-8") )
 
 		if(str(mess, "utf-8")=="SUBMITVULNERABILITY"):
-			print("OVERFLOW VULNERABILITY")
-			submitMenu()
-
-		else:
-			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			submitMenu()
-
-
-	elif (command=="2"):
-		command_as_string = "submitFingerprint"+"!-!"
-		ssl_sock.send(command_as_string.encode())
-		username_as_string = username+"!-!"
-		ssl_sock.send(username_as_string.encode())
-		EOF = b"\n\r##"
-		ssl_sock.send(EOF)
-
-		# message received from server
-		mess = ssl_sock.recv(1024)
-		print( "\n>>", str(mess, "utf-8") )
-
-		if(str(mess, "utf-8")=="SUBMITFINGERPRINT"):
-			print("ASEAWRSADCSARFWRFASDFSADAWSEWQE!1231243145E%$W&/$#$#F")
-			submitMenu()
 			
+			print("BINARY:", end="")
+			file = input()
+			
+			# if it does not find file ...
+			while (not os.path.isfile(file)) or (not os.path.exists(file)):
+				print("NO SUCH FILE !!! TRY AGAIN \n\nBINARY:", end="")
+				file = input()
+			
+			# sending the binary file
+			sendFile(file,ssl_sock)
+			
+			
+			print("VULNERABILITIES:", end="")
+			file = input()
+			
+			# if it does not find file ...
+			while (not os.path.isfile(file)) or (not os.path.exists(file)):
+				print("NO SUCH FILE !!! TRY AGAIN \n\nVULNERABILITIES:", end="")
+				file = input()
+			
+			# sending the vulns file
+			sendFile(file, ssl_sock)
+			
+			submitMenu()
+		
+
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			submitMenu()
@@ -280,6 +257,24 @@ def submitMenu():
 	else:
 		print("WRONG COMMAND\n")
 		submitMenu()
+
+
+
+def sendFile(file, ssl_sock):
+
+	print (">>A Decorrer Transferencia")
+	
+	# sending the vulns file
+	f = open( file, "rb" )
+	data = ""
+	data = f.read()
+	ssl_sock.send(data)
+			
+	EOF = b"\n\r##"
+	ssl_sock.send(EOF)
+	f.close()
+			
+	print (">>Transferencia Concluida")
 
 
 

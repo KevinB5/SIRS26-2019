@@ -1,5 +1,4 @@
-import mysql.connector
-import sys
+import mysql.connector, sys, HashPwd
 
 def connect():
 	db = mysql.connector.connect(
@@ -22,14 +21,17 @@ def authenticate(user, password):
 
 		# Username and Password coming from Server.py
 		username = user
-		password = hashlib.sha256(password.encode()).hexdigest()
+		
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username FROM Users WHERE username=%s AND password=%s;"
-		parameters = (username,password)
+		query = "SELECT username, password FROM Users WHERE username=%s;"
+		parameters = [(username)]
 		cursor.execute(query,parameters)
 		result = cursor.fetchone()
 
-		if result != None:
+		# to check if the hash matches the password
+		hash = HashPwd.Hash(bytes(password, "utf-8"), user)
+
+		if( hash.check_password(bytes(result[1], "utf-8")) == True ):
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
 			return True;
@@ -47,6 +49,8 @@ def authenticate(user, password):
 		if db.is_connected():
 			cursor.close()
 			db.close()
+
+
 
 def authorization(username, auth_type):
 	try:
@@ -90,7 +94,7 @@ def getUsersList():
 	try:
 		db = connect()
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username FROM Users ;"
+		query = "SELECT username FROM Users;"
 		cursor.execute(query)
 		result = cursor.fetchall()
 		decodedresult=[]
@@ -113,7 +117,7 @@ def getGroupIDList():
 	try:
 		db = connect()
 		cursor = db.cursor(prepared=True)
-		query = "SELECT group_id FROM Users ;"
+		query = "SELECT group_id FROM Users;"
 		cursor.execute(query)
 		result = cursor.fetchall()
 		return result
@@ -141,8 +145,9 @@ def getUserGroupID(username):
 		username = str(username)
 		group_id ='group_id'
 		cursor = db.cursor()
-		query = "SELECT group_id FROM Users WHERE" + username + ";"
-		cursor.execute(query)
+		query = "SELECT group_id FROM Users WHERE username=%s;"
+		parameters = [username]
+		cursor.execute(query, parameters)
 		result = cursor.fetchone()
 
 		if result != None:
@@ -177,8 +182,9 @@ def getUserAuthType(username):
 		# Username and Password coming from Server.py
 		username = str(username)
 		cursor = db.cursor()
-		query = "SELECT auth_type FROM Users WHERE" + username + ";"
-		cursor.execute(query)
+		query = "SELECT auth_type FROM Users WHERE username=%s;"
+		parameters = [username]
+		cursor.execute(query, parameters)
 		result = cursor.fetchone()
 
 		if result != None:
