@@ -1,5 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log
+import System_log, Server_NS
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)

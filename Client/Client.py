@@ -1,4 +1,5 @@
 import socket, ssl, getpass, os
+import Client_NS
 
 
 sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
