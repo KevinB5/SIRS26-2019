@@ -35,33 +35,17 @@ def getAuthorizationValues(operation, user):
 				if(operation not in validOperations):
 					return False
 				else:
-					if (operation==1):
-						#read User Score
-						if(userAuthTypeInt not in validAuthType):
-							return False
-						else:
-							return True
-					elif (operation==2):
-						#read Scores of all the Team
-						if(userAuthTypeInt not in validAuthType):
-							return False
-						else:
-							return True
-					elif (operation==3):
-						#read User Vulnerabilities and Fingerprints
+					if (operation==1 or operation==2 or operation==3):
+						#read User Score -- operation = 1
+						#read User Vulns and Fingerps -- operation = 2
+						#read Scoreboard
 						if(userAuthTypeInt not in validAuthType):
 							return False
 						else:
 							return True
 					elif (operation==4):
-						#submit Vulnerabilities and Fingerprint
-						if(userAuthTypeInt not in validAuthType):
-							return False
-						else:
-							return True
-					elif (operation==4):
-						#for admin: read vulns and fing of all team
-						if(userAuthTypeInt != 2):
+						#only for admin: read vulns and fingpr of all team
+						if(userAuthTypeInt != 1):
 							return False
 						else:
 							return True
