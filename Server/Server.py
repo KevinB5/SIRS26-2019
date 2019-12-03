@@ -1,4 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
+import System_log
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -19,6 +20,8 @@ class ServerSocket:
 	#
 	def socketConnect(self):
 		
+		System_log.writeSystemLog('Server','Server started','info')
+		
 		print (">> WAITING CONNECTION\n")
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.bind((HOST, PORT))
@@ -28,12 +31,16 @@ class ServerSocket:
 		# Receive Connection
 		#
 		try:
+			System_log.writeSystemLog('Server','Connection attempt','info')
+			
 			self.newsocket, self.clientSocket = self.sock.accept()
 			print (">> ATTEMPT OF CONNECTION")
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
 		except Exception as err:
+			System_log.writeSystemLog('Server','Connection attempt failed','error')
+
 			print (">> !!USER DOESNT HAS PERMISSIONS!!\n")
 			print(err)
 	
@@ -44,10 +51,11 @@ class ServerSocket:
 	# Close connection
 	#
 	def	socketClose(self):
-	
+		
 		self.newsocket.close()
 		self.sock.close()
 		print (">>FINALIZED SOCKET")
+		System_log.writeSystemLog('Server','Server closed','info')
 		exit()
 
 	#
@@ -272,10 +280,12 @@ class ServerSocket:
 
 			except Exception as err:
 				print (">>!!FAILED IN COMMAND!!\n")
+				System_log.writeUserLog('Server','Failed in command reception','error')
 				print(err)
 			
 		except Exception as err:
 			print(">>!!FAILED THE TRANSFER!!!\n")
+			System_log.writeUserLog('Server','Failed transfering message','error')
 			print(err)
 		
 		

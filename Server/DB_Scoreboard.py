@@ -1,6 +1,6 @@
 import mysql.connector, sys, hashlib
 from datetime import datetime
-
+import System_log
 
 def connect():
 	db = mysql.connector.connect(
@@ -9,6 +9,7 @@ def connect():
 			passwd="group26",
 			database="SIRS26SCOREBOARD"
 		)
+	System_log.writeSystemLog('Database Scoreboard','Connection attempt','info')
 	return db
 
 
@@ -24,19 +25,22 @@ def get_group_scoreboard(group_id):
 		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 
-		print(result)
+		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
+		#print(result)
 		return result;
 
 
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
 
 
 
@@ -53,18 +57,21 @@ def get_user_score(username):
 		cursor.execute(query,parameters)
 		result = cursor.fetchone()
 
+		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
 		return result[0];
 
 
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
 
 
 
@@ -102,15 +109,17 @@ def add_score_vulnerability(binFile, vulns, username):
 				cursor.execute(query,parameters)
 				db.commit()
 			
-			
+			System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
 			return True
 
 		except Exception as e:
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print("Error connecting to the server")
+			System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
 			print(e)
 
 		finally:
+			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
 			if db.is_connected():
 				cursor.close()
 				db.close()
@@ -141,6 +150,7 @@ def vulnerability_exist(fingerprint, binFile, vulns, username):
 			if( not repeated ):
 				notRepeated.append(vuln)
 	
+		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
 		# Return the vulns to be added to DB , else return False
 		if( len(notRepeated) != 0 ):
 			return notRepeated
@@ -152,12 +162,14 @@ def vulnerability_exist(fingerprint, binFile, vulns, username):
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
 
 
 
