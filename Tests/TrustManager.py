@@ -101,7 +101,7 @@ class TrustManagerNS:
 		encrypted_response = server_encryptor.encrypt(pad(content_bytes))
 
 		#print(encrypted_response)
-		response_message = {'nonce':nonce,'destination':destination,'session_key':base64.encodestring(key).rstrip("\n"),'iv':base64.encodestring(iv).rstrip("\n"),'response': base64.encodestring(encrypted_response).rstrip("\n")}
+		response_message = {'nonce':nonce,'destination':destination,'session_key':base64.encodestring(key).rstrip("\n"),'session_iv':base64.encodestring(iv).rstrip("\n"),'response': base64.encodestring(encrypted_response).rstrip("\n")}
 		#print('final',response)
 
 		client_key,client_iv = self.read_shared_key(source)
