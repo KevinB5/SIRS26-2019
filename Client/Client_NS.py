@@ -59,7 +59,7 @@ class ClientNS:
 		#print(decrypted_response)
 
 		self.session_key= base64.decodestring(decrypted_response['session_key'])
-		self.session_iv=base64.decodestring(decrypted_response['iv'])
+		self.session_iv=base64.decodestring(decrypted_response['session_iv'])
 		final_response = base64.decodestring(decrypted_response['response'])
 
 		#print('final ',base64.decodestring(final_response))

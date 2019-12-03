@@ -14,9 +14,54 @@ BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
 unpad = lambda s : s[0:-ord(s[-1])]
 
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65433       # Port to listen on (non-privileged ports are > 1023)
+
+
+class TrustManagerSocket:
+
+	def socketConnect(self):
+		TrustManagerLog.writeLog('TrustManager','Trust Manager started','info')
+		
+		print (">> WAITING CONNECTION\n")
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.bind((HOST, PORT))
+		self.sock.listen(1)
+
+		#
+		# Receive Connection
+		#
+		try:
+			TrustManagerLog.writeLog('TrustManager','Connection attempt','info')
+			
+			self.newsocket, self.clientSocket = self.sock.accept()
+			print (">> ATTEMPT OF CONNECTION")
+				
+			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
+
+		except Exception as err:
+			TrustManagerLog.writeLog('TrustManager','Connection attempt failed','error')
+
+			print (">> !!USER DOESNT HAS PERMISSIONS!!\n")
+			print(err)
+	
+		print (">> RECEIVED CONNECTION\n")
+
+		#
+	# Close connection
+	#
+	def	socketClose(self):
+		
+		self.newsocket.close()
+		self.sock.close()
+		print (">>FINALIZED SOCKET")
+		TrustManagerLog.writeLog('TrustManager','Trust Manager closed','info')
+		exit()
+
+
 class TrustManagerNS:
 	def __init__(self):
-		self.log = TrustManagerLog()
+		pass
 
 	def encrypt_shared_keys(self):
 		key,iv = self.get_key('Keys/trustmanager.key')
@@ -75,7 +120,7 @@ class TrustManagerNS:
 		nonce = message['nonce']
 		response = message['response']
 
-		self.log.writeLog(source,destination,nonce,'Received connection request','ACCEPTED','info')
+		TrustManagerLog.writeLog(source,destination,nonce,'Received connection request','ACCEPTED','info')
 		
 		server_key,server_iv = self.read_shared_key(destination)
 		server_encryptor = AES.new(pad(server_key)[:16], AES.MODE_CBC, pad(server_iv)[:16])
@@ -101,7 +146,7 @@ class TrustManagerNS:
 		encrypted_response = server_encryptor.encrypt(pad(content_bytes))
 
 		#print(encrypted_response)
-		response_message = {'nonce':nonce,'destination':destination,'session_key':base64.encodestring(key).rstrip("\n"),'iv':base64.encodestring(iv).rstrip("\n"),'response': base64.encodestring(encrypted_response).rstrip("\n")}
+		response_message = {'nonce':nonce,'destination':destination,'session_key':base64.encodestring(key).rstrip("\n"),'session_iv':base64.encodestring(iv).rstrip("\n"),'response': base64.encodestring(encrypted_response).rstrip("\n")}
 		#print('final',response)
 
 		client_key,client_iv = self.read_shared_key(source)

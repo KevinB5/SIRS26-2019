@@ -7,6 +7,7 @@ def connect():
 			passwd="group26",
 			database="SIRS26USERS"
 		)
+	System_log.writeSystemLog('Database Users','Connection attemp','info')
 	return db
 
 
@@ -31,6 +32,7 @@ def authenticate(user, password):
 		# to check if the hash matches the password
 		hash = HashPwd.Hash(bytes(password, "utf-8"), user)
 
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		if( hash.check_password(bytes(result[1], "utf-8")) == True ):
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
@@ -43,12 +45,14 @@ def authenticate(user, password):
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 
@@ -69,6 +73,7 @@ def authorization(username, auth_type):
 		cursor.execute(query,parameters)
 		result = cursor.fetchone()
 
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		if result != None:
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
@@ -81,12 +86,14 @@ def authorization(username, auth_type):
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 
@@ -98,18 +105,21 @@ def getUsersList():
 		cursor.execute(query)
 		result = cursor.fetchall()
 		decodedresult=[]
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		for row in result:
 			decodedresult.append(row[0].decode('utf-8'))
 
 		return decodedresult;
 
 	except Exception as e:
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 
@@ -120,16 +130,20 @@ def getGroupIDList():
 		query = "SELECT group_id FROM Users;"
 		cursor.execute(query)
 		result = cursor.fetchall()
+
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		return result
 
 
 	except Exception as e:
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 
@@ -150,6 +164,7 @@ def getUserGroupID(username):
 		cursor.execute(query, parameters)
 		result = cursor.fetchone()
 
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		if result != None:
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
@@ -162,13 +177,14 @@ def getUserGroupID(username):
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
-
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 def getUserAuthType(username):
@@ -187,6 +203,7 @@ def getUserAuthType(username):
 		cursor.execute(query, parameters)
 		result = cursor.fetchone()
 
+		System_log.writeSystemLog('Database Users','Connection successful','info')
 		if result != None:
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
@@ -199,12 +216,14 @@ def getUserAuthType(username):
 	except Exception as e:
 		# UNCOMENT FOR DATABASE LOGIN DEBUG
 		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Users','Connection failed','error')
 		print(e)
 
 	finally:
 		if db.is_connected():
 			cursor.close()
 			db.close()
+			System_log.writeSystemLog('Database Users','Connection closed','info')
 
 
 

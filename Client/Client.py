@@ -1,5 +1,5 @@
 import socket, ssl, getpass, os, re
-
+import Client_NS
 
 sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)

@@ -17,6 +17,7 @@ authtype=0
 
 
 def getAuthorizationValues(operation, user):
+	
 
 	if(operation!=None and user!=None):
 		userGroupID=DB_User.getUserGroupID(user)

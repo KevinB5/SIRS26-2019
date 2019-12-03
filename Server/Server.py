@@ -1,4 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
+import System_log, Server_NS
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -19,6 +20,8 @@ class ServerSocket:
 	#
 	def socketConnect(self):
 		
+		System_log.writeSystemLog('Server','Server started','info')
+		
 		print (">> WAITING CONNECTION\n")
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.bind((HOST, PORT))
@@ -28,12 +31,16 @@ class ServerSocket:
 		# Receive Connection
 		#
 		try:
+			System_log.writeSystemLog('Server','Connection attempt','info')
+			
 			self.newsocket, self.clientSocket = self.sock.accept()
 			print (">> ATTEMPT OF CONNECTION")
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
 		except Exception as err:
+			System_log.writeSystemLog('Server','Connection attempt failed','error')
+
 			print (">> !!USER DOESNT HAS PERMISSIONS!!\n")
 			print(err)
 	
@@ -44,10 +51,11 @@ class ServerSocket:
 	# Close connection
 	#
 	def	socketClose(self):
-	
+		
 		self.newsocket.close()
 		self.sock.close()
 		print (">>FINALIZED SOCKET")
+		System_log.writeSystemLog('Server','Server closed','info')
 		exit()
 
 	#
@@ -105,11 +113,15 @@ class ServerSocket:
 
 	def scoreboardMenu(self):
 		global userAuthenticated
+		global username
 		
+		System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Request','info')
 		if(userAuthenticated==True):
+			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Accept','info')
 			print("SENDING SCOREBOARDMENU TO USER\n")
 			self.connssl.send(b"SCOREBOARDMENU")
 		else:
+			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Rejected','warning')
 			print("USER NOT AUTHENTICATED\n")
 			self.connssl.send(b"NO AUTH")
 
@@ -134,16 +146,19 @@ class ServerSocket:
 		global username
 		
 		if(userAuthenticated==True):
-			
+			System_log.writeUserLog('',username,'User score access','Scoreboard','Request','info')
 			if(self.getAuthorization(1, username)):
 				print("SENDING USER SCORE\n")
 				points = DB_Scoreboard.get_user_score(username)
+				System_log.writeUserLog('',username,'User score access','Scoreboard','Accepted','info')
 				self.connssl.send(bytes(str(points),"utf-8"))
 			else:
+				System_log.writeUserLog('',username,'User score access','Scoreboard','Rejected','warning')
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
 
 		else:
+			System_log.writeUserLog('',username,'User score access, user not authenticated','Scoreboard','Rejected','error')
 			print("USER NOT AUTHENTICATED\n")
 			self.connssl.send(b"NO AUTHENTICATION")
 
@@ -227,6 +242,7 @@ class ServerSocket:
 		if(userAuthenticated==True):
 			
 			self.getAuthorization(3, username)
+
 			if(userAuthorized==True):
 			
 				print("ASKING USER FOR VULNERABILITY\n")
@@ -262,14 +278,21 @@ class ServerSocket:
 				# Adding vulnerabilities to DB
 				bool = DB_Scoreboard.add_score_vulnerability(binFile, vulns, username)
 		
+				#TODO: Add filename on log
+				System_log.writeUserLog('',username,'Submited vulnerability attempt','Vulnerability','Request','info')
 				if( bool ):
+					#TODO: Add filename on log
+					System_log.writeUserLog('',username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
 					print("ADDED NEW VULNS")
 		
 				else:
+					#TODO: Add filename on log
+					System_log.writeUserLog('',username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
 					print("ALREADY HAVE THIS VULNS")
 					
 					
 			else:
+				System_log.writeUserLog('',username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
 				print("USER NOT AUTHENTICATED\n")
 				self.connssl.send(b"NO AUTH")
 
@@ -332,10 +355,12 @@ class ServerSocket:
 
 			except Exception as err:
 				print (">>!!FAILED IN COMMAND!!\n")
+				System_log.writeUserLog('Server','Failed in command reception','error')
 				print(err)
 			
 		except Exception as err:
 			print(">>!!FAILED THE TRANSFER!!!\n")
+			System_log.writeUserLog('Server','Failed transfering message','error')
 			print(err)
 		
 		
@@ -346,17 +371,20 @@ class ServerSocket:
 		global userAuthenticated
 		
 		if( goodInput ):
-			
+			System_log.writeUserLog('',user,'Authentication','Users','Request','info')
 			if(DB_User.authenticate(user,pw)):
+				System_log.writeUserLog('',user,'Authentication','Users','Accepted','info')
 				print("USER AUTHENTICATED!!!\n")
 				self.connssl.send(b"USER AUTHENTICATED!!!")
 				userAuthenticated=True
 	
 			else:
+				System_log.writeUserLog('',user,'Authentication','Users','Rejected','info')
 				print("USER NOT AUTHENTICATED!!!\n")
 				self.connssl.send(b"USER NOT AUTHENTICATED!!!")
 				userAuthenticated=False
 		else:
+			System_log.writeUserLog('',user,'Authentication, wrong input','Users','Rejected','error')
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
 			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
 
@@ -367,8 +395,10 @@ class ServerSocket:
 		
 		if(AuthManager.getAuthorizationValues(operation, user)):
 			userAuthorized=True
+			System_log.writeUserLog('',user,'Authorization - operation:'+operation,'Users','Accepted','info')
 			return userAuthorized
 		else:
+			System_log.writeUserLog('',user,'Authorization - operation:'+operation,'Users','False','info')
 			userAuthorized=False
 			return userAuthorized
 

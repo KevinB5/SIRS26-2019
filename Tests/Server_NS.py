@@ -67,7 +67,9 @@ class ServerNS:
         decrypted_response = unpad(decryptor.decrypt(response))
         #json.loads(unpad(
         #TODO:
-        #print('DECRYPTED R3: ',decrypted_response)
+        print('__')
+        print('BUG DECRYPTION R3: ',decrypted_response)
+        print('--')
 
         first_coma = decrypted_response.index("source")
         #print('PLEASE ',decrypted_response[first_coma:])
@@ -96,7 +98,9 @@ class ServerNS:
         server_nonce = int(nonce)- 1
         aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
         message = unpad(aes.decrypt(client_message))
-        #print('Round 4 message: ',message)
+        print('__')
+        print('BUG DECRYPTION R4: ',message)
+        print('--')
 
         first_coma = message.index("nonce")
         #print('PLEASE ',message[first_coma:])
