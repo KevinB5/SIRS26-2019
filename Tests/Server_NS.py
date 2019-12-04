@@ -73,34 +73,28 @@ class ServerNS:
         #nonce = uuid.uuid4().hex
         nonce = os.urandom(16)
         self.nonce = nonce
+        print('r3 nonce ',nonce)
 
         session = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
         
+        print('SERVER NONCE ',str(base64.b64encode(nonce),'utf-8'))
         response = {'nonce': str(base64.b64encode(nonce),'utf-8')}
         response = json.dumps(response)
         final_response = session.encrypt(bytes(pad(response),'utf-8'))
         return final_response
 
     def round4_client(self,client_message):
-        #print('server nonce ',self.nonce)
-        nonce = ''.join(str(ord(c)) for c in self.nonce)
-        #print('server estimated nonce ',nonce)
-        server_nonce = int(nonce)- 1
+        #server_nonce = nonce- 1
+        server_nonce =  int.from_bytes(self.nonce,byteorder='little')-1
         aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
         message = unpad(aes.decrypt(client_message))
-        print('__')
-        print('BUG DECRYPTION R4: ',message)
-        print('--')
-
-        first_coma = message.index("nonce")
-        #print('PLEASE ',message[first_coma:])
-        temporary_fix = '{'+message[first_coma-1:]
-        #print('TEMPORARY ',temporary_fix)
-        temporary_fix = json.loads(temporary_fix)
+        message = json.loads(str(message,'utf-8'))
 
         #message = json.loads(message)
-        client_nonce = temporary_fix['nonce']
+        client_nonce = message['nonce']
 
+        print('SERVER NONCE: ',server_nonce)
+        print('CLIENT NONCE: ',client_nonce)
         result=False
         if server_nonce == client_nonce:
             result=True

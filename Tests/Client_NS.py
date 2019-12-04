@@ -58,6 +58,7 @@ class ClientNS:
 		#	decrypted_response[str(key)] = str(value)
 		print('CLIENT DECRYPTED ',decrypted_response)
 
+		print(base64.b64decode(decrypted_response['session_key']))
 		self.session_key= base64.b64decode(decrypted_response['session_key'])
 		self.session_iv=base64.b64decode(decrypted_response['session_iv'])
 		print('CLIENT ',decrypted_response['response'])
@@ -68,16 +69,17 @@ class ClientNS:
 		return message
 
 	def round4_server(self,server_response):
-		aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
+		aes = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
 		response = unpad(aes.decrypt(server_response))
 		#print('ROUND 4 SERVER ',response)
 		response = json.loads(response)
 		nonce = base64.b64decode(response['nonce'])
-		nonce = ''.join(str(ord(c)) for c in nonce)
-		calculated_nonce = int(nonce) - 1
-		#print('estimated nonce ',calculated_nonce)
-		response = {'nonce1':calculated_nonce,'nonce':calculated_nonce}
+		#print('NONCE ', nonce)
+		calculated_nonce = int.from_bytes(nonce,byteorder='little')-1
+		print('estimated nonce ',calculated_nonce)
+		response = {'nonce':calculated_nonce}
 		response = json.dumps(response)
 		#print(response)
-		final_response = aes.encrypt(pad(response))
+		aes2 = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
+		final_response = aes2.encrypt(bytes(pad(response),'utf-8'))
 		return final_response
