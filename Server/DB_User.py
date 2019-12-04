@@ -1,4 +1,4 @@
-import mysql.connector, sys, HashPwd
+import mysql.connector, sys, HashPwd, System_log
 
 def connect():
 	db = mysql.connector.connect(
@@ -31,9 +31,17 @@ def authenticate(user, password):
 
 		# to check if the hash matches the password
 		hash = HashPwd.Hash(bytes(password, "utf-8"), user)
+		#hash = HashPwd.Hash(bytes(password), user)
 
 		System_log.writeSystemLog('Database Users','Connection successful','info')
+		
+		
+		print(result)
+		print( hash.get_hashed_password() )
+		
+		
 		if( hash.check_password(bytes(result[1], "utf-8")) == True ):
+		#if( hash.check_password(bytes(result[1])) == True ):
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
 			return True;

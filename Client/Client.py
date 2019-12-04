@@ -1,5 +1,6 @@
-import socket, ssl, getpass, os, re
-import Client_NS
+import socket, ssl, getpass, os, re, Client_NS, pickle
+from Crypto.Util.number import long_to_bytes
+from Crypto.PublicKey import RSA
 
 sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
@@ -7,12 +8,11 @@ ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRE
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+PORT2 = 65440
 
-# Global Variables
-username =''
+
 
 def mainMenu():
-	global username
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: LOGIN")
 	print("0: EXIT")
@@ -39,7 +39,7 @@ def mainMenu():
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="USER AUTHENTICATED!!!"):
-			secondMenu()
+			secondMenu(username)
 		
 		elif((str(mess, "utf-8")=="USER NOT AUTHENTICATED!!!")):
 			mainMenu()
@@ -63,7 +63,7 @@ def mainMenu():
 
 
 
-def secondMenu():
+def secondMenu(username):
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: SCOREBOARD")
@@ -84,7 +84,7 @@ def secondMenu():
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="SCOREBOARDMENU"):
-			scoreboardMenu()
+			scoreboardMenu(username)
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu()
@@ -105,20 +105,20 @@ def secondMenu():
 			submitMenu()
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			secondMenu()
+			secondMenu(username)
 
 	elif (command=="0"):
 		mainMenu()
 		
 	else:
 		print("WRONG COMMAND\n")
-		secondMenu()
+		secondMenu(username)
 
 
 
 
 
-def scoreboardMenu():
+def scoreboardMenu(username):
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: CHECK SCORE")
@@ -136,11 +136,12 @@ def scoreboardMenu():
 		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
+		
 		# message received from server
 		mess = ssl_sock.recv(1024)
 
 		print("\n\nUSER SCORE IS", str(mess, "utf-8"),"\n" )
-		scoreboardMenu()
+		scoreboardMenu(username)
 
 
 
@@ -174,7 +175,8 @@ def scoreboardMenu():
 			print(strAux + sep, end="")
 		print("\n\n")
 		
-		scoreboardMenu()
+		scoreboardMenu(username)
+
 
 
 	elif (command=="3"):
@@ -184,30 +186,34 @@ def scoreboardMenu():
 		ssl_sock.send(username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
+		
 		# message received from server
-		scoreboard = ssl_sock.recv(1024)
+		scoreboard = b""
+		while True:
+			packet = ssl_sock.recv(1024)
+			if b"\n\r##" in packet:
+				break
+			scoreboard += packet
+		
+		scoreboard = pickle.loads(scoreboard)
+		
 		
 		#printing the scoreoboard
 		print("-" * 300 + "SCOREBOARD" + "-"*270)
 		print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
 
-		scoreboard = str(scoreboard, "utf-8")[1:-1]
-		scoreboard = scoreboard.replace("'","")
-		scoreboard = scoreboard.replace(" ","")
-		scoreboard = re.findall("[^(),]+", scoreboard[1:-1])
+		for i in range(0,len(scoreboard)):
+			username, points =  scoreboard[i][0], str(scoreboard[i][1])
+			numberOfVulns, date = str(scoreboard[i][2]), scoreboard[i][3]
 		
-		for i in range(0,len(scoreboard),10):
-		
-			print(" "*10 + scoreboard[i+0] + " " *(40-len(scoreboard[i+0])), end="")
-			print(" "*2 + scoreboard[i+1] + " " *(10-len(scoreboard[i+1])), end="")
-			print(" "*10 + scoreboard[i+2] + " " *(30-len(scoreboard[i+2])), end="")
-			
-			date = scoreboard[i+4] + "/" + scoreboard[i+5] + "/" + scoreboard[i+6]
-			time = scoreboard[i+7] + ":" + scoreboard[i+8] + ":" + scoreboard[i+9]
-			print(  date + " " + time, "\n")
-		
+			print(" "*10 + username + " " *(40-len(username)), end="")
+			print(" "*2 + points + " " *(10-len(points)), end="")
+			print(" "*10 + numberOfVulns + " " *(30-len(numberOfVulns)), end="")
+			print(  date, "  \n")
 
-		scoreboardMenu()
+		scoreboardMenu(username)
+
+
 
 	elif (command=="4"):
 		command_as_string = "checkTeamVulnsandFingerprints"+"!-!"
@@ -218,50 +224,43 @@ def scoreboardMenu():
 		ssl_sock.send(EOF)
 		
 		# message received from server
-		mess = ssl_sock.recv(1024)
-		
+		mess = b""
+		while True:
+			packet = ssl_sock.recv(1024)
+			if b"\n\r##" in packet:
+				break
+			mess += packet
+	
+		mess = pickle.loads(mess)
+	
 		if(mess == b"NO AUTHORIZATION"):
 			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
 		
 		else:
 			# print in terminal : User ; Fingerprint ; Name_Vuln ;
-			newAux = re.findall(b"[^(),]+", mess[1:-1])
-			print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*70 + "Name_Vuln  ;\n" )
+			print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*95 + "Name_Vuln  ;\n" )
 			
-			k = 0
-			for name in newAux:
-				strAux = str(name, "utf-8")[1:-1]
-				strAux = strAux.replace("'","")
-				
-				k = k + 1
-				sep = "    ;    "
-				
-				if( k % 4 == 0):
-					print("\n")
-					sep = ""
-				
-				print(strAux + sep, end="")
-			print("\n\n")
+			for i in range(0, len(mess)):
+				user, fing, vuln = mess[i][0], mess[i][1], mess[i][2]
+				print(user + " "*(20) + fing + " "*(20) + vuln)
 		
-		
-		
-		scoreboardMenu()
 
+		scoreboardMenu(username)
 
 
 	elif (command=="0"):
-		secondMenu()
+		secondMenu(username)
 
 		
 	else:
 		print("WRONG COMMAND\n")
-		scoreboardMenu()
+		scoreboardMenu(username)
 
 
 
 
 
-def submitMenu():
+def submitMenu(username):
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: BINARY AND VULNERABILITIES")
@@ -312,15 +311,15 @@ def submitMenu():
 
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			submitMenu()
+			submitMenu(username)
 
 
 	elif (command=="0"):
-		secondMenu()
+		secondMenu(username)
 
 	else:
 		print("WRONG COMMAND\n")
-		submitMenu()
+		submitMenu(username)
 
 
 
@@ -342,9 +341,55 @@ def sendFile(file, ssl_sock):
 
 
 
+def NS_Protocol_Client():
+
+	sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+	sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+	
+	# Alice sends her name "Alice" to server
+	print("\n\nSENDING STEP 1")
+	sockServer.connect((HOST, PORT))
+	sockServer.send( pickle.dumps("Alice") )
+	print( "\n" )
+
+	print("RECEIVING STEP 2")
+	mess = pickle.loads(sockServer.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 3")
+	sockTrustManager.connect((HOST, PORT2))
+	sockTrustManager.send( pickle.dumps("Encrypted Message -- From Client") )
+	print( "\n" )
+
+	print("RECEIVING STEP 4")
+	mess = pickle.loads(sockTrustManager.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 5")
+	sockServer.send( pickle.dumps("Encrypted Message -- From Client") )
+	print( "\n" )
+
+	print("\nRECEIVING STEP 6")
+	mess = pickle.loads(sockServer.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 7")
+	sockServer.send( pickle.dumps("Encrypted Message -- From Client") )
+	print( "\n" )
+	
+
+	sockServer.close()
+	sockTrustManager.close()
+	print ("\n>>FINALIZED SOCKET\n\n")
+	#System_log.writeSystemLog('Server','Server closed','info')
+	exit()
+
+
+
 
 """ start the client side """
 try:
+	#NS_Protocol_Client()
 	ssl_sock.connect((HOST, PORT))
 	print( "\n>> CONNECTION ESTABLISHED !" )
 
@@ -355,20 +400,9 @@ except:
 mainMenu()
 
 
+
 '''
 if __name__ == "__main__":
 
 	start()
 '''
-
-
-# f = open( "C:\\Users\\Documents\\Projecto\\demo.jpg", "rb" )
-#data = b"OLA"
-# data = f.readlines()
-# for line in data:
-
-
-# f.close()
-
-# ssl_sock.close()
-# print( ">> Envio terminado!" )

@@ -1,27 +1,23 @@
-import json
-import uuid
-import os
+import json, uuid, os, random, hashlib, base64, socket, pickle
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from base64 import b64decode,b64encode
-import random
-import hashlib
-import base64
 from TrustManager_log import TrustManagerLog
 
 BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
 unpad = lambda s : s[0:-ord(s[-1])]
 
+
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65433       # Port to listen on (non-privileged ports are > 1023)
-
+PORT2 = 65440
 
 class TrustManagerSocket:
 
 	def socketConnect(self):
-		TrustManagerLog.writeLog('TrustManager','Trust Manager started','info')
+		TrustManagerLog.writeLog("TrustManager","Trust Manager started","info")
 		
 		print (">> WAITING CONNECTION\n")
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,7 +55,9 @@ class TrustManagerSocket:
 		exit()
 
 
+
 class TrustManagerNS:
+	
 	def __init__(self):
 		pass
 
@@ -71,12 +69,13 @@ class TrustManagerNS:
 				with open('Keys/shared_keys','a') as write_file:
 					for line in fp:
 						content = base64.encodestring(aes_key.encrypt(pad(line)))
-						print content
+						#print content
 						#write_file.write(content)
 						#write_file.flush()
 		finally:
 			write_file.close()
 			fp.close()
+
 
 	def read_shared_key(self,entity):
 		filename='Keys/'
@@ -113,18 +112,20 @@ class TrustManagerNS:
 			f.close()
 		return key,iv
 
+
 	# round1 is done on server side
 	def round2_client(self,message):
-		source = message['source']
-		destination = message['destination']
-		nonce = message['nonce']
-		response = message['response']
+		source = message["source"]
+		destination = message["destination"]
+		nonce = message["nonce"]
+		response = message["response"]
 
-		TrustManagerLog.writeLog(source,destination,nonce,'Received connection request','ACCEPTED','info')
+		TrustManagerLog.writeLog(source,destination,nonce,"Received connection request","ACCEPTED","info")
 		
 		server_key,server_iv = self.read_shared_key(destination)
 		server_encryptor = AES.new(pad(server_key)[:16], AES.MODE_CBC, pad(server_iv)[:16])
 		decrypted_response = json.loads(unpad(server_encryptor.decrypt(response)))
+		
 		for key,value in decrypted_response.iteritems():
 			decrypted_response.pop(key)
 			decrypted_response[str(key)] = str(value)
@@ -156,3 +157,40 @@ class TrustManagerNS:
 		#print(response_message)
 		final_response = client_encryptor.encrypt(pad(response_message))
 		return final_response
+
+
+
+
+def NS_Protocol_TrustManager():
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((HOST, PORT2))
+	sock.listen(1)
+	print ("\n\n>> WAITING CONNECTION\n")
+	
+	socketClient, clientSocket = sock.accept()
+
+	print("RECEIVED STEP 3")
+	mess = pickle.loads(socketClient.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 4")
+	socketClient.send( pickle.dumps("Encrypted Message -- From TrustManager") )
+
+	socketClient.close()
+	sock.close()
+	print (">>FINALIZED SOCKET\n\n")
+	#System_log.writeSystemLog('Server','Server closed','info')
+	exit()
+
+
+
+#NS_Protocol_TrustManager()
+
+
+
+
+
+
+
+

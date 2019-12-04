@@ -7,12 +7,10 @@ from Crypto import Random
 from base64 import b64decode,b64encode
 import base64
 
-BS = 16
-pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
-unpad = lambda s : s[0:-ord(s[-1])]
+
 
 class ClientNS:
-	def __init__(self, my_id,key_file):
+	def __init__(self, my_id, key_file):
 		self.id = my_id
 		self.trustmanager_key = None
 		self.trustmanager_iv = None
@@ -29,15 +27,19 @@ class ClientNS:
 				for line in fp:
 					split = line.split('=')
 					if split[0]=='key':
-						self.trustmanager_key= split[1].rstrip("\n")
+						self.trustmanager_key= b64decode(split[1].rstrip("\n"))[:32]
 					elif split[0]=='iv ':
-						self.trustmanager_iv= split[1].rstrip("\n")
+						self.trustmanager_iv= b64dcode(split[1].rstrip("\n"))[:16]
 		finally:
 			fp.close()
 
+
+
 	def round1_server(self):
-		message = {'source':self.id}
+		message = {"source":self.id}
 		return message
+
+
 
 	def round2_trustmanager(self,server_response):
 		self.server = server_response['source']
@@ -47,6 +49,8 @@ class ClientNS:
 
 		message = {'source':self.id,'destination':self.server,'nonce':base64.encodestring(nonce).rstrip('\n'),'response':response}
 		return message
+
+
 
 	def round3_server(self,trustmanager_response):
 		decryptor = AES.new(pad(self.trustmanager_key)[:16], AES.MODE_CBC, pad(self.trustmanager_iv)[:16])

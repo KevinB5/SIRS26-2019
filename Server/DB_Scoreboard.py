@@ -119,7 +119,7 @@ def get_team_vulnsAndfingerprint():
 		if db.is_connected():
 			cursor.close()
 			db.close()
-			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
+			System_log.writeSystemLog("Database Scoreboard","Connection closed","info")
 
 
 

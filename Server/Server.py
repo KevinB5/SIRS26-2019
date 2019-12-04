@@ -1,5 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log, Server_NS
+import System_log, Server_NS, pickle
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -31,7 +31,7 @@ class ServerSocket:
 		# Receive Connection
 		#
 		try:
-			System_log.writeSystemLog('Server','Connection attempt','info')
+			System_log.writeSystemLog("Server","Connection attempt","info")
 			
 			self.newsocket, self.clientSocket = self.sock.accept()
 			print (">> ATTEMPT OF CONNECTION")
@@ -47,6 +47,7 @@ class ServerSocket:
 		print (">> RECEIVED CONNECTION\n")
 
 
+
 	#
 	# Close connection
 	#
@@ -57,6 +58,8 @@ class ServerSocket:
 		print (">>FINALIZED SOCKET")
 		System_log.writeSystemLog('Server','Server closed','info')
 		exit()
+
+
 
 	#
 	# Get User Credentials for Database Usage
@@ -199,7 +202,8 @@ class ServerSocket:
 			if(self.getAuthorization(3, username)):
 				scoreboard = DB_Scoreboard.get_scoreboard()
 				print("SENDING SCOREBOARD \n")
-				self.connssl.send(bytes(str(scoreboard),"utf-8"))
+				self.connssl.send(pickle.dumps(scoreboard))
+				self.connssl.send(b"\n\r##")
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
@@ -220,9 +224,10 @@ class ServerSocket:
 		if(userAuthenticated==True):
 			
 			if(self.getAuthorization(4, username)):
-				points = DB_Scoreboard.get_team_vulnsAndfingerprint()
+				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
-				self.connssl.send(bytes(str(points),"utf-8"))
+				self.connssl.send(pickle.dumps(teamVulnsandFing))
+				self.connssl.send(b"\n\r##")
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
@@ -395,41 +400,73 @@ class ServerSocket:
 		
 		if(AuthManager.getAuthorizationValues(operation, user)):
 			userAuthorized=True
-			System_log.writeUserLog('',user,'Authorization - operation:'+operation,'Users','Accepted','info')
+			System_log.writeUserLog("",user,"Authorization - operation:" + str(operation),"Users","Accepted","info")
 			return userAuthorized
 		else:
-			System_log.writeUserLog('',user,'Authorization - operation:'+operation,'Users','False','info')
+			System_log.writeUserLog("",user,"Authorization - operation:"+ str(operation),"Users","False","info")
 			userAuthorized=False
 			return userAuthorized
 
 
 
-x = ServerSocket()
-x.socketConnect()
+def NS_Protocol_Server():
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((HOST, PORT))
+	sock.listen(1)
+	print ("\n\n>> WAITING CONNECTION\n")
+	
+	socketClient, newSocket = sock.accept()
+	
+	print("RECEIVED STEP 1")
+	mess = pickle.loads(socketClient.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 2")
+	socketClient.send( pickle.dumps("Encrypted Message -- From Server") )
+	print( "\n" )
+
+	print("RECEIVED STEP 5")
+	mess = pickle.loads(socketClient.recv(1024))
+	print( mess, "\n" )
+
+	print("SENDING STEP 6")
+	socketClient.send( pickle.dumps("Encrypted Message -- From Server") )
+	print( "\n" )
+
+	print("RECEIVED STEP 7")
+	mess = pickle.loads(socketClient.recv(1024))
+	print( mess, "\n" )
+
+	print("VERIFY STEP 8")
+	print( "\n" )
 
 
-while(1):
-	x.messageTransfer()
+	socketClient.close()
+	sock.close()
+	print ("\n>>FINALIZED SOCKET\n\n")
+	#System_log.writeSystemLog('Server','Server closed','info')
+	exit()
 
 
 
 
 
 
+def begin():
 
-#print ( ">>>IP Remoto: %s" % self.clientSocket[0] )
-#print ( ">>>Porta Remota: %d" % self.clientSocket[1] )
+	x = ServerSocket()
+	x.socketConnect()
 
-#print (">>A Decorrer Transferencia")
+	while(1):
+		x.messageTransfer()
 
-#print (">>>Mensagem Recebida : %s" % self.data)
 
-#print(decoded)
 
-#print(split_decoded)
 
-#self.imageOut = open( "C:\\Users\\Documents\\Projecto\\demo_out.jpg", "wb" )
-#self.imageOut.write(self.data)
-#self.imageOut.close()
+#NS_Protocol_Server()
+begin()
+
+
 
 

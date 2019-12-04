@@ -4,6 +4,7 @@ import os
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Random import get_random_bytes
 from base64 import b64decode,b64encode
 import random
 import hashlib
@@ -14,41 +15,49 @@ BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
 unpad = lambda s : s[0:-ord(s[-1])]
 
+
+
 class TrustManagerNS:
+	
 	def __init__(self):
 		self.log = TrustManagerLog()
 
+
+
 	def encrypt_shared_keys(self):
-		key,iv = self.get_key('Keys/trustmanager.key')
+		key,iv = self.get_key("Keys/trustmanager.key")
 		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
 		try:
-			with open('Keys/shared_keys_temp','r') as fp:
-				with open('Keys/shared_keys','a') as write_file:
+			with open("Keys/shared_keys_temp","r") as fp:
+				with open("Keys/shared_keys","a") as write_file:
 					for line in fp:
-						content = base64.encodestring(aes_key.encrypt(pad(line)))
-						print content
+						content = base64.b64encode(aes_key.encrypt(pad(line)))
+						#print(content)
 						#write_file.write(content)
 						#write_file.flush()
 		finally:
 			write_file.close()
 			fp.close()
 
+
+
 	def read_shared_key(self,entity):
-		filename='Keys/'
-		key,iv = self.get_key('Keys/trustmanager.key')
+		filename="Keys/"
+		key,iv = self.get_key("Keys/trustmanager.key")
 		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
 		try:
 			with open('Keys/shared_keys') as fp:
 				for line in fp:
-					line = base64.decodestring(line)
+					line = base64.b64decode(line)
 					line = unpad(aes_key.decrypt(line))
-					split = line.split(':')
+					split = line.split(":")
 					if split[0]==entity:
 						filename += split[1].rstrip("\n")
 						#print(filename)
 						return self.get_key(filename)
 		finally:
 			fp.close()
+		
 		return None
 
 		
@@ -67,6 +76,8 @@ class TrustManagerNS:
 		finally:
 			f.close()
 		return key,iv
+
+
 
 	# round1 is done on server side
 	def round2_client(self,message):
