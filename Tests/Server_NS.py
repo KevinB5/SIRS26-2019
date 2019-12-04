@@ -10,7 +10,7 @@ import base64
 
 BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
-unpad = lambda s : s[0:-ord(s[-1])]
+unpad = lambda s : s[0:-ord(s[-1:])]
 
 class ServerNS:
     def __init__(self, my_id,key_file):
@@ -41,10 +41,11 @@ class ServerNS:
         #nonce = uuid.uuid4().hex
         nonce = os.urandom(16)
 
-        content = {'nonce':base64.encodestring(nonce).rstrip('\n'),'destination':client}
-        aes_key = pad(self.trustmanager_key)[:16]
-        iv = pad(self.trustmanager_iv)[:16]
-        #print('SERVER KEYS ',aes_key,' IV ',iv)
+        #content = {'nonce':base64.encodestring(nonce).rstrip('\n'),'destination':client}
+        content = {'nonce':str(base64.encodestring(nonce)).rstrip("\n"),'destination':client}
+        aes_key = bytes(pad(self.trustmanager_key)[:32],'utf-8')
+        iv = bytes(pad(self.trustmanager_iv)[:16],'utf-8')
+        print('SERVER KEYS ',aes_key,' IV ',iv)
         #aes_key = os.urandom(16)
         #iv = os.urandom(16)
         trustmanager_session = AES.new(aes_key, AES.MODE_CBC, iv)
@@ -52,13 +53,13 @@ class ServerNS:
         content_bytes = json.dumps(content)
         #print(content_bytes)
         #print(pad(content_bytes))
-        encrypted_content = trustmanager_session.encrypt(pad(content_bytes))
+        encrypted_content = trustmanager_session.encrypt(bytes(pad(content_bytes),'utf-8'))
         #print('ENCRYPTED: ',encrypted_content)
         response = {'source':self.id,'response':encrypted_content}
         return response
 
     def round3_client(self,client_message):
-        aes_key = pad(self.trustmanager_key)[:16]
+        aes_key = pad(self.trustmanager_key)[:32]
         iv = pad(self.trustmanager_iv)[:16]
         decryptor = AES.new(aes_key, AES.MODE_CBC, iv)
         response = client_message['response']

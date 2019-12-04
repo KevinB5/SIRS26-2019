@@ -9,7 +9,7 @@ import base64
 
 BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
-unpad = lambda s : s[0:-ord(s[-1])]
+unpad = lambda s : s[0:-ord(s[-1:])]
 
 class ClientNS:
 	def __init__(self, my_id,key_file):
@@ -45,11 +45,11 @@ class ClientNS:
 		#nonce = uuid.uuid4().hex
 		nonce = os.urandom(16)
 
-		message = {'source':self.id,'destination':self.server,'nonce':base64.encodestring(nonce).rstrip('\n'),'response':response}
+		message = {'source':self.id,'destination':self.server,'nonce':str(base64.encodestring(nonce)).rstrip("\n"),'response':response}
 		return message
 
 	def round3_server(self,trustmanager_response):
-		decryptor = AES.new(pad(self.trustmanager_key)[:16], AES.MODE_CBC, pad(self.trustmanager_iv)[:16])
+		decryptor = AES.new(pad(self.trustmanager_key)[:32], AES.MODE_CBC, pad(self.trustmanager_iv)[:16])
 		decrypted_response = json.loads(unpad(decryptor.decrypt(trustmanager_response)))
 		#print(decrypted_response)
 
