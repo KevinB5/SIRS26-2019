@@ -14,34 +14,6 @@ def connect():
 
 
 
-def get_group_scoreboard(group_id):
-	try:
-		db = connect()
-
-		group_id = str(group_id)
-		cursor = db.cursor(prepared=True)
-		query = "SELECT username,points,num_vul FROM Scoreboard WHERE group_id=%s ORDER BY points DESC LIMIT 10"
-		parameters = (group_id)
-		cursor.execute(query,parameters)
-		result = cursor.fetchall()
-
-		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
-		#print(result)
-		return result;
-
-
-	except Exception as e:
-		# UNCOMENT FOR DATABASE LOGIN DEBUG
-		# print("Error connecting to the server")
-		System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
-		print(e)
-
-	finally:
-		if db.is_connected():
-			cursor.close()
-			db.close()
-			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
-
 
 
 def get_user_score(username):
@@ -58,6 +30,7 @@ def get_user_score(username):
 		result = cursor.fetchone()
 
 		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
+		#print(result)
 		return result[0];
 
 
@@ -72,6 +45,82 @@ def get_user_score(username):
 			cursor.close()
 			db.close()
 			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
+
+
+
+
+def get_user_vulnsAndfingerprint(username):
+	try:
+		db = connect()
+		cursor = db.cursor(prepared=True)
+		query = "SELECT username, fingerprint, name_vul FROM Vulnerability WHERE username=%s;"
+		parameters = [username]
+		cursor.execute(query,parameters)
+		result = cursor.fetchall()
+		
+		return result;
+	
+	
+	except Exception as e:
+		# UNCOMENT FOR DATABASE LOGIN DEBUG
+		# print("Error connecting to the server")
+		print(e)
+	
+	finally:
+		if db.is_connected():
+			cursor.close()
+			db.close()
+			System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
+
+
+
+def get_scoreboard():
+	try:
+		db = connect()
+		cursor = db.cursor(prepared=True)
+		query = "SELECT username, points, num_vul, last_update  FROM Scoreboard;"
+		cursor.execute(query)
+		result = cursor.fetchall()
+
+		return result;
+	
+	
+	except Exception as e:
+		# UNCOMENT FOR DATABASE LOGIN DEBUG
+		# print("Error connecting to the server")
+		System_log.writeSystemLog('Database Scoreboard','Connection failed','error')
+		print(e)
+	
+	finally:
+		if db.is_connected():
+			cursor.close()
+			db.close()
+
+
+
+
+def get_team_vulnsAndfingerprint():
+	try:
+		db = connect()
+		cursor = db.cursor(prepared=True)
+		query = "SELECT username, fingerprint, name_vul FROM Vulnerability;"
+		cursor.execute(query)
+		result = cursor.fetchall()
+		
+		return result;
+	
+	
+	except Exception as e:
+		# UNCOMENT FOR DATABASE LOGIN DEBUG
+		# print("Error connecting to the server")
+		print(e)
+	
+	finally:
+		if db.is_connected():
+			cursor.close()
+			db.close()
+			System_log.writeSystemLog('Database Scoreboard','Connection closed','info')
+
 
 
 

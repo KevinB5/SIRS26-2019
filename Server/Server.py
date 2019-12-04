@@ -1,5 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log
+import System_log, Server_NS
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -138,7 +138,9 @@ class ServerSocket:
 			self.connssl.send(b"NO AUTH")
 
 
-
+	#
+	#
+	#
 	def checkScore(self):
 		global userAuthenticated
 		global username
@@ -162,6 +164,9 @@ class ServerSocket:
 
 
 
+	#
+	#
+	#
 	def checkVulnerabilityandFingerprint(self):
 		global userAuthenticated
 		global username
@@ -169,8 +174,9 @@ class ServerSocket:
 		if(userAuthenticated==True):
 			
 			if(self.getAuthorization(2, username)):
-				print("SENDING USER VULNERABILITIES AND FINGERPRINTS\n")
-				self.connssl.send(b"CHECKVULNERABILITY")
+				result = DB_Scoreboard.get_user_vulnsAndfingerprint(username)
+				print("SENDING USER VULNS AND FINGERPRINTS \n")
+				self.connssl.send(bytes(str(result),"utf-8"))
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
@@ -178,6 +184,54 @@ class ServerSocket:
 		else:
 			print("USER NOT AUTHENTICATED\n")
 			self.connssl.send(b"NO AUTH")
+
+
+
+	#
+	#
+	#
+	def checkScoreboard(self):
+		global userAuthenticated
+		global username
+		
+		if(userAuthenticated==True):
+			
+			if(self.getAuthorization(3, username)):
+				scoreboard = DB_Scoreboard.get_scoreboard()
+				print("SENDING SCOREBOARD \n")
+				self.connssl.send(bytes(str(scoreboard),"utf-8"))
+			else:
+				print("USER NOT AUTHORIZED\n")
+				self.connssl.send(b"NO AUTHORIZATION")
+	
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTHENTICATION")
+
+
+
+	#
+	#
+	#
+	def checkTeamVulnsandFingerprints(self):
+		global userAuthenticated
+		global username
+		
+		if(userAuthenticated==True):
+			
+			if(self.getAuthorization(4, username)):
+				points = DB_Scoreboard.get_team_vulnsAndfingerprint()
+				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
+				self.connssl.send(bytes(str(points),"utf-8"))
+			else:
+				print("USER NOT AUTHORIZED\n")
+				self.connssl.send(b"NO AUTHORIZATION")
+	
+		else:
+			print("USER NOT AUTHENTICATED\n")
+			self.connssl.send(b"NO AUTHENTICATION")
+
+
 
 
 
@@ -281,8 +335,14 @@ class ServerSocket:
 				elif(command == "checkScore" and userAuthenticated==True ):
 					self.checkScore()
 
-				elif(command == "checkVulnerability" and userAuthenticated==True ):
+				elif(command == "checkVulnsandFingerprints" and userAuthenticated==True ):
 					self.checkVulnerabilityandFingerprint()
+				
+				elif(command == "checkScoreboard" and userAuthenticated==True ):
+					self.checkScoreboard()
+
+				elif(command == "checkTeamVulnsandFingerprints" and userAuthenticated==True ):
+					self.checkTeamVulnsandFingerprints()
 
 				elif(command == "submitVulnerability" and userAuthenticated==True ):
 					self.submitVulnerability()
