@@ -45,24 +45,25 @@ class ClientNS:
 		#nonce = uuid.uuid4().hex
 		nonce = os.urandom(16)
 
-		message = {'source':self.id,'destination':self.server,'nonce':str(base64.encodestring(nonce)).rstrip("\n"),'response':response}
+		message = {'source':self.id,'destination':self.server,'nonce':str(base64.b64encode(nonce),'utf-8'),'response':response}
 		return message
 
 	def round3_server(self,trustmanager_response):
-		decryptor = AES.new(pad(self.trustmanager_key)[:32], AES.MODE_CBC, pad(self.trustmanager_iv)[:16])
+		decryptor = AES.new(bytes(pad(self.trustmanager_key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(self.trustmanager_iv)[:16],'utf-8'))
 		decrypted_response = json.loads(unpad(decryptor.decrypt(trustmanager_response)))
 		#print(decrypted_response)
 
-		for key,value in decrypted_response.iteritems():
-			decrypted_response.pop(key)
-			decrypted_response[str(key)] = str(value)
-		#print(decrypted_response)
+		#for key,value in decrypted_response.items():
+		#	decrypted_response.pop(key)
+		#	decrypted_response[str(key)] = str(value)
+		print('CLIENT DECRYPTED ',decrypted_response)
 
-		self.session_key= base64.decodestring(decrypted_response['session_key'])
-		self.session_iv=base64.decodestring(decrypted_response['session_iv'])
-		final_response = base64.decodestring(decrypted_response['response'])
+		self.session_key= base64.b64decode(decrypted_response['session_key'])
+		self.session_iv=base64.b64decode(decrypted_response['session_iv'])
+		print('CLIENT ',decrypted_response['response'])
+		final_response = decrypted_response['response']
 
-		#print('final ',base64.decodestring(final_response))
+		#print('final ',base64.b64decode(final_response))
 		message = {'response':final_response}
 		return message
 
@@ -71,7 +72,7 @@ class ClientNS:
 		response = unpad(aes.decrypt(server_response))
 		#print('ROUND 4 SERVER ',response)
 		response = json.loads(response)
-		nonce = base64.decodestring(response['nonce'])
+		nonce = base64.b64decode(response['nonce'])
 		nonce = ''.join(str(ord(c)) for c in nonce)
 		calculated_nonce = int(nonce) - 1
 		#print('estimated nonce ',calculated_nonce)

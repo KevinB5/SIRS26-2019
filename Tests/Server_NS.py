@@ -41,8 +41,8 @@ class ServerNS:
         #nonce = uuid.uuid4().hex
         nonce = os.urandom(16)
 
-        #content = {'nonce':base64.encodestring(nonce).rstrip('\n'),'destination':client}
-        content = {'nonce':str(base64.encodestring(nonce)).rstrip("\n"),'destination':client}
+        #content = {'nonce':base64.b64encode(nonce).rstrip('\n'),'destination':client}
+        content = {'nonce':str(base64.b64encode(nonce),'utf-8'),'destination':client}
         aes_key = bytes(pad(self.trustmanager_key)[:32],'utf-8')
         iv = bytes(pad(self.trustmanager_iv)[:16],'utf-8')
         print('SERVER KEYS ',aes_key,' IV ',iv)
@@ -59,37 +59,26 @@ class ServerNS:
         return response
 
     def round3_client(self,client_message):
-        aes_key = pad(self.trustmanager_key)[:32]
-        iv = pad(self.trustmanager_iv)[:16]
+        aes_key = bytes(pad(self.trustmanager_key)[:32],'utf-8')
+        iv = bytes(pad(self.trustmanager_iv)[:16],'utf-8')
+        #print('USED KEY TRUST ',aes_key,' iv ',iv)
         decryptor = AES.new(aes_key, AES.MODE_CBC, iv)
         response = client_message['response']
-        #decoded_response = base64.decodestring(response)
-        #print(decoded_response)
-        decrypted_response = unpad(decryptor.decrypt(response))
-        #json.loads(unpad(
-        #TODO:
-        print('__')
-        print('BUG DECRYPTION R3: ',decrypted_response)
-        print('--')
+        decrypted_response = decryptor.decrypt(bytes(response[2:-1],'utf-8').decode('unicode-escape').encode('ISO-8859-1'))
+        decrypted_response = unpad(decrypted_response)
+        decrypted_response = json.loads(str(decrypted_response,'utf-8'))
 
-        first_coma = decrypted_response.index("source")
-        #print('PLEASE ',decrypted_response[first_coma:])
-        temporary_fix = '{'+decrypted_response[first_coma-1:]
-        #print('TEMPORARY ',temporary_fix)
-        temporary_fix = json.loads(temporary_fix)
-        
-        #self.nonce = temporary_fix['nonce']
-        self.session_key=base64.decodestring(temporary_fix['session_key'])
-        self.session_iv=base64.decodestring(temporary_fix['session_iv'])
+        self.session_key=base64.b64decode(decrypted_response['session_key'])
+        self.session_iv=base64.b64decode(decrypted_response['session_iv'])
         #nonce = uuid.uuid4().hex
         nonce = os.urandom(16)
         self.nonce = nonce
 
         session = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
         
-        response = {'nonce': base64.encodestring(nonce).rstrip('\n')}
+        response = {'nonce': str(base64.b64encode(nonce),'utf-8')}
         response = json.dumps(response)
-        final_response = session.encrypt(pad(response))
+        final_response = session.encrypt(bytes(pad(response),'utf-8'))
         return final_response
 
     def round4_client(self,client_message):

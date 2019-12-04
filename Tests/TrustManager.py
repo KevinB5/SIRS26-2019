@@ -49,6 +49,7 @@ class TrustManagerNS:
 					#print('decoded ',line)
 					#line = str(line)[2:]
 					#print('test ',line[:-1])
+					
 					line = aes_key.decrypt(line[:-1])
 					#print('TEMP ',str(line))
 					
@@ -101,7 +102,7 @@ class TrustManagerNS:
 		server_key,server_iv = self.read_shared_key(destination)
 		server_encryptor = AES.new(bytes(pad(server_key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(server_iv)[:16],'utf-8'))
 		decrypted_response = json.loads(unpad(server_encryptor.decrypt(response)))
-		for key,value in decrypted_response.iteritems():
+		for key,value in decrypted_response.items():
 			decrypted_response.pop(key)
 			decrypted_response[str(key)] = str(value)
 		#print(decrypted_response)
@@ -113,22 +114,27 @@ class TrustManagerNS:
 		#session_key = AES.new(key, AES.MODE_CBC, iv)
 		#print('nonce ',decrypted_response['nonce'])
 
-		new_reponse = {'nonce1':decrypted_response['nonce'],'source':source\
-        ,'session_key':str(base64.encodestring(key)).rstrip("\n"),'session_iv':str(base64.encodestring(iv).rstrip("\n")).rstrip("\n"),'nonce':decrypted_response['nonce']}
-        
-		#print(new_reponse)
-		content_bytes = json.dumps(new_reponse)
-		#print('TEST ',content_bytes)
-		encrypted_response = server_encryptor.encrypt(pad(content_bytes))
+		#new_reponse = {'nonce1':decrypted_response['nonce'],
+		new_response = {'source':source,'session_key':str(base64.b64encode(key),'utf-8'),\
+		'session_iv':str(base64.b64encode(iv),'utf-8'),'nonce':decrypted_response['nonce']}
 
-		#print(encrypted_response)
-		response_message = {'nonce':nonce,'destination':destination,'session_key':base64.encodestring(key).rstrip("\n"),'session_iv':base64.encodestring(iv).rstrip("\n"),'response': base64.encodestring(encrypted_response).rstrip("\n")}
-		#print('final',response)
+		content_bytes = json.dumps(new_response)
+		#print('TEST ',content_bytes)
+		server_encryptor2 = AES.new(bytes(pad(server_key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(server_iv)[:16],'utf-8'))
+		#print('SERVER KEY ',bytes(pad(server_key)[:32],'utf-8'),' iv ',bytes(pad(server_iv)[:16],'utf-8'))
+
+		encrypted_response = server_encryptor2.encrypt(bytes(pad(content_bytes),'utf-8'))
+		print('encrypting: ',content_bytes)
+		print('')
+		print('ENCRYPTED: ',encrypted_response)
+		response_message = {'nonce':nonce,'destination':destination,'session_key':str(base64.b64encode(key),'utf-8'),\
+		'session_iv':str(base64.b64encode(iv),'utf-8'),'response': str(encrypted_response)}
+		print('final ',response_message)
 
 		client_key,client_iv = self.read_shared_key(source)
-		client_encryptor = AES.new(pad(client_key)[:32], AES.MODE_CBC, pad(client_iv)[:16])
+		client_encryptor = AES.new(bytes(pad(client_key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(client_iv)[:16],'utf-8'))
 		
 		response_message = json.dumps(response_message)
 		#print(response_message)
-		final_response = client_encryptor.encrypt(pad(response_message))
+		final_response = client_encryptor.encrypt(bytes(pad(response_message),'utf-8'))
 		return final_response
