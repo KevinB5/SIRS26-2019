@@ -1,0 +1,103 @@
+Notas da VM Configs iniciais:
+
+Download VM imagem from osboxes.org
+
+sudo apt get update
+sudo apt get upgrade
+
+Clone 3 times (Full Clone)
+
+Global Configs:
+
+	python3:
+		$ sudo apt install python3
+		$ sudo apt install python3-pip
+
+	apache2:
+		$ sudo pip3 install mysql-connector-python
+
+	mySQL-server:
+		$ sudo apt-get install mysql-server
+
+	VM 1 - Server: (192.168.1.1)
+
+		VirtualBoxSettings:
+
+			Network - Adapter 2 - Internal Network (sirs_switchServer)
+
+		sudo hostnamectl set-hostname server
+
+		sudo vi /etc/hosts
+
+		In the hosts file, change the name for 127.0.1.1 to server
+
+		Edit /etc/network/interfaces  - (Follow interfaces picture)
+
+	VM 2 - Client: (192.168.2.1)
+
+		VirtualBoxSettings:
+
+			Network - Adapter 2 - Internal Network (sirs_switchClient)
+
+		sudo hostnamectl set-hostname client
+
+		sudo vi /etc/hosts
+
+		In the hosts file, change the name for 127.0.1.1 to client
+
+		Edit /etc/network/interfaces  - (Follow interfaces picture)
+
+	VM 3 - TrustManager: (192.168.3.1)
+
+		VirtualBoxSettings:
+
+			Network - Adapter 2 - Internal Network (sirs_switchTrustManager)
+
+		sudo hostnamectl set-hostname trustmanager
+
+		sudo vi /etc/hosts
+
+		In the hosts file, change the name for 127.0.1.1 to trustmanager
+
+		Edit /etc/network/interfaces  - (Follow interfaces picture)
+
+	VM 4 - Switch/Firewall: (192.168.1.254 , 192.168.2.254 , 192.168.3.254)
+
+		VirtualBoxSettings:
+
+			Network - Adapter 2 - Internal Network (sirs_switchServer)
+			Network - Adapter 3 - Internal Network (sirs_switchClient)
+			Network - Adapter 4 - Internal Network (sirs_switchTrustManager)
+
+		sudo hostnamectl set-hostname switch
+
+		sudo vi /etc/hosts
+
+		In the hosts file, change the name for 127.0.1.1 to switch
+
+		Edit /etc/sysctl.conf :
+			Uncoment net.ipv4.ip_forward=1
+
+
+
+--------------------------------------------------------------------------------------
+
+Network Table:
+
++-----------------+-----------+---------------+
+| NODE            | INTERFACE | IP            |
++-----------------+-----------+---------------+
+| SERVER          | enp0s8    | 192.168.1.1   |
++-----------------+-----------+---------------+
+| CLIENT          | enp0s8    | 192.168.2.1   |
++-----------------+-----------+---------------+
+| TRUSTMANAGER    | enp0s8    | 192.168.3.1   |
++-----------------+-----------+---------------+
+|                 | enp0s8    | 192.168.1.254 |
+|                 +-----------+---------------+
+|                 | enp0s9    | 192.168.2.254 |
+| SWITCH/FIREWALL +-----------+---------------+
+|                 | enp0s10   | 192.168.3.254 |
+|                 +-----------+---------------+
+|                 | enp0s3    | DHCP          |
++-----------------+-----------+---------------+

@@ -10,7 +10,12 @@ trustmanager = TrustManagerNS()
 
 #trustmanager.encrypt_shared_keys()
 
+
 print("1 client -> server")
+
+
+print('1 client -> server')
+
 result = client.round1_server()
 print(result)
 print("\n")
@@ -42,7 +47,10 @@ print("")
 print("4 server -> client")
 result = server.round4_client(result)
 print(result)
+
 '''
+
+
 
 
 

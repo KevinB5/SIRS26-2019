@@ -1,22 +1,24 @@
-Kevin: Trust Manager(key management, utilizar chave privada para assinar(com timestamp,etc) mensagens enviadas pelo SSL, distribuir certificados)
+Kevin: Trust Manager(key management, utilizar chave privada para assinar(com timestamp,etc) mensagens enviadas pelo SSL, distribuir certificados) /
 
-TiagoM: Alterar função de hash (fingerprint,password...)
+TiagoM: Alterar função de hash (fingerprint,password...) X
 
 Alterar comunicação,entre Server, Client e TrustM:
-	TiagoM: - Establish connection: TrustM-Client, TrustM-Server, Server-Client.
-	TiagoS: - Setup VM's
+	TiagoM: - Establish connection: TrustM-Client, TrustM-Server, Server-Client. 
+	TiagoS: - Setup VM's 
 	- Firewall setup
 
+Receber ficheiros como input(vulnerability) X
+Submit fingerprinting and vulnerabilities to score points X
+
+Report
 _______________________________________________________
 AVANÇADO
 
-Server Error Handling ideas:
-	- Analisar a existência de DOS
-	- Detectar brute force 
-	- Inserir ficheiros com scripts mal intencionados
+Só se tivermos tempo:
+	Server Error Handling ideas:
+		- Analisar a existência de DOS
+		- Detectar brute force 
+		- Inserir ficheiros com scripts mal intencionados
 
-Receber ficheiros como input(vulnerability)
-
-Submit fingerprinting and vulnerabilities to score points
 
 Automatically detect common vulnerabilities like calls to "gets" function or to print-family functions with user controlled buffers

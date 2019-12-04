@@ -152,6 +152,7 @@ Certificate Creation: https://carlo-hamalainen.net/2013/01/24/python-ssl-socket-
 
 Python package to encrypt:
 - $pip install pycrypto
+- $pip install pycryptodome
 - How to use: https://www.novixys.com/blog/using-aes-encryption-decryption-python-pycrypto/
 - https://stackoverflow.com/questions/30056762/rsa-encryption-and-decryption-in-python
 	
