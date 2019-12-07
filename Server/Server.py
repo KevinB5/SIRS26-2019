@@ -207,10 +207,12 @@ class ServerSocket:
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
+				self.connssl.send(b"\n\r##")
 	
 		else:
 			print("USER NOT AUTHENTICATED\n")
 			self.connssl.send(b"NO AUTHENTICATION")
+			self.connssl.send(b"\n\r##")
 
 
 
@@ -231,10 +233,11 @@ class ServerSocket:
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.connssl.send(b"NO AUTHORIZATION")
-	
+				self.connssl.send(b"\n\r##")
 		else:
 			print("USER NOT AUTHENTICATED\n")
 			self.connssl.send(b"NO AUTHENTICATION")
+			self.connssl.send(b"\n\r##")
 
 
 

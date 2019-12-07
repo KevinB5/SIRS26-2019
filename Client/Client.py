@@ -102,7 +102,7 @@ def secondMenu(username):
 		print( "\n>>", str(mess, "utf-8") )
 		
 		if(str(mess, "utf-8")=="SUBMITMENU"):
-			submitMenu()
+			submitMenu(username)
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu(username)
@@ -203,8 +203,8 @@ def scoreboardMenu(username):
 		print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
 
 		for i in range(0,len(scoreboard)):
-			username, points =  scoreboard[i][0], str(scoreboard[i][1])
-			numberOfVulns, date = str(scoreboard[i][2]), scoreboard[i][3]
+			username, points =  str(scoreboard[i][0],'utf-8'), str(scoreboard[i][1])
+			numberOfVulns, date = str(scoreboard[i][2]), str(scoreboard[i][3])
 		
 			print(" "*10 + username + " " *(40-len(username)), end="")
 			print(" "*2 + points + " " *(10-len(points)), end="")
@@ -231,12 +231,12 @@ def scoreboardMenu(username):
 				break
 			mess += packet
 	
-		mess = pickle.loads(mess)
-	
+
 		if(mess == b"NO AUTHORIZATION"):
 			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
-		
+
 		else:
+			mess = pickle.loads(mess)
 			# print in terminal : User ; Fingerprint ; Name_Vuln ;
 			print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*95 + "Name_Vuln  ;\n" )
 			
@@ -306,7 +306,7 @@ def submitMenu(username):
 			# sending the vulns file
 			sendFile(file, ssl_sock)
 			
-			submitMenu()
+			submitMenu(username)
 		
 
 		else:
