@@ -30,7 +30,7 @@ Virtual Machine Setup:
 			- $ sudo ufw default allow outgoing
 
 - VM 1 - Server: (192.168.1.1):
-	-VirtualBoxSettings:
+	- VirtualBoxSettings:
 		- Network - Adapter 2 - Internal Network (sirs_switchServer)
 		- $ sudo hostnamectl set-hostname server
 		- $ sudo vi /etc/hosts
