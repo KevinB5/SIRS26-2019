@@ -30,17 +30,6 @@ class TrustManagerNS:
 
 	def encrypt_shared_keys(self):
 
-		key,iv = self.get_key("Keys/trustmanager.key")
-		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
-		try:
-			with open("Keys/shared_keys_temp","r") as fp:
-				with open("Keys/shared_keys","a") as write_file:
-					for line in fp:
-						content = base64.b64encode(aes_key.encrypt(pad(line)))
-						#print(content)
-						#write_file.write(content)
-						#write_file.flush()
-
 		key,iv = self.get_key('Keys/trustmanager.key')
 		aes_key = AES.new(bytes(pad(key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(iv)[:16],'utf-8'))
 		try:
