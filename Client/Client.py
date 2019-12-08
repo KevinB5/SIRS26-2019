@@ -325,7 +325,7 @@ def submitMenu(ssl_sock,username):
 
 def sendFile(file, ssl_sock):
 
-	print (">>A Decorrer Transferencia")
+	print (">>Transfering file")
 	
 	# sending the vulns file
 	f = open( file, "rb" )
@@ -337,7 +337,7 @@ def sendFile(file, ssl_sock):
 	ssl_sock.send(EOF)
 	f.close()
 			
-	print (">>Transferencia Concluida")
+	print (">>Transfer concluded")
 
 
 

@@ -260,7 +260,7 @@ class ServerSocket:
 				print("ASKING USER FOR VULNERABILITY\n")
 				self.connssl.send(b"SUBMITVULNERABILITY")
 					
-				print (">>A Decorrer Transferencia")
+				print (">>Transfering file")
 						
 				# receiving the binary file
 				binFile = b""
@@ -269,7 +269,7 @@ class ServerSocket:
 			
 				binFile = binFile.replace(b"\n\r##", b"")
 					
-				print (">>Transferencia Concluida \n\n>>A Decorrer Transferencia")
+				print (">>Transfer concluded \n\n>>Transfering file")
 				
 				# receiving the vulnerabilities file
 				vulnFile = b""
@@ -278,7 +278,7 @@ class ServerSocket:
 			
 				vulnFile = vulnFile.replace(b"\n\r##", b"")
 				
-				print (">>Transferencia Concluida")
+				print (">>Transfer concluded")
 				
 				splitLines = vulnFile.split()
 				vulns = []
@@ -295,12 +295,12 @@ class ServerSocket:
 				if( bool ):
 					#TODO: Add filename on log
 					System_log.writeUserLog('',username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
-					print("ADDED NEW VULNS")
+					print("ADDED NEW VULNERABILITY")
 		
 				else:
 					#TODO: Add filename on log
 					System_log.writeUserLog('',username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
-					print("ALREADY HAVE THIS VULNS")
+					print("THIS VULNERABILITY ALREADY EXIST")
 					
 					
 			else:
