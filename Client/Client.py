@@ -28,7 +28,7 @@ def mainMenu(ssl_sock,username,client_ns):
 		password=getpass.getpass()
 
 		command_as_string = "login"+"!-!"+username+"!-!"+password+"!-!"
-		#send_encrypted(ssl_sock,client_ns,command_as_string)
+		send_encrypted(ssl_sock,client_ns,command_as_string)
 		
 		#username_as_string = username+"!-!"
 		#send_encrypted(ssl_sock,client_ns,username_as_string)
@@ -42,11 +42,11 @@ def mainMenu(ssl_sock,username,client_ns):
 		# message that says if username and password are correct
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
-		print( "\n>>", str(mess, "utf-8") )
-		if(str(mess, "utf-8")=="USER AUTHENTICATED!!!"):
+		print( "\n>>", mess )
+		if(mess=="USER AUTHENTICATED!!!"):
 			secondMenu(ssl_sock,username,client_ns)
-		
-		elif((str(mess, "utf-8")=="USER NOT AUTHENTICATED!!!")):
+	
+		elif(mess =="USER NOT AUTHENTICATED!!!"):
 			mainMenu(ssl_sock,username,client_ns)
 		
 		else:
@@ -78,37 +78,37 @@ def secondMenu(ssl_sock,username,client_ns):
 	command=input()
 	
 	if (command=="1"):
-		command_as_string = "scoreboardMenu"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "scoreboardMenu"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = username+"!-!"
+		#send_encrypted(ssl_sock,client_ns,username_as_string)
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
 		# message received from server
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
-		print( "\n>>", str(mess, "utf-8") )
-		if(str(mess, "utf-8")=="SCOREBOARDMENU"):
+		print( "\n>>", mess, "utf-8" )
+		if(mess=="SCOREBOARDMENU"):
 			scoreboardMenu(ssl_sock,username,client_ns)
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu(ssl_sock,username,client_ns)
 
 	elif (command=="2"):
-		command_as_string = "submitMenu"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "submitMenu"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = username+"!-!"
+		#send_encrypted(ssl_sock,client_ns,username_as_string)
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
 		# message received from server
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
-		print( "\n>>", str(mess, "utf-8") )
+		print( "\n>>", mess)
 		
-		if(str(mess, "utf-8")=="SUBMITMENU"):
+		if(mess, "utf-8"=="SUBMITMENU"):
 			submitMenu(ssl_sock,username,client_ns)
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
@@ -136,10 +136,10 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 	command=input()
 	
 	if (command=="1"):
-		command_as_string = "checkScore"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "checkScore"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = 
+		#send_encrypted(ssl_sock,client_ns,username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 		
@@ -147,16 +147,16 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
 
-		print("\n\nUSER SCORE IS", str(mess, "utf-8"),"\n" )
+		print("\n\nUSER SCORE IS", mess,"\n" )
 		scoreboardMenu(ssl_sock,username,client_ns)
 
 
 
 	elif (command=="2"):
-		command_as_string = "checkVulnsandFingerprints"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "checkVulnsandFingerprints"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = 
+		#send_encrypted(ssl_sock,client_ns,username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -170,7 +170,7 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 
 		k = 0
 		for name in newAux:
-			strAux = str(name, "utf-8")[1:-1]
+			strAux = name[1:-1]
 			strAux = strAux.replace("'","")
 		
 			k = k + 1
@@ -188,59 +188,65 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 
 
 	elif (command=="3"):
-		command_as_string = "checkScoreboard"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "checkScoreboard"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = 
+		#send_encrypted(ssl_sock,client_ns,username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 		
 		# message received from server
-		scoreboard = ""
+		scoreboard = b""
 		while True:
-			mess = ssl_sock.recv(1024)
-			packet = client_ns.receive_message(mess)
-			if "\n\r##" in packet:
+			packet = ssl_sock.recv(1024)
+			#packet = client_ns.receive_message(mess)
+			if b"\n\r##" in packet:
 				break
 			scoreboard += packet
+
+		scoreboard = client_ns.receive_message(scoreboard)
 		
-		scoreboard = pickle.loads(scoreboard)
+		#scoreboard = pickle.loads(scoreboard)
 		
 		
 		#printing the scoreoboard
 		print("-" * 300 + "SCOREBOARD" + "-"*270)
 		print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
-
-		for i in range(0,len(scoreboard)):
-			username, points =  str(scoreboard[i][0],'utf-8'), str(scoreboard[i][1])
-			numberOfVulns, date = str(scoreboard[i][2]), str(scoreboard[i][3])
+		print(scoreboard)
+		
+		#for i in range(0,len(scoreboard)):
+		'''
+		i=0
+		while(i+3 < len(scoreboard)):
+			username, points =  str(scoreboard[i]), str(scoreboard[i+1])
+			numberOfVulns, date = str(scoreboard[i+2]), str(scoreboard[i+3])
 		
 			print(" "*10 + username + " " *(40-len(username)), end="")
 			print(" "*2 + points + " " *(10-len(points)), end="")
 			print(" "*10 + numberOfVulns + " " *(30-len(numberOfVulns)), end="")
 			print(  date, "  \n")
-
+			i+=4
+		'''
 		scoreboardMenu(ssl_sock,username,client_ns)
 
 
 
 	elif (command=="4"):
-		command_as_string = "checkTeamVulnsandFingerprints"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "checkTeamVulnsandFingerprints"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = username+"!-!"
+		#send_encrypted(ssl_sock,client_ns,username_as_string.encode())
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 		
 		# message received from server
-		mess = ""
+		mess = b""
 		while True:
-			mess = ssl_sock.recv(1024)
-			packet = client_ns.receive_message(mess)
-			if "\n\r##" in packet:
+			packet = ssl_sock.recv(1024)
+			if b"\n\r##" in packet:
 				break
 			mess += packet
-	
+		mess = client_ns.receive_message(mess)
 
 		if(mess == "NO AUTHORIZATION"):
 			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
@@ -279,19 +285,19 @@ def submitMenu(ssl_sock,username,client_ns):
 	command=input()
 	
 	if (command=="1"):
-		command_as_string = "submitVulnerability"+"!-!"
-		send_encrypted(ssl_sock,client_ns,command_as_string.encode())
-		username_as_string = username+"!-!"
-		send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		command_as_string = "submitVulnerability"+"!-!"+username+"!-!"
+		send_encrypted(ssl_sock,client_ns,command_as_string)
+		#username_as_string = username+"!-!"
+		#send_encrypted(ssl_sock,client_ns,username_as_string)
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
 		# message received from server
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
-		print( "\n>>", str(mess, "utf-8") )
+		print( "\n>>", mess)
 
-		if(str(mess, "utf-8")=="SUBMITVULNERABILITY"):
+		if(mess=="SUBMITVULNERABILITY"):
 			
 			print("BINARY:", end="")
 			file = input()

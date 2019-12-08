@@ -40,8 +40,15 @@ class ClientNS:
 		except Exception as err:
 			print (">> !!USER DOESN'T HAS KEY!!\n")
 			print(err)
+			exit()
 		finally:
-			fp.close()
+			try:
+				fp.close()
+
+			except Exception as err:
+				print (">> !!USER DOESN'T HAS KEY!!\n")
+				print(err)
+				exit()
 
 
 
@@ -79,6 +86,7 @@ class ClientNS:
 		response = unpad(aes.decrypt(server_response))
 		response = json.loads(response)
 		nonce = base64.b64decode(response['nonce'])
+		self.current_nonce = nonce
 		calculated_nonce = int.from_bytes(nonce,byteorder='little')-1
 		response = {'nonce':calculated_nonce}
 		response = json.dumps(response)
@@ -88,8 +96,7 @@ class ClientNS:
 
 	def send_message(self,content):
 		aes = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
-		nonce = os.urandom(16)
-		self.current_nonce = nonce
+		nonce = self.current_nonce
 		message = {'nonce':str(base64.b64encode(nonce),'utf-8'),'content':content}
 		message = json.dumps(message)
 		encrypted_message = aes.encrypt(bytes(pad(message),'utf-8'))
@@ -98,12 +105,11 @@ class ClientNS:
 	def receive_message(self,message):
 		decryptor = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
 		message = decryptor.decrypt(message)
-		print('received',message)
 		message = unpad(message)
+		print('received',message)
 		decrypted_response = json.loads(message)
 		nonce = base64.b64decode(decrypted_response['nonce'])
-		if(nonce==self.current_nonce):
-			message = decrypted_response['content']
-			return message
-		else:
-			raise Exception("Nonce does not match")
+		self.current_nonce = nonce
+		message = decrypted_response['content']
+		return message
+		

@@ -37,7 +37,12 @@ class ServerNS:
                     elif split[0]=="iv ":
                         self.trustmanager_iv= split[1].rstrip("\n")
         finally:
-            fp.close()
+            try:
+                fp.close()
+            except Exception as err:
+                print (">> !!SERVER DOESN'T HAS KEY!!\n")
+                print(err)
+                exit()
 
 
 
@@ -108,6 +113,8 @@ class ServerNS:
     def receive_message(self,message):
         decryptor = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
         decrypted_response = json.loads(unpad(decryptor.decrypt(message)))
+
+        #print('DECRYPTED ',decrypted_response)
         nonce = b64decode(decrypted_response['nonce'])
         if(nonce==self.nonce):
             message = decrypted_response['content']

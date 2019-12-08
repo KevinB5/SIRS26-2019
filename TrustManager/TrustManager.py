@@ -87,8 +87,13 @@ class TrustManagerNS:
 						write_file.flush()
 
 		finally:
-			write_file.close()
-			fp.close()
+			try:
+				write_file.close()
+				fp.close()
+			except Exception as err:
+				print (">> !!TRUST MANAGER DOESN'T HAS KEY!!\n")
+				print(err)
+				exit()
 
 
 
@@ -110,7 +115,12 @@ class TrustManagerNS:
 
 						return self.get_key(filename)
 		finally:
-			fp.close()
+			try:
+				fp.close()
+			except Exception as err:
+				print (">> !!USER DOESN'T HAS KEY!!\n")
+				print(err)
+				exit()
 		
 		return None
 
@@ -128,7 +138,12 @@ class TrustManagerNS:
 					elif split[0]=='iv ':
 						iv= split[1].rstrip("\n")
 		finally:
-			f.close()
+			try:
+				f.close()
+			except Exception as err:
+				print (">> !!USER DOESN'T HAS KEY!!\n")
+				print(err)
+				exit()
 		#print(key,'and',iv)
 		return key,iv
 
