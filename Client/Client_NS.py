@@ -37,6 +37,9 @@ class ClientNS:
 						self.trustmanager_key= split[1].rstrip("\n")
 					elif split[0]=='iv ':
 						self.trustmanager_iv= split[1].rstrip("\n")
+		except Exception as err:
+			print (">> !!USER DOESN'T HAS KEY!!\n")
+			print(err)
 		finally:
 			fp.close()
 

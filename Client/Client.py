@@ -13,16 +13,16 @@ PORT2 = 65440
 
 
 
-def mainMenu(sockServer,username):
+def mainMenu(ssl_sock,username):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: LOGIN")
 	print("0: EXIT")
 	# ask user for input
-	ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
 
 	command=input()
 	if (command=="1"):
 	
+		print('Insert your password:')
 		password=getpass.getpass()
 
 		command_as_string = "login"+"!-!"
@@ -41,10 +41,10 @@ def mainMenu(sockServer,username):
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="USER AUTHENTICATED!!!"):
-			secondMenu(username)
+			secondMenu(ssl_sock,username)
 		
 		elif((str(mess, "utf-8")=="USER NOT AUTHENTICATED!!!")):
-			mainMenu()
+			mainMenu(ssl_sock,username)
 		
 		else:
 			print("SOMETHING WENT WRONG\n")
@@ -60,12 +60,12 @@ def mainMenu(sockServer,username):
 		
 	else:
 		print("WRONG COMMAND\n")
-		mainMenu()
+		mainMenu(ssl_sock,username)
 
 
 
 
-def secondMenu(username):
+def secondMenu(ssl_sock,username):
 		
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: SCOREBOARD")
@@ -86,10 +86,10 @@ def secondMenu(username):
 		mess = ssl_sock.recv(1024)
 		print( "\n>>", str(mess, "utf-8") )
 		if(str(mess, "utf-8")=="SCOREBOARDMENU"):
-			scoreboardMenu(username)
+			scoreboardMenu(ssl_sock,username)
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			secondMenu()
+			secondMenu(ssl_sock,username)
 
 	elif (command=="2"):
 		command_as_string = "submitMenu"+"!-!"
@@ -104,24 +104,23 @@ def secondMenu(username):
 		print( "\n>>", str(mess, "utf-8") )
 		
 		if(str(mess, "utf-8")=="SUBMITMENU"):
-			submitMenu(username)
+			submitMenu(ssl_sock,username)
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			secondMenu(username)
+			secondMenu(ssl_sock,username)
 
 	elif (command=="0"):
-		mainMenu()
+		mainMenu(ssl_sock,username)
 		
 	else:
 		print("WRONG COMMAND\n")
-		secondMenu(username)
+		secondMenu(ssl_sock,username)
 
 
 
 
 
-def scoreboardMenu(username):
-		
+def scoreboardMenu(ssl_sock,username):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: CHECK SCORE")
 	print("2: CHECK VULNERABILITIES AND FINGERPRINTS")
@@ -143,7 +142,7 @@ def scoreboardMenu(username):
 		mess = ssl_sock.recv(1024)
 
 		print("\n\nUSER SCORE IS", str(mess, "utf-8"),"\n" )
-		scoreboardMenu(username)
+		scoreboardMenu(ssl_sock,username)
 
 
 
@@ -177,7 +176,7 @@ def scoreboardMenu(username):
 			print(strAux + sep, end="")
 		print("\n\n")
 		
-		scoreboardMenu(username)
+		scoreboardMenu(ssl_sock,username)
 
 
 
@@ -213,7 +212,7 @@ def scoreboardMenu(username):
 			print(" "*10 + numberOfVulns + " " *(30-len(numberOfVulns)), end="")
 			print(  date, "  \n")
 
-		scoreboardMenu(username)
+		scoreboardMenu(ssl_sock,username)
 
 
 
@@ -247,23 +246,22 @@ def scoreboardMenu(username):
 				print(user + " "*(20) + fing + " "*(20) + vuln)
 		
 
-		scoreboardMenu(username)
+		scoreboardMenu(ssl_sock,username)
 
 
 	elif (command=="0"):
-		secondMenu(username)
+		secondMenu(ssl_sock,username)
 
 		
 	else:
 		print("WRONG COMMAND\n")
-		scoreboardMenu(username)
+		scoreboardMenu(ssl_sock,username)
 
 
 
 
 
-def submitMenu(username):
-		
+def submitMenu(ssl_sock,username):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: BINARY AND VULNERABILITIES")
 	print("0: LAST MENU")
@@ -308,20 +306,20 @@ def submitMenu(username):
 			# sending the vulns file
 			sendFile(file, ssl_sock)
 			
-			submitMenu(username)
+			submitMenu(ssl_sock,username)
 		
 
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			submitMenu(username)
+			submitMenu(ssl_sock,username)
 
 
 	elif (command=="0"):
-		secondMenu(username)
+		secondMenu(ssl_sock,username)
 
 	else:
 		print("WRONG COMMAND\n")
-		submitMenu(username)
+		submitMenu(ssl_sock,username)
 
 
 
@@ -348,7 +346,8 @@ def NS_Protocol_Client():
 	sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	
-	username=input("Username:")
+	print("\nPLEASE INSERT YOUR USERNAME:")
+	username=input("Username: ")
 	client_ns = ClientNS(username,username.lower()+'.key')
 	# Alice sends her name "Alice" to server
 	print("\n\nSENDING STEP 1")
@@ -392,7 +391,12 @@ def NS_Protocol_Client():
 	#sockServer.close()
 	sockTrustManager.close()
 	print ("\n>>FINALIZED SOCKET\n\n")
-	return sockServer,username
+	try:
+		ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
+	except Exception as err:
+			print (">> !!INVALID CERTIFICATE!!\n")
+			print(err)
+	return ssl_sock,username
 	#System_log.writeSystemLog('Server','Server closed','info')
 	#exit()
 
@@ -401,8 +405,8 @@ def NS_Protocol_Client():
 
 """ start the client side """
 #try:
-serverSocket,username = NS_Protocol_Client()
-mainMenu(serverSocket,username)
+ssl_sock,username = NS_Protocol_Client()
+mainMenu(ssl_sock,username)
 	#ssl_sock.connect((HOST, PORT))
 #print( "\n>> CONNECTION ESTABLISHED !" )
 

@@ -67,16 +67,20 @@ class ServerNS:
         decrypted_response = unpad(decrypted_response)
         decrypted_response = json.loads(str(decrypted_response,'utf-8'))
 
-        self.session_key=b64decode(decrypted_response['session_key'])
-        self.session_iv=b64decode(decrypted_response['session_iv'])
-        nonce = os.urandom(16)
-        self.nonce = nonce
+        nonce_check = b64decode(decrypted_response['nonce'])
+        if(nonce_check==self.nonce):
+            self.session_key=b64decode(decrypted_response['session_key'])
+            self.session_iv=b64decode(decrypted_response['session_iv'])
+            nonce = os.urandom(16)
+            self.nonce = nonce
 
-        session = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
-        response = {'nonce': str(b64encode(nonce),'utf-8')}
-        response = json.dumps(response)
-        final_response = session.encrypt(bytes(pad(response),'utf-8'))
-        return final_response
+            session = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
+            response = {'nonce': str(b64encode(nonce),'utf-8')}
+            response = json.dumps(response)
+            final_response = session.encrypt(bytes(pad(response),'utf-8'))
+            return final_response
+        else:
+            raise Exception("Nonce does not match")
 
     def round4_client(self,client_message):
         server_nonce =  int.from_bytes(self.nonce,byteorder='little')-1
