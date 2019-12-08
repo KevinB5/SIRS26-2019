@@ -1,4 +1,4 @@
-import os, pickle
+import os, pickle, json
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto import Random
@@ -29,13 +29,13 @@ class ServerNS:
 
     def read_trustmanager_key(self):
         try:
-            with open(self.key_file) as fp:
+            with open('Keys/'+self.key_file) as fp:
                 for line in fp:
                     split = line.split("=")
                     if split[0]=="key":
-                        self.trustmanager_key= b64decode(split[1].rstrip("\n"))[:32]
+                        self.trustmanager_key= split[1].rstrip("\n")
                     elif split[0]=="iv ":
-                        self.trustmanager_iv= b64decode(split[1].rstrip("\n"))[:16]
+                        self.trustmanager_iv= split[1].rstrip("\n")
         finally:
             fp.close()
 
@@ -43,37 +43,15 @@ class ServerNS:
 
     def round1_client(self,client_message):        
         client = client_message["source"]
-		
         nonce = os.urandom(16)
-        content = {"nonce":b64encode(nonce), "destination":client}
-
-
-        aes_key = self.trustmanager_key
-        iv = self.trustmanager_iv
-
-        trustmanager_session = AES.new(aes_key, AES.MODE_CBC, iv)
-        content_bytes = pickle.dumps(content)
-		
-		
-		
-		
-        encrypted_content = trustmanager_session.encrypt(pad(content_bytes, AES.blocksize))
-
-        #content = {'nonce':base64.b64encode(nonce).rstrip('\n'),'destination':client}
-        content = {'nonce':str(base64.b64encode(nonce),'utf-8'),'destination':client}
+        self.nonce = nonce
+        content = {'nonce':str(b64encode(nonce),'utf-8'),'destination':client}
         aes_key = bytes(pad(self.trustmanager_key)[:32],'utf-8')
         iv = bytes(pad(self.trustmanager_iv)[:16],'utf-8')
-        print('SERVER KEYS ',aes_key,' IV ',iv)
-        #aes_key = os.urandom(16)
-        #iv = os.urandom(16)
         trustmanager_session = AES.new(aes_key, AES.MODE_CBC, iv)
 
         content_bytes = json.dumps(content)
-        #print(content_bytes)
-        #print(pad(content_bytes))
         encrypted_content = trustmanager_session.encrypt(bytes(pad(content_bytes),'utf-8'))
-
-        #print('ENCRYPTED: ',encrypted_content)
         response = {'source':self.id,'response':encrypted_content}
         return response
 
@@ -89,39 +67,28 @@ class ServerNS:
         decrypted_response = unpad(decrypted_response)
         decrypted_response = json.loads(str(decrypted_response,'utf-8'))
 
-        self.session_key=base64.b64decode(decrypted_response['session_key'])
-        self.session_iv=base64.b64decode(decrypted_response['session_iv'])
-        #nonce = uuid.uuid4().hex
+        self.session_key=b64decode(decrypted_response['session_key'])
+        self.session_iv=b64decode(decrypted_response['session_iv'])
         nonce = os.urandom(16)
         self.nonce = nonce
-        print('r3 nonce ',nonce)
 
         session = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
-        
-        print('SERVER NONCE ',str(base64.b64encode(nonce),'utf-8'))
-        response = {'nonce': str(base64.b64encode(nonce),'utf-8')}
+        response = {'nonce': str(b64encode(nonce),'utf-8')}
         response = json.dumps(response)
         final_response = session.encrypt(bytes(pad(response),'utf-8'))
         return final_response
 
     def round4_client(self,client_message):
-        #server_nonce = nonce- 1
         server_nonce =  int.from_bytes(self.nonce,byteorder='little')-1
         aes = AES.new(self.session_key, AES.MODE_CBC, self.session_iv)
         message = unpad(aes.decrypt(client_message))
         message = json.loads(str(message,'utf-8'))
-
-        #message = json.loads(message)
         client_nonce = message['nonce']
 
-        print('SERVER NONCE: ',server_nonce)
-        print('CLIENT NONCE: ',client_nonce)
+        #print('SERVER NONCE: ',server_nonce)
+        #print('CLIENT NONCE: ',client_nonce)
         result=False
         if server_nonce == client_nonce:
             result=True
-        
-        #response = {'result':result}
-        #response = json.dumps(response)
-        #final_response = aes.encrypt(pad(response))
         return result
     

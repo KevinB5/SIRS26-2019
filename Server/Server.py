@@ -1,5 +1,6 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
 import System_log, Server_NS, pickle
+from Server_NS import ServerNS
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -57,7 +58,7 @@ class ServerSocket:
 	def	socketClose(self):
 		
 		self.newsocket.close()
-		self.sock.close()
+		#self.sock.close()
 		print (">>FINALIZED SOCKET")
 		System_log.writeSystemLog('Server','Server closed','info')
 		exit()
@@ -423,29 +424,44 @@ def NS_Protocol_Server():
 	print ("\n\n>> WAITING CONNECTION\n")
 	
 	socketClient, newSocket = sock.accept()
+
+	server_ns = ServerNS("Server","server.key")
 	
 	print("RECEIVED STEP 1")
 	mess = pickle.loads(socketClient.recv(1024))
 	print( mess, "\n" )
+	result = server_ns.round1_client(mess)
+	print('result: ',result)
 
-	print("SENDING STEP 2")
-	socketClient.send( pickle.dumps("Encrypted Message -- From Server") )
+	print("SENDING STEP 3")
+	socketClient.send( pickle.dumps(result) )
 	print( "\n" )
+
 
 	print("RECEIVED STEP 5")
 	mess = pickle.loads(socketClient.recv(1024))
 	print( mess, "\n" )
+	result = server_ns.round3_client(mess)
+	print('result: ',result)
 
 	print("SENDING STEP 6")
-	socketClient.send( pickle.dumps("Encrypted Message -- From Server") )
+	socketClient.send( pickle.dumps(result) )
 	print( "\n" )
 
 	print("RECEIVED STEP 7")
 	mess = pickle.loads(socketClient.recv(1024))
 	print( mess, "\n" )
+	print( mess, "\n" )
+	result = server_ns.round4_client(mess)
+	print('result: ',result)
 
 	print("VERIFY STEP 8")
 	print( "\n" )
+	if(result ==False):
+		raise Exception('Trust Manager Authentication failed')
+	
+
+
 
 
 	#socketClient.close()

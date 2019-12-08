@@ -81,7 +81,7 @@ class TrustManagerNS:
 					for line in fp:
 						#content = base64.b64encode(aes_key.encrypt(bytes(pad(line),'utf-8')))
 						content = aes_key.encrypt(bytes(pad(line),'utf-8'))
-						print('written: ',content)
+						#print('written: ',content)
 						write_file.write(content)
 						write_file.write('\n'.encode('utf-8'))
 						write_file.flush()
@@ -94,10 +94,6 @@ class TrustManagerNS:
 
 	def read_shared_key(self,entity):
 
-		filename="Keys/"
-		key,iv = self.get_key("Keys/trustmanager.key")
-		aes_key = AES.new(pad(key)[:16], AES.MODE_CBC, pad(iv)[:16])
-
 		filename='Keys/'
 		key,iv = self.get_key('Keys/trustmanager.key')
 		aes_key = AES.new(bytes(pad(key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(iv)[:16],'utf-8'))
@@ -105,37 +101,12 @@ class TrustManagerNS:
 		try:
 			with open('Keys/shared_keys','rb') as fp:
 				for line in fp:
-
-					line = base64.b64decode(line)
-					line = unpad(aes_key.decrypt(line))
-					split = line.split(":")
-					if split[0]==entity:
-						filename += split[1].rstrip("\n")
-						#print(filename)
-
-					#print('line base64 ',line)
-					#line = base64.b64decode(line)
-
-					#print('decoded ',line)
-					#line = str(line)[2:]
-					#print('test ',line[:-1])
-					
 					line = aes_key.decrypt(line[:-1])
-					#print('TEMP ',str(line))
-					
-					#TODO: TEMPORARY FIX
-					#pad_index = line.index("key")
-					#line = line[2:pad_index+3]
-					
 					line = (unpad(line))[:-1]
-					#print('UNPAD ',line)
 					split = str(line).split(':')
-					#print('SPLIT ',str(split))
-					#print('COMPARE ',str(split[0])[2:],' and ',entity)
 					if str(split[0])[2:]==entity:
-						#print('SPLIT ',split)
 						filename += str(split[1])[:-1]
-						print('SUCCESS ',filename)
+						#print('SUCCESS ',filename)
 
 						return self.get_key(filename)
 		finally:
@@ -198,12 +169,10 @@ class TrustManagerNS:
 		#print('SERVER KEY ',bytes(pad(server_key)[:32],'utf-8'),' iv ',bytes(pad(server_iv)[:16],'utf-8'))
 
 		encrypted_response = server_encryptor2.encrypt(bytes(pad(content_bytes),'utf-8'))
-		print('encrypting: ',content_bytes)
-		print('')
-		print('ENCRYPTED: ',encrypted_response)
+		#print('ENCRYPTED: ',encrypted_response)
 		response_message = {'nonce':nonce,'destination':destination,'session_key':str(base64.b64encode(key),'utf-8'),\
 		'session_iv':str(base64.b64encode(iv),'utf-8'),'response': str(encrypted_response)}
-		print('final ',response_message)
+		#print('final ',response_message)
 
 		client_key,client_iv = self.read_shared_key(source)
 		client_encryptor = AES.new(bytes(pad(client_key)[:32],'utf-8'), AES.MODE_CBC, bytes(pad(client_iv)[:16],'utf-8'))
@@ -221,13 +190,16 @@ def NS_Protocol_TrustManager():
 	print ("\n\n>> WAITING CONNECTION\n")
 	
 	socketClient, clientSocket = sock.accept()
+	trust = TrustManagerNS()
 
 	print("RECEIVED STEP 3")
 	mess = pickle.loads(socketClient.recv(1024))
 	print( mess, "\n" )
+	result = trust.round2_client(mess)
+	print('result: ',result)
 
 	print("SENDING STEP 4")
-	socketClient.send( pickle.dumps("Encrypted Message -- From TrustManager") )
+	socketClient.send( pickle.dumps(result) )
 
 	socketClient.close()
 	sock.close()

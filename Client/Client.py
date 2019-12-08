@@ -1,6 +1,7 @@
-import socket, ssl, getpass, os, re, Client_NS, pickle
+import socket, ssl, getpass, os, re, pickle
 from Crypto.Util.number import long_to_bytes
 from Crypto.PublicKey import RSA
+from Client_NS import ClientNS
 
 #sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 #ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
@@ -12,7 +13,7 @@ PORT2 = 65440
 
 
 
-def mainMenu(sockServer):
+def mainMenu(sockServer,username):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: LOGIN")
 	print("0: EXIT")
@@ -22,7 +23,6 @@ def mainMenu(sockServer):
 	command=input()
 	if (command=="1"):
 	
-		username=input("Username:")
 		password=getpass.getpass()
 
 		command_as_string = "login"+"!-!"
@@ -348,42 +348,51 @@ def NS_Protocol_Client():
 	sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	
+	username=input("Username:")
+	client_ns = ClientNS(username,username.lower()+'.key')
 	# Alice sends her name "Alice" to server
 	print("\n\nSENDING STEP 1")
 	sockServer.connect((HOST, PORT))
-	sockServer.send( pickle.dumps("Alice") )
+	mess = client_ns.round1_server()
+	sockServer.send( pickle.dumps(mess) )
 	print( "\n" )
 
 	print("RECEIVING STEP 2")
 	mess = pickle.loads(sockServer.recv(1024))
 	print( mess, "\n" )
+	result = client_ns.round2_trustmanager(mess)
+	print('result: ',result)
 
 	print("SENDING STEP 3")
 	sockTrustManager.connect((HOST, PORT2))
-	sockTrustManager.send( pickle.dumps("Encrypted Message -- From Client") )
+	sockTrustManager.send( pickle.dumps(result) )
 	print( "\n" )
 
 	print("RECEIVING STEP 4")
 	mess = pickle.loads(sockTrustManager.recv(1024))
 	print( mess, "\n" )
+	result = client_ns.round3_server(mess)
+	print('result: ',result)
 
 	print("SENDING STEP 5")
-	sockServer.send( pickle.dumps("Encrypted Message -- From Client") )
+	sockServer.send( pickle.dumps(result) )
 	print( "\n" )
 
 	print("\nRECEIVING STEP 6")
 	mess = pickle.loads(sockServer.recv(1024))
 	print( mess, "\n" )
+	result = client_ns.round4_server(mess)
+	print('result: ',result)
 
 	print("SENDING STEP 7")
-	sockServer.send( pickle.dumps("Encrypted Message -- From Client") )
+	sockServer.send( pickle.dumps(result) )
 	print( "\n" )
 	
 
 	#sockServer.close()
 	sockTrustManager.close()
 	print ("\n>>FINALIZED SOCKET\n\n")
-	return sockServer
+	return sockServer,username
 	#System_log.writeSystemLog('Server','Server closed','info')
 	#exit()
 
@@ -391,14 +400,14 @@ def NS_Protocol_Client():
 
 
 """ start the client side """
-try:
-	serverSocket = NS_Protocol_Client()
-	mainMenu(serverSocket)
+#try:
+serverSocket,username = NS_Protocol_Client()
+mainMenu(serverSocket,username)
 	#ssl_sock.connect((HOST, PORT))
-	print( "\n>> CONNECTION ESTABLISHED !" )
+#print( "\n>> CONNECTION ESTABLISHED !" )
 
-except:
-	print( "\n>> CONNECTION LOST!" )
+#except:
+#	print( "\n>> CONNECTION LOST!" )
 
 
 
