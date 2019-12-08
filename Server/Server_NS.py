@@ -96,3 +96,21 @@ class ServerNS:
             result=True
         return result
     
+    def send_message(self,content):
+        aes = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
+        nonce = os.urandom(16)
+        self.nonce = nonce
+        message = {'nonce':str(b64encode(nonce),'utf-8'),'content':content}
+        message = json.dumps(message)
+        encrypted_message = aes.encrypt(bytes(pad(message),'utf-8'))
+        return encrypted_message
+
+    def receive_message(self,message):
+        decryptor = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
+        decrypted_response = json.loads(unpad(decryptor.decrypt(message)))
+        nonce = b64decode(decrypted_response['nonce'])
+        if(nonce==self.nonce):
+            message = decrypted_response['content']
+            return message
+        else:
+            raise Exception("Nonce does not match")

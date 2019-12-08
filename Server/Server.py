@@ -16,8 +16,14 @@ username=""
 
 class ServerSocket:
 	
-	def __init__(self,newsocket):
+	def __init__(self,newsocket,server_ns):
 		self.newsocket = newsocket
+		self.server_ns = server_ns
+
+	def send_encrypted(self,message):
+		message = self.server_ns.send_message(message)
+		self.connssl.send(message)
+
 	#
 	# Connect
 	#
@@ -41,7 +47,6 @@ class ServerSocket:
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
-			print('connssl ')
 		except Exception as err:
 			System_log.writeSystemLog('Server','Connection attempt failed','error')
 
@@ -70,11 +75,12 @@ class ServerSocket:
 	#
 	def userCredentials(self, user, password):
 		try:
-			if(self.connssl.recv(1024))!="login":
-				self.send("WRONG OPTION!!")
+			if(self.server_ns.receive_message(self.connssl.recv(1024)))!="login":
+				mess = self.server_ns.send_message("WRONG OPTION!!")
+				self.send(mess)
 			else:
-				username = user.connssl.recv(1024)
-				password = pw.connssl.recv(1024)
+				username = self.server_ns.receive_message(user.connssl.recv(1024))
+				password = self.server_ns.receive_message(pw.connssl.recv(1024))
 	
 		except Exception as err:
 			print (">>!!WRONG CREDENTIALS!!\n")
@@ -126,11 +132,11 @@ class ServerSocket:
 		if(userAuthenticated==True):
 			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Accept','info')
 			print("SENDING SCOREBOARDMENU TO USER\n")
-			self.connssl.send(b"SCOREBOARDMENU")
+			self.send_encrypted("SCOREBOARDMENU")
 		else:
 			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Rejected','warning')
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTH")
+			self.send_encrypted("NO AUTH")
 
 
 
@@ -139,10 +145,10 @@ class ServerSocket:
 		
 		if(userAuthenticated==True):
 			print("SENDING SUBMITMENU TO USER\n")
-			self.connssl.send(b"SUBMITMENU")
+			self.send_encrypted("SUBMITMENU")
 		else:
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTH")
+			self.send_encrypted("NO AUTH")
 
 
 	#
@@ -158,16 +164,16 @@ class ServerSocket:
 				print("SENDING USER SCORE\n")
 				points = DB_Scoreboard.get_user_score(username)
 				System_log.writeUserLog('',username,'User score access','Scoreboard','Accepted','info')
-				self.connssl.send(bytes(str(points),"utf-8"))
+				self.send_encrypted(ytes(str(points),"utf-8"))
 			else:
 				System_log.writeUserLog('',username,'User score access','Scoreboard','Rejected','warning')
 				print("USER NOT AUTHORIZED\n")
-				self.connssl.send(b"NO AUTHORIZATION")
+				self.send_encrypted("NO AUTHORIZATION")
 
 		else:
 			System_log.writeUserLog('',username,'User score access, user not authenticated','Scoreboard','Rejected','error')
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTHENTICATION")
+			self.send_encrypted("NO AUTHENTICATION")
 
 
 
@@ -183,14 +189,14 @@ class ServerSocket:
 			if(self.getAuthorization(2, username)):
 				result = DB_Scoreboard.get_user_vulnsAndfingerprint(username)
 				print("SENDING USER VULNS AND FINGERPRINTS \n")
-				self.connssl.send(bytes(str(result),"utf-8"))
+				self.send_encrypted(ytes(str(result),"utf-8"))
 			else:
 				print("USER NOT AUTHORIZED\n")
-				self.connssl.send(b"NO AUTHORIZATION")
+				self.send_encrypted("NO AUTHORIZATION")
 			
 		else:
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTH")
+			self.send_encrypted("NO AUTH")
 
 
 
@@ -206,17 +212,17 @@ class ServerSocket:
 			if(self.getAuthorization(3, username)):
 				scoreboard = DB_Scoreboard.get_scoreboard()
 				print("SENDING SCOREBOARD \n")
-				self.connssl.send(pickle.dumps(scoreboard))
-				self.connssl.send(b"\n\r##")
+				self.send_encrypted(pickle.dumps(scoreboard))
+				self.send_encrypted("\n\r##")
 			else:
 				print("USER NOT AUTHORIZED\n")
-				self.connssl.send(b"NO AUTHORIZATION")
-				self.connssl.send(b"\n\r##")
+				self.send_encrypted("NO AUTHORIZATION")
+				self.send_encrypted("\n\r##")
 	
 		else:
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTHENTICATION")
-			self.connssl.send(b"\n\r##")
+			self.send_encrypted("NO AUTHENTICATION")
+			self.send_encrypted("\n\r##")
 
 
 
@@ -232,16 +238,16 @@ class ServerSocket:
 			if(self.getAuthorization(4, username)):
 				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
-				self.connssl.send(pickle.dumps(teamVulnsandFing))
-				self.connssl.send(b"\n\r##")
+				self.send_encrypted(pickle.dumps(teamVulnsandFing))
+				self.send_encrypted("\n\r##")
 			else:
 				print("USER NOT AUTHORIZED\n")
-				self.connssl.send(b"NO AUTHORIZATION")
-				self.connssl.send(b"\n\r##")
+				self.send_encrypted("NO AUTHORIZATION")
+				self.send_encrypted("\n\r##")
 		else:
 			print("USER NOT AUTHENTICATED\n")
-			self.connssl.send(b"NO AUTHENTICATION")
-			self.connssl.send(b"\n\r##")
+			self.send_encrypted("NO AUTHENTICATION")
+			self.send_encrypted("\n\r##")
 
 
 
@@ -258,25 +264,32 @@ class ServerSocket:
 			if(userAuthorized==True):
 			
 				print("ASKING USER FOR VULNERABILITY\n")
-				self.connssl.send(b"SUBMITVULNERABILITY")
+				self.send_encrypted("SUBMITVULNERABILITY")
 					
 				print (">>Transfering file")
 						
 				# receiving the binary file
-				binFile = b""
-				while (binFile[-4:] != b"\n\r##"):
+				binFile = ""
+				finalBinFile = ""
+				while (finalBinFile[-4:] != "\n\r##"):
 					binFile += self.connssl.recv(1024)
+					finalBinFile = self.server_ns.receive_message(binFile)
 			
-				binFile = binFile.replace(b"\n\r##", b"")
+				finalBinFile = self.server_ns.receive_message(binFile)
+				binFile = finalBinFile.replace("\n\r##", "")
 					
 				print (">>Transfer concluded \n\n>>Transfering file")
 				
 				# receiving the vulnerabilities file
-				vulnFile = b""
-				while (vulnFile[-4:] != b"\n\r##"):
+				vulnFile = ""
+				finalVulnFile = ""
+				while (finalVulnFile[-4:] != "\n\r##"):
 					vulnFile += self.connssl.recv(1024)
+					finalVulnFile = self.server_ns.receive_message(vulnFile)
+
 			
-				vulnFile = vulnFile.replace(b"\n\r##", b"")
+				finalVulnFile = self.server_ns.receive_message(vulnFile)
+				vulnFile = finalVulnFile.replace("\n\r##", "")
 				
 				print (">>Transfer concluded")
 				
@@ -284,7 +297,7 @@ class ServerSocket:
 				vulns = []
 				
 				for i in range(len(splitLines)):
-					if( splitLines[i] == b"Vulnerability:"):
+					if( splitLines[i] == "Vulnerability:"):
 						vulns.append(str(splitLines[i+1], "utf-8"))
 				
 				# Adding vulnerabilities to DB
@@ -306,7 +319,7 @@ class ServerSocket:
 			else:
 				System_log.writeUserLog('',username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
 				print("USER NOT AUTHENTICATED\n")
-				self.connssl.send(b"NO AUTH")
+				self.send_encrypted("NO AUTH")
 
 
 
@@ -320,14 +333,22 @@ class ServerSocket:
 		global username
 		global userAuthorized
 		
-		try:
+		#try:
+		if(True):
 			self.data = b""
 			string_data=""
+			final_data = ""
 			while (self.data[-4:] != b"\n\r##"):
 				self.data += self.connssl.recv(1024)
+				#print('self.data ',self.data)
+				
+			final_data = self.data[:-4]
 
-			self.data = self.data.replace(b"\n\r##", b"")
-			decoded=self.data.decode("UTF-8")
+			print('FINAL DATA',final_data)
+			decoded = self.server_ns.receive_message(final_data)
+			
+			#decoded=self.data.decode("UTF-8")
+
 			
 			split_decoded=decoded.split("!-!")
 			command=split_decoded[0]
@@ -363,17 +384,17 @@ class ServerSocket:
 					self.socketClose()
 				
 				else:
-					self.send(b"WRONG COMMAND")
+					self.send("WRONG COMMAND")
 
 			except Exception as err:
 				print (">>!!FAILED IN COMMAND!!\n")
 				System_log.writeSystemLog('Server','Failed in command reception','error')
 				print(err)
 			
-		except Exception as err:
-			print(">>!!FAILED THE TRANSFER!!!\n")
-			System_log.writeSystemLog('Server','Failed transfering message','error')
-			print(err)
+		#except Exception as err:
+		#	print(">>!!FAILED THE TRANSFER!!!\n")
+		#	System_log.writeSystemLog('Server','Failed transfering message','error')
+		#	print(err)
 		
 		
 	#
@@ -387,18 +408,18 @@ class ServerSocket:
 			if(DB_User.authenticate(user,pw)):
 				System_log.writeUserLog('',user,'Authentication','Users','Accepted','info')
 				print("USER AUTHENTICATED!!!\n")
-				self.connssl.send(b"USER AUTHENTICATED!!!")
+				self.send_encrypted("USER AUTHENTICATED!!!")
 				userAuthenticated=True
 	
 			else:
 				System_log.writeUserLog('',user,'Authentication','Users','Rejected','info')
 				print("USER NOT AUTHENTICATED!!!\n")
-				self.connssl.send(b"USER NOT AUTHENTICATED!!!")
+				self.send_encrypted("USER NOT AUTHENTICATED!!!")
 				userAuthenticated=False
 		else:
 			System_log.writeUserLog('',user,'Authentication, wrong input','Users','Rejected','error')
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
-			self.connssl.send(b"USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
+			self.send_encrypted("USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND '_' !!!")
 
 
 
@@ -467,7 +488,7 @@ def NS_Protocol_Server():
 	#socketClient.close()
 	#sock.close()
 	print ("\n>>FINALIZED TRUST MANAGER AUTHENTICATION\n\n")
-	return socketClient
+	return socketClient,server_ns
 	#System_log.writeSystemLog('Server','Server closed','info')
 	#exit()
 
@@ -477,9 +498,9 @@ def NS_Protocol_Server():
 
 
 def begin():
-	newSocket = NS_Protocol_Server()
+	newSocket,server_ns = NS_Protocol_Server()
 
-	x = ServerSocket(newSocket)
+	x = ServerSocket(newSocket,server_ns)
 	x.socketConnect()
 
 	while(1):
