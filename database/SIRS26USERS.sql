@@ -30,7 +30,7 @@ CREATE TABLE `Users` (
   `password` varchar(500) NOT NULL,
   `reg_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

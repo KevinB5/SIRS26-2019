@@ -2,8 +2,8 @@ import socket, ssl, getpass, os, re, Client_NS, pickle
 from Crypto.Util.number import long_to_bytes
 from Crypto.PublicKey import RSA
 
-sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
+#sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+#ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -12,11 +12,13 @@ PORT2 = 65440
 
 
 
-def mainMenu():
+def mainMenu(sockServer):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: LOGIN")
 	print("0: EXIT")
 	# ask user for input
+	ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
+
 	command=input()
 	if (command=="1"):
 	
@@ -378,26 +380,28 @@ def NS_Protocol_Client():
 	print( "\n" )
 	
 
-	sockServer.close()
+	#sockServer.close()
 	sockTrustManager.close()
 	print ("\n>>FINALIZED SOCKET\n\n")
+	return sockServer
 	#System_log.writeSystemLog('Server','Server closed','info')
-	exit()
+	#exit()
 
 
 
 
 """ start the client side """
 try:
-	#NS_Protocol_Client()
-	ssl_sock.connect((HOST, PORT))
+	serverSocket = NS_Protocol_Client()
+	mainMenu(serverSocket)
+	#ssl_sock.connect((HOST, PORT))
 	print( "\n>> CONNECTION ESTABLISHED !" )
 
 except:
 	print( "\n>> CONNECTION LOST!" )
 
 
-mainMenu()
+
 
 
 

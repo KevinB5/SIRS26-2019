@@ -29,7 +29,7 @@ CREATE TABLE `Scoreboard` (
   `num_vul` int(10) DEFAULT '0',
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +55,7 @@ CREATE TABLE `Vulnerability` (
   `name_vul` varchar(100) NOT NULL,
   `insert_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`username`, `fingerprint`, `name_vul` )
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

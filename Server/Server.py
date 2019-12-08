@@ -15,6 +15,8 @@ username=""
 
 class ServerSocket:
 	
+	def __init__(self,newsocket):
+		self.newsocket = newsocket
 	#
 	# Connect
 	#
@@ -22,10 +24,10 @@ class ServerSocket:
 		
 		System_log.writeSystemLog('Server','Server started','info')
 		
-		print (">> WAITING CONNECTION\n")
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.bind((HOST, PORT))
-		self.sock.listen(1)
+		#print (">> WAITING CONNECTION\n")
+		#self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		#self.sock.bind((HOST, PORT))
+		#self.sock.listen(1)
 	
 		#
 		# Receive Connection
@@ -33,11 +35,12 @@ class ServerSocket:
 		try:
 			System_log.writeSystemLog("Server","Connection attempt","info")
 			
-			self.newsocket, self.clientSocket = self.sock.accept()
-			print (">> ATTEMPT OF CONNECTION")
+			#self.newsocket, self.clientSocket = self.sock.accept()
+			#print (">> ATTEMPT OF CONNECTION")
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
+			print('connssl ')
 		except Exception as err:
 			System_log.writeSystemLog('Server','Connection attempt failed','error')
 
@@ -327,7 +330,7 @@ class ServerSocket:
 			
 			split_decoded=decoded.split("!-!")
 			command=split_decoded[0]
-			print(command)
+			print('COMMAND: ',command)
 
 			# deal with different possible received messages
 			try:
@@ -363,12 +366,12 @@ class ServerSocket:
 
 			except Exception as err:
 				print (">>!!FAILED IN COMMAND!!\n")
-				System_log.writeUserLog('Server','Failed in command reception','error')
+				System_log.writeSystemLog('Server','Failed in command reception','error')
 				print(err)
 			
 		except Exception as err:
 			print(">>!!FAILED THE TRANSFER!!!\n")
-			System_log.writeUserLog('Server','Failed transfering message','error')
+			System_log.writeSystemLog('Server','Failed transfering message','error')
 			print(err)
 		
 		
@@ -445,11 +448,12 @@ def NS_Protocol_Server():
 	print( "\n" )
 
 
-	socketClient.close()
-	sock.close()
-	print ("\n>>FINALIZED SOCKET\n\n")
+	#socketClient.close()
+	#sock.close()
+	print ("\n>>FINALIZED TRUST MANAGER AUTHENTICATION\n\n")
+	return socketClient
 	#System_log.writeSystemLog('Server','Server closed','info')
-	exit()
+	#exit()
 
 
 
@@ -457,8 +461,9 @@ def NS_Protocol_Server():
 
 
 def begin():
+	newSocket = NS_Protocol_Server()
 
-	x = ServerSocket()
+	x = ServerSocket(newSocket)
 	x.socketConnect()
 
 	while(1):
