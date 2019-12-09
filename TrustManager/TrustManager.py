@@ -23,45 +23,6 @@ HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65433       # Port to listen on (non-privileged ports are > 1023)
 PORT2 = 65440
 
-class TrustManagerSocket:
-
-	def socketConnect(self):
-		TrustManagerLog.writeLog("TrustManager","Trust Manager started","info")
-		
-		print (">> WAITING CONNECTION\n")
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.bind((HOST, PORT))
-		self.sock.listen(1)
-
-		#
-		# Receive Connection
-		#
-		try:
-			TrustManagerLog.writeLog('TrustManager','Connection attempt','info')
-			
-			self.newsocket, self.clientSocket = self.sock.accept()
-			print (">> ATTEMPT OF CONNECTION")
-				
-			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
-
-		except Exception as err:
-			TrustManagerLog.writeLog('TrustManager','Connection attempt failed','error')
-
-			print (">> !!USER DOESNT HAS PERMISSIONS!!\n")
-			print(err)
-	
-		print (">> RECEIVED CONNECTION\n")
-
-		#
-	# Close connection
-	#
-	def	socketClose(self):
-		
-		self.newsocket.close()
-		self.sock.close()
-		print (">>FINALIZED SOCKET")
-		TrustManagerLog.writeLog('TrustManager','Trust Manager closed','info')
-		exit()
 
 class TrustManagerNS:
 	

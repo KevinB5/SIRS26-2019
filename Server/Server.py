@@ -267,17 +267,17 @@ class ServerSocket:
 				print (">>Transfering file")
 						
 				# receiving the binary file
-				binFile = ""
+				binFile = b""
 				finalBinFile = ""
 				while (binFile[-4:] != b"\n\r##"):
 					binFile += self.connssl.recv(1024)
 					#finalBinFile = self.server_ns.receive_message(binFile)
 			
 				finalBinFile = binFile.replace(b"\n\r##", b"")
-				print('TOTAL BIN FILE ',finalBinFile)
+				#print('TOTAL BIN FILE ',finalBinFile)
 				binFile = self.server_ns.receive_message(finalBinFile)
-				print('')
-				print('TOTAL DECRYPTED BIN FILE ',finalBinFile)
+				#print('')
+				#print('TOTAL DECRYPTED BIN FILE ',finalBinFile)
 				
 					
 				print (">>Transfer concluded \n\n>>Transfering file")
@@ -303,7 +303,7 @@ class ServerSocket:
 						vulns.append(str(splitLines[i+1], "utf-8"))
 				
 				# Adding vulnerabilities to DB
-				bool = DB_Scoreboard.add_score_vulnerability(binFile, vulns, username)
+				bool = DB_Scoreboard.add_score_vulnerability(binFile.encode(), vulns, username)
 		
 				#TODO: Add filename on log
 				System_log.writeUserLog('',username,'Submited vulnerability attempt','Vulnerability','Request','info')
@@ -425,7 +425,7 @@ class ServerSocket:
 	
 				print("\n\nFING:", fingerprint, "\n\n")
 	
-				self.send_encrypted(fingerprint)
+				self.send_encrypted(str(fingerprint))
 				self.connssl.send(b"\n\r##")
 
 

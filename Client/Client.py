@@ -2,7 +2,6 @@ import socket, ssl, getpass, os, re, pickle
 from Crypto.Util.number import long_to_bytes
 from Crypto.PublicKey import RSA
 from Client_NS import ClientNS
-import base64
 
 #sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 #ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
@@ -173,7 +172,7 @@ def computeFingerprint(ssl_sock,client_ns):
 	
 		print("\n\n FINGERPRINT:" , fingerprint, "\n\n")
 	
-		return "SUBMIT_MENU"
+		submitMenu(ssl_sock,username,client_ns)
 
 
 
@@ -361,18 +360,22 @@ def submitMenu(ssl_sock,username,client_ns):
 			
 			# sending the binary file
 			sendFile(ssl_sock,file,client_ns)
-			
+			#EOF = b"\n\r##"
+			#ssl_sock.send(EOF)
 			
 			print("VULNERABILITIES:", end="")
-			file = input()
+			file2 = input()
 			
 			# if it does not find file ...
-			while (not os.path.isfile(file)) or (not os.path.exists(file)):
+			while (not os.path.isfile(file2)) or (not os.path.exists(file2)):
 				print("NO SUCH FILE !!! TRY AGAIN \n\nVULNERABILITIES:", end="")
-				file = input()
+				file2 = input()
 			
 			# sending the vulns file
-			sendFile(ssl_sock,file,client_ns)
+			sendFile(ssl_sock,file2,client_ns)
+
+			#EOF = b"\n\r##"
+			#ssl_sock.send(EOF)
 			
 			submitMenu(ssl_sock,username,client_ns)
 		
@@ -408,7 +411,7 @@ def sendFile(ssl_sock,file,client_ns):
 	
 			
 	print (">>Transfer concluded")
-	submitMenu(ssl_sock,username,client_ns)
+	#submitMenu(ssl_sock,username,client_ns)
 
 
 
