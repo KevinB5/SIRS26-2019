@@ -3,6 +3,14 @@ import System_log, Server_NS, pickle
 from Server_NS import ServerNS
 import hashlib
 
+import signal
+import sys
+
+def signal_handler(signal, frame):
+	print('\n>>PROGRAM TERMINATED\n')
+	sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
@@ -491,6 +499,8 @@ def NS_Protocol_Server():
 	socketClient, newSocket = sock.accept()
 
 	server_ns = ServerNS("Server","server.key")
+
+	print('\n>>STARTED TRUST MANAGER AUTHENTICATION\n\n')
 	
 	print("RECEIVED STEP 1")
 	mess = pickle.loads(socketClient.recv(1024))

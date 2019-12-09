@@ -6,6 +6,15 @@ from Client_NS import ClientNS
 #sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 #ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
 
+import signal
+import sys
+
+def signal_handler(signal, frame):
+	print('\n>>PROGRAM TERMINATED\n')
+	sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
