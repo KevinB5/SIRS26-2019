@@ -73,6 +73,7 @@ def secondMenu(ssl_sock,username,client_ns):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: SCOREBOARD")
 	print("2: SUBMIT")
+	print("3: COMPUTE FINGERPRINT")
 	print("0: LAST MENU")
 	# ask user for input
 	command=input()
@@ -88,7 +89,7 @@ def secondMenu(ssl_sock,username,client_ns):
 		# message received from server
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
-		print( "\n>>", mess, "utf-8" )
+		print( "\n>>", mess )
 		if(mess=="SCOREBOARDMENU"):
 			scoreboardMenu(ssl_sock,username,client_ns)
 		else:
@@ -108,11 +109,37 @@ def secondMenu(ssl_sock,username,client_ns):
 		mess = client_ns.receive_message(mess)
 		print( "\n>>", mess)
 		
-		if(mess, "utf-8"=="SUBMITMENU"):
+		if(mess=="SUBMITMENU"):
 			submitMenu(ssl_sock,username,client_ns)
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
 			secondMenu(ssl_sock,username,client_ns)
+
+	elif(command=="3"):
+			send = ""
+			
+			command_as_string = "computeFingerprint"+"!-!"
+			send += command_as_string
+			
+			username_as_string = username+"!-!"
+			send += username_as_string
+			
+			send_encrypted(ssl_sock,client_ns,send)
+			
+			EOF = b"\n\r##"
+			ssl_sock.send(EOF)
+			
+			# message received from server
+			mess = ssl_sock.recv(1024)
+			mess = client_ns.receive_message(mess)
+			print( "\n>>", mess )
+			
+			if(mess == "COMPUTEFINGERPRINT"):
+				return "COMPUTE_FINGERPRINT"
+			
+			else:
+				print("3-UNKNOWN SERVER RESPONSE, TRY AGAIN")
+				return "SECOND_MENU"
 
 	elif (command=="0"):
 		mainMenu(ssl_sock,username,client_ns)

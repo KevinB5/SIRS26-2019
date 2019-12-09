@@ -376,6 +376,9 @@ class ServerSocket:
 				elif(command == "submitVulnerability" and userAuthenticated==True ):
 					self.submitVulnerability()
 
+				elif(command== "computeFingerprint" and userAuthenticated==True):
+					self.computeFingerprint()
+
 				elif(command == "exit"):
 					self.socketClose()
 				
@@ -392,6 +395,47 @@ class ServerSocket:
 			System_log.writeSystemLog('Server','Failed transfering message','error')
 			print(err)
 		
+	def computeFingerprint(self):
+		global userAuthenticated
+		global username
+		global userAuthorized
+	
+		if(userAuthenticated==True):
+			if(self.getAuthorization(4, username)):
+			
+				self.send_encrypted("COMPUTEFINGERPRINT")
+			
+				print("\n\nASKING USER FOR BINARY FILE\n\n")
+				
+				data = b""
+				final_data = ""
+				while (data[-4:] != b"\n\r##"):
+					data = self.connssl.recv(1024)
+				
+				final_data = data.replace(b"\n\r##", b"")
+				data = self.server_ns.receive_message(final_data)
+
+				# calculate the fingerprint of the file
+				hash_object = hashlib.sha512(data)
+				fingerprint = hash_object.hexdigest()
+	
+				print("\n\nFING:", fingerprint, "\n\n")
+	
+				self.send_encrypted(fingerprint)
+				self.connssl.send(b"\n\r##")
+
+
+			else:
+				System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authorized", "Compute Fingerprint", "Rejected", "error")
+				print("USER NOT AUTHORIZED\n")
+				self.send_encrypted("NO AUTHORIZATION")
+				self.connssl.send(b"\n\r##")
+	
+		else:
+			System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authenticated", "Compute Fingerprint", "Rejected", "error")
+			print("USER NOT AUTHENTICATED\n")
+			self.send_encrypted("NO AUTH")
+			self.connssl.send(b"\n\r##")
 		
 	#
 	# Autenticar user
