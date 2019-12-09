@@ -3,14 +3,11 @@ import System_log, Server_NS, pickle
 from Server_NS import ServerNS
 import hashlib
 
+from threading import Thread
+
+
 import signal
 import sys
-
-def signal_handler(signal, frame):
-	print('\n>>PROGRAM TERMINATED\n')
-	sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
@@ -28,6 +25,7 @@ class ServerSocket:
 	def __init__(self,newsocket,server_ns):
 		self.newsocket = newsocket
 		self.server_ns = server_ns
+		self.socketConnect()
 
 	def send_encrypted(self,message):
 		message = self.server_ns.send_message(message)
@@ -56,6 +54,8 @@ class ServerSocket:
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
+			while(1):
+				self.messageTransfer()
 		except Exception as err:
 			System_log.writeSystemLog('Server','Connection attempt failed','error')
 
@@ -489,52 +489,54 @@ class ServerSocket:
 
 
 
-def NS_Protocol_Server():
+def NS_Protocol_Server(sock):
 
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind((HOST, PORT))
-	sock.listen(1)
-	print ("\n\n>> WAITING CONNECTION\n")
-	
-	socketClient, newSocket = sock.accept()
+	try:
+		
+		print ("\n\n>> WAITING CONNECTION\n")
+		
+		socketClient, newSocket = sock.accept()
 
-	server_ns = ServerNS("Server","server.key")
+		server_ns = ServerNS("Server","server.key")
 
-	print('\n>>STARTED TRUST MANAGER AUTHENTICATION\n\n')
-	
-	print("RECEIVED STEP 1")
-	mess = pickle.loads(socketClient.recv(1024))
-	print( mess, "\n" )
-	result = server_ns.round1_client(mess)
-	print('result: ',result)
+		print('\n>>STARTED TRUST MANAGER AUTHENTICATION\n\n')
+		
+		print("RECEIVED STEP 1")
+		mess = pickle.loads(socketClient.recv(1024))
+		print( mess, "\n" )
+		result = server_ns.round1_client(mess)
+		print('result: ',result)
 
-	print("SENDING STEP 3")
-	socketClient.send( pickle.dumps(result) )
-	print( "\n" )
+		print("SENDING STEP 3")
+		socketClient.send( pickle.dumps(result) )
+		print( "\n" )
 
 
-	print("RECEIVED STEP 5")
-	mess = pickle.loads(socketClient.recv(1024))
-	print( mess, "\n" )
-	result = server_ns.round3_client(mess)
-	print('result: ',result)
+		print("RECEIVED STEP 5")
+		mess = pickle.loads(socketClient.recv(1024))
+		print( mess, "\n" )
+		result = server_ns.round3_client(mess)
+		print('result: ',result)
 
-	print("SENDING STEP 6")
-	socketClient.send( pickle.dumps(result) )
-	print( "\n" )
+		print("SENDING STEP 6")
+		socketClient.send( pickle.dumps(result) )
+		print( "\n" )
 
-	print("RECEIVED STEP 7")
-	mess = pickle.loads(socketClient.recv(1024))
-	print( mess, "\n" )
-	print( mess, "\n" )
-	result = server_ns.round4_client(mess)
-	print('result: ',result)
+		print("RECEIVED STEP 7")
+		mess = pickle.loads(socketClient.recv(1024))
+		print( mess, "\n" )
+		print( mess, "\n" )
+		result = server_ns.round4_client(mess)
+		print('result: ',result)
 
-	print("VERIFY STEP 8")
-	print( "\n" )
-	if(result ==False):
-		raise Exception('Trust Manager Authentication failed')
-	
+		print("VERIFY STEP 8")
+		print( "\n" )
+		if(result ==False):
+			raise Exception('Trust Manager Authentication failed')
+	except Exception as err:
+				print (">> !!CONNECTION INTERRUPTED!!\n")
+				print(err)
+				exit()
 
 
 
@@ -551,20 +553,33 @@ def NS_Protocol_Server():
 
 
 
-def begin():
-	newSocket,server_ns = NS_Protocol_Server()
+def main():
+	#incrementPort = 0
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((HOST, PORT))
+	sock.listen(5)
+	while True:
+		newSocket,server_ns = NS_Protocol_Server(sock)
 
-	x = ServerSocket(newSocket,server_ns)
-	x.socketConnect()
+		#x = ServerSocket(newSocket,server_ns)
+		#x.socketConnect()
+		Thread(target=ServerSocket, args=(newSocket, server_ns),daemon=True).start()
+		#while(1):
+		#	x.messageTransfer()
+		#incrementPort+=1
+		#print('PORT: ',incrementPort)
 
-	while(1):
-		x.messageTransfer()
 
-
+def signal_handler(signal, frame):
+	print('\n>>PROGRAM TERMINATED\n')
+	sys.exit(0)
 
 
 #NS_Protocol_Server()
-begin()
+if __name__== "__main__":
+	signal.signal(signal.SIGINT, signal_handler)
+	signal.signal(signal.SIGTERM, signal_handler)
+	main()
 
 
 

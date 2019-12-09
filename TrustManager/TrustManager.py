@@ -18,6 +18,8 @@ from TrustManager_log import TrustManagerLog
 import signal
 import sys
 
+from threading import Thread
+
 def signal_handler(signal, frame):
 	print('\n>>PROGRAM TERMINATED\n')
 	sys.exit(0)
@@ -176,12 +178,9 @@ class TrustManagerNS:
 				exit()
 				
 
-def NS_Protocol_TrustManager():
+def NS_Protocol_TrustManager(sock):
 
-	try:
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.bind((HOST, PORT2))
-		sock.listen(1)
+	#try:
 		print ("\n\n>> WAITING CONNECTION\n")
 		
 		socketClient, clientSocket = sock.accept()
@@ -196,15 +195,27 @@ def NS_Protocol_TrustManager():
 		print("SENDING STEP 4")
 		socketClient.send( pickle.dumps(result) )
 
-		socketClient.close()
-		sock.close()
-		print (">>FINALIZED SOCKET\n\n")
+		print (">>FINALIZED CONNECTION\n\n")
+		
 		#System_log.writeSystemLog('Server','Server closed','info')
-	except Exception as err:
-				print (">> !!CONNECTION INTERRUPTED!!\n")
-				print(err)
-				exit()
+	#except Exception as err:
+	#			print (">> !!CONNECTION INTERRUPTED!!\n")
+	#			print(err)
+	#			exit()
 
-	exit()
+	#exit()
+def main():
+	#incrementPort=0
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((HOST, PORT2))
+	sock.listen(5)
+	while(1):
+		#Thread(target=NS_Protocol_TrustManager, args=(PORT2+incrementPort)).start()
+		NS_Protocol_TrustManager(sock)
+		#incrementPort+=1
+	socketClient.close()
+	sock.close()
+	print (">>FINALIZED SOCKET\n\n")
 
-NS_Protocol_TrustManager()
+if __name__== "__main__":
+	main()
