@@ -2,6 +2,7 @@ import socket, ssl, getpass, os, re, pickle
 from Crypto.Util.number import long_to_bytes
 from Crypto.PublicKey import RSA
 from Client_NS import ClientNS
+import base64
 
 #sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 #ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
@@ -135,7 +136,7 @@ def secondMenu(ssl_sock,username,client_ns):
 			print( "\n>>", mess )
 			
 			if(mess == "COMPUTEFINGERPRINT"):
-				return "COMPUTE_FINGERPRINT"
+				computeFingerprint(ssl_sock,client_ns)
 			
 			else:
 				print("3-UNKNOWN SERVER RESPONSE, TRY AGAIN")
@@ -149,6 +150,30 @@ def secondMenu(ssl_sock,username,client_ns):
 		secondMenu(ssl_sock,username,client_ns)
 
 
+
+def computeFingerprint(ssl_sock,client_ns):
+	
+	
+		file = input("\n\nBINARY FILE:")
+		
+		# if it does not find file ...
+		while (not os.path.isfile(file)) or (not os.path.exists(file)):
+			file = input("\nNO SUCH FILE !!! TRY AGAIN \n\nBINARY FILE:")
+		
+		# sending the binary file
+		sendFile(ssl_sock,file,client_ns)
+		
+		# receive the fingerprint
+		data, fingerprint = b"", b""
+		while (data != b"\n\r##"):
+			data += ssl_sock.recv(1024)
+	
+		fingerprint = data.replace(b"\n\r##", b"")
+		fingerprint = client_ns.receive_message(fingerprint)
+	
+		print("\n\n FINGERPRINT:" , fingerprint, "\n\n")
+	
+		return "SUBMIT_MENU"
 
 
 
@@ -335,7 +360,7 @@ def submitMenu(ssl_sock,username,client_ns):
 				file = input()
 			
 			# sending the binary file
-			sendFile(file,ssl_sock)
+			sendFile(ssl_sock,file,client_ns)
 			
 			
 			print("VULNERABILITIES:", end="")
@@ -371,16 +396,19 @@ def sendFile(ssl_sock,file,client_ns):
 	print (">>Transfering file")
 	
 	# sending the vulns file
-	f = open( file, "r" )
+	f = open( file, "rb" )
 	data = ""
 	data = f.read()
-	send_encrypted(ssl_sock,client_ns,data)
-			
+	print('FILE IS: ',data)
+	send_encrypted(ssl_sock,client_ns,str(data))
+	f.close()
+	
 	EOF = b"\n\r##"
 	ssl_sock.send(EOF)
-	f.close()
+	
 			
 	print (">>Transfer concluded")
+	submitMenu(ssl_sock,username,client_ns)
 
 
 

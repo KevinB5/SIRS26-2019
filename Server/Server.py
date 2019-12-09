@@ -1,6 +1,7 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
 import System_log, Server_NS, pickle
 from Server_NS import ServerNS
+import hashlib
 
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -233,7 +234,7 @@ class ServerSocket:
 		
 		if(userAuthenticated==True):
 			
-			if(self.getAuthorization(4, username)):
+			if(self.getAuthorization(5, username)):
 				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
 				self.send_encrypted(str(teamVulnsandFing))
@@ -257,7 +258,7 @@ class ServerSocket:
 
 		if(userAuthenticated==True):
 			
-			self.getAuthorization(3, username)
+			self.getAuthorization(2, username)
 
 			if(userAuthorized==True):
 				print("ASKING USER FOR VULNERABILITY\n")
@@ -272,14 +273,17 @@ class ServerSocket:
 					binFile += self.connssl.recv(1024)
 					#finalBinFile = self.server_ns.receive_message(binFile)
 			
-				finalBinFile = binFile.replace(b"\n\r##", "")
+				finalBinFile = binFile.replace(b"\n\r##", b"")
+				print('TOTAL BIN FILE ',finalBinFile)
 				binFile = self.server_ns.receive_message(finalBinFile)
+				print('')
+				print('TOTAL DECRYPTED BIN FILE ',finalBinFile)
 				
 					
 				print (">>Transfer concluded \n\n>>Transfering file")
 				
 				# receiving the vulnerabilities file
-				vulnFile = ""
+				vulnFile = b""
 				finalVulnFile = ""
 				while (vulnFile[-4:] != b"\n\r##"):
 					vulnFile += self.connssl.recv(1024)
@@ -342,7 +346,7 @@ class ServerSocket:
 
 			final_data = self.data[:-4]
 
-			print('FINAL DATA',final_data)
+			#print('FINAL DATA',final_data)
 			decoded = self.server_ns.receive_message(final_data)
 			
 			#decoded=self.data.decode("UTF-8")
@@ -410,13 +414,13 @@ class ServerSocket:
 				data = b""
 				final_data = ""
 				while (data[-4:] != b"\n\r##"):
-					data = self.connssl.recv(1024)
+					data += self.connssl.recv(1024)
 				
 				final_data = data.replace(b"\n\r##", b"")
 				data = self.server_ns.receive_message(final_data)
 
 				# calculate the fingerprint of the file
-				hash_object = hashlib.sha512(data)
+				hash_object = hashlib.sha512(data.encode())
 				fingerprint = hash_object.hexdigest()
 	
 				print("\n\nFING:", fingerprint, "\n\n")
@@ -426,13 +430,13 @@ class ServerSocket:
 
 
 			else:
-				System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authorized", "Compute Fingerprint", "Rejected", "error")
+				System_log.writeUserLog("", username, "Compute fingerprint attempt, user not authorized", "Compute Fingerprint", "Rejected", "error")
 				print("USER NOT AUTHORIZED\n")
 				self.send_encrypted("NO AUTHORIZATION")
 				self.connssl.send(b"\n\r##")
 	
 		else:
-			System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authenticated", "Compute Fingerprint", "Rejected", "error")
+			System_log.writeUserLog("", username, "Compute fingerprint attempt, user not authenticated", "Compute Fingerprint", "Rejected", "error")
 			print("USER NOT AUTHENTICATED\n")
 			self.send_encrypted("NO AUTH")
 			self.connssl.send(b"\n\r##")
