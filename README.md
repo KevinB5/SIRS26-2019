@@ -68,8 +68,8 @@ Virtual Machine Setup:
 		- $ CREATE DATABASE SIRS26SCOREBOARD;
 		- $ quit
 		- You have to leave MySQL to import.
-		- $ sudo mysqldump -u root -pmysql SIRS26USERS < database/SIRS26USERS.sql
-		- $ sudo mysqldump -u root -pmysql SIRS26SCOREBOARD < database/SIRS26SCOREBOARD.sql
+		- $ sudo mysql -u root -pmysql SIRS26USERS < database/SIRS26USERS.sql
+		- $ sudo mysql -u root -pmysql SIRS26SCOREBOARD < database/SIRS26SCOREBOARD.sql
 	- Setup Database User (If it is not created on import):
 		- $ sudo mysql -u root
 		- Check users with:
