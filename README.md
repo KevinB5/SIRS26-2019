@@ -13,15 +13,15 @@ Virtual Machine Setup:
 		- $ sudo apt install python3
 		- $ sudo apt install python3-pip
 	- Install apache2:
-		- $ sudo pip3 install mysql-connector-python
+		- $ sudo pip3 install mysql-connector
 		- $ sudo /etc/init.d/mysql start (may need to start apache2 also)
 	- Install mySQL-server:
 		- $ sudo apt-get install mysql-server
 	- Install pycrypto and pycryptodome:
 		- $ pip install pycrypto
 		- $ pip install pycryptodome
-	- Install py-bcrypt and datetime:
-		- $ pip install py-bcrypt
+	- Install bcrypt and datetime:
+		- $ pip install bcrypt
 		- $ pip install datetime
 	- Install firewall:
 		- $ apt-get install ufw
