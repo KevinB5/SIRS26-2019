@@ -16,7 +16,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 class ServerSocket:
 	
-	def __init__(self,newsocket,server_ns):
+	def __init__(self, newsocket,server_ns):
 		self.newsocket = newsocket
 		self.server_ns = server_ns
 		self.username = None
