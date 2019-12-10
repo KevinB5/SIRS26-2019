@@ -553,7 +553,7 @@ def NS_Protocol_Server(sock):
 
 	except Exception as err:
 				print (">> !!CONNECTION INTERRUPTED!!\n")
-				print(err)
+				#print(err)
 				exit()
 
 	
@@ -587,7 +587,7 @@ def main():
 
 
 def signal_handler(signal, frame):
-	print('\n>>PROGRAM TERMINATED\n')
+	print('\n>>CONNECTION CLOSED\n')
 	sys.exit(0)
 
 

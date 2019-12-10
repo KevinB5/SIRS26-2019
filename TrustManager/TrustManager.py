@@ -174,8 +174,8 @@ class TrustManagerNS:
 		except Exception as err:
 				print (">> !!AUTHENTICATION INTERRUPTED!!\n")
 				self.log.writeLog(source,destination,nonce,'Authentication rejected','REJECTED','error')
-				print(err)
-				exit()
+				#print(err)
+				#exit()
 				
 
 def NS_Protocol_TrustManager(sock):
@@ -203,7 +203,8 @@ def NS_Protocol_TrustManager(sock):
 				print (">> !!CONNECTION INTERRUPTED!!\n")
 				trust.log.writeLog("","","",'Connection terminated','REJECTED','error')
 	#			print(err)
-				exit()
+				#NS_Protocol_TrustManager(sock)
+				#exit()
 
 	#exit()
 def main():

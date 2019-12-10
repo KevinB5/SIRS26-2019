@@ -127,7 +127,7 @@ class Client_Socket:
 			EOF = b"\n\r##"
 			self.ssl_sock.send(EOF)
 			self.ssl_sock.close()
-			print( "\n>> CONNECTION TERMINATED" )
+			print( "\n>> CONNECTION CLOSED" )
 			exit()
 			
 		else:
@@ -523,9 +523,10 @@ def NS_Protocol_Client():
 
 """ start the client side """
 if __name__ == "__main__":
-	
-	ssl_sock,username,client_ns = NS_Protocol_Client()
-	client = Client_Socket(ssl_sock, username, client_ns)
-	client.menus()
-
+	try:
+		ssl_sock,username,client_ns = NS_Protocol_Client()
+		client = Client_Socket(ssl_sock, username, client_ns)
+		client.menus()
+	except Exception as err:
+		print (">> !!PROGRAM TERMINATED!!\n")
 
