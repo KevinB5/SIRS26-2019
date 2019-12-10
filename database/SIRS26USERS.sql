@@ -39,7 +39,7 @@ CREATE TABLE `Users` (
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,1,1,'Admin','admin','2019-11-13 19:14:05'),(2,2,1,'Kevin','$2b$14$Ru6ojLgvdA5s456IeyNf9e.8CCret718RtXmqRkrVQDkH8iDDV7qy','2019-11-13 19:14:05'),(3,2,1,'TiagoM','$2b$14$zwheXPO9IFicA4riui7kJ.vdNrIhT8ysQKzqWMHSF/5CnYl/1J4ZW','2019-11-13 19:14:05'),(4,2,1,'TiagoS','$2b$14$P67CRnQgKWaqmVfrDPMFzOMqZALmRGUkmzfIkkS2Y4Zx4xT/6E7ju','2019-11-13 19:14:05'),(5,1,2,'Admin2','admin2','2019-11-13 19:14:05'),(6,2,2,'Kevin2','kevin2','2019-11-13 19:14:05'),(7,2,2,'TiagoM2','tiagom','2019-11-13 19:14:05'),(8,2,2,'TiagoS2','tiagos','2019-11-13 19:14:05');
+INSERT INTO `Users` VALUES (1,1,1,'Admin','$2b$14$hCxmngO9Fnz9t4Rd5AKnCuD9Iy3ctlBm5xMU.jhQoVPE1dP6GKzG2','2019-11-13 19:14:05'),(2,2,1,'Kevin','$2b$14$Ru6ojLgvdA5s456IeyNf9e.8CCret718RtXmqRkrVQDkH8iDDV7qy','2019-11-13 19:15:05'),(3,2,1,'TiagoM','$2b$14$zwheXPO9IFicA4riui7kJ.vdNrIhT8ysQKzqWMHSF/5CnYl/1J4ZW','2019-11-13 19:16:05'),(4,2,1,'TiagoS','$2b$14$P67CRnQgKWaqmVfrDPMFzOMqZALmRGUkmzfIkkS2Y4Zx4xT/6E7ju','2019-11-13 19:17:05'),(5,1,2,'Admin2','$2b$14$fNta/GHYvomVWB.D3WEehu8HjOSNS/VLIOD/cXluoxs6QoGrdbh7K','2019-11-13 19:18:05'),(6,2,2,'Kevin2','$2b$14$pDkQ3vIyJbvNk/vMmhPEkuNycZboxpWLHDud558AL/kgB.qBt73dK','2019-11-13 19:19:05'),(7,2,2,'TiagoM2','$2b$14$So.bZutvYimYGwNHa/GQB.Mgh.f0SF2dhTTNpJPYTsuJVydvfFUYq','2019-11-13 19:20:05'),(8,2,2,'TiagoS2','$2b$14$YtPlYpv9pLiyo0MZd1GV5OgYt8LRYMAiXFpQuum8T4slpFudMnUwm','2019-11-13 19:21:05');
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

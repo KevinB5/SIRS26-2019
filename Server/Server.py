@@ -42,7 +42,9 @@ class ServerSocket:
 		try:
 			System_log.writeSystemLog("Server","Connection attempt","info")
 				
-			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
+			#self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
+
+			self.connssl = self.newsocket
 
 			while(1):
 				self.messageTransfer()
@@ -518,8 +520,11 @@ def NS_Protocol_Server(sock):
 
 		print("VERIFY STEP 8")
 		print( "\n" )
+		
 		if(result ==False):
 			raise Exception('Trust Manager Authentication failed')
+
+
 	except Exception as err:
 				print (">> !!CONNECTION INTERRUPTED!!\n")
 				print(err)
@@ -546,6 +551,7 @@ def main():
 		while True:
 			newSocket,server_ns = NS_Protocol_Server(sock)
 			Thread(target=ServerSocket, args=(newSocket, server_ns),daemon=True).start()
+
 	except Exception as err:
 				print (">> !!SERVER COULD NOT START!!\n")
 				#print(err)

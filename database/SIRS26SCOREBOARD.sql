@@ -38,7 +38,7 @@ CREATE TABLE `Scoreboard` (
 
 LOCK TABLES `Scoreboard` WRITE;
 /*!40000 ALTER TABLE `Scoreboard` DISABLE KEYS */;
-INSERT INTO `Scoreboard` VALUES ('Kevin',1,0,0,'2019-11-15 23:18:47'),('TiagoM',1,0,0,'2019-11-15 23:18:47'),('TiagoS',1,0,0,'2019-11-15 23:18:47'),('Kevin2',2,0,0,'2019-11-15 23:18:47'),('TiagoM2',2,0,0,'2019-11-15 23:18:47'),('TiagoS2',2,0,0,'2019-11-15 23:18:47');
+INSERT INTO `Scoreboard` VALUES ('Admin',1,0,0,'2019-11-15 23:22:47'),('Kevin',1,0,0,'2019-11-15 23:23:47'),('TiagoM',1,0,0,'2019-11-15 23:24:47'),('TiagoS',1,0,0,'2019-11-15 23:25:47'), ('Admin2',2,0,0,'2019-11-15 23:26:47'),('Kevin2',2,0,0,'2019-11-15 23:27:47'),('TiagoM2',2,0,0,'2019-11-15 23:28:47'),('TiagoS2',2,0,0,'2019-11-15 23:29:47');
 /*!40000 ALTER TABLE `Scoreboard` ENABLE KEYS */;
 UNLOCK TABLES;
 

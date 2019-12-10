@@ -504,14 +504,20 @@ def NS_Protocol_Client():
 		#sockServer.close()
 		sockTrustManager.close()
 		print ("\n>>FINALIZED SOCKET\n\n")
+		
+		'''
 		try:
 			ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
 		except Exception as err:
 				print (">> !!INVALID CERTIFICATE!!\n")
 				print(err)
-		return ssl_sock,username,client_ns
+		'''
+		
+		return sockServer, username, client_ns
+	
 		#System_log.writeSystemLog('Server','Server closed','info')
 		#exit()
+		
 	except Exception as err:
 				print (">> !!CLIENT COULD NOT CONNECT!!\n")
 				#print(err)
