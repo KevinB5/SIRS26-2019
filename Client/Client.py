@@ -1,4 +1,4 @@
-import socket, ssl, getpass, os, re, pickle, signal, sys
+import socket, ssl, getpass, os, re, pickle, signal, sys, json
 from Crypto.Util.number import long_to_bytes
 from base64 import b64decode,b64encode
 from Client_NS import ClientNS
@@ -101,7 +101,7 @@ class Client_Socket:
 		
 			password=getpass.getpass()
 
-			command_as_string = "login"+"!-!"+username+"!-!"+password+"!-!"
+			command_as_string = "login"+"!-!"+self.username+"!-!"+password+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -148,7 +148,7 @@ class Client_Socket:
 		command=input()
 		
 		if (command=="1"):
-			command_as_string = "scoreboardMenu"+"!-!"+username+"!-!"
+			command_as_string = "scoreboardMenu"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -166,7 +166,7 @@ class Client_Socket:
 
 
 		elif (command=="2"):
-			command_as_string = "submitMenu"+"!-!"+username+"!-!"
+			command_as_string = "submitMenu"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -189,7 +189,7 @@ class Client_Socket:
 				command_as_string = "computeFingerprint"+"!-!"
 				send += command_as_string
 				
-				username_as_string = username+"!-!"
+				username_as_string = self.username+"!-!"
 				send += username_as_string
 				
 				self.send_encrypted(send)
@@ -255,7 +255,7 @@ class Client_Socket:
 		command=input()
 		
 		if (command=="1"):
-			command_as_string = "checkScore"+"!-!"+username+"!-!"
+			command_as_string = "checkScore"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -269,7 +269,7 @@ class Client_Socket:
 
 
 		elif (command=="2"):
-			command_as_string = "checkVulnsandFingerprints"+"!-!"+username+"!-!"
+			command_as_string = "checkVulnsandFingerprints"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -301,7 +301,7 @@ class Client_Socket:
 
 
 		elif (command=="3"):
-			command_as_string = "checkScoreboard"+"!-!"+username+"!-!"
+			command_as_string = "checkScoreboard"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -311,10 +311,11 @@ class Client_Socket:
 			scoreboard = b""
 			while True:
 				packet = self.ssl_sock.recv(1024)
-				if b"\n\r##" in packet:
+				if(b"\n\r##" in packet):
 					break
 				scoreboard += packet
 
+			scoreboard = scoreboard.replace(b"\n\r##", b"")
 			scoreboard = self.client_ns.receive_message(scoreboard)
 
 
@@ -322,10 +323,22 @@ class Client_Socket:
 				print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE SCOREBOARD OF THE TEAM" + "-"*20 + "\n")
 
 			else:
+				
+				scoreboard = json.loads(scoreboard)
+				
 				#printing the scoreoboard
 				print("-" * 300 + "SCOREBOARD" + "-"*270)
 				print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
-				print(scoreboard)
+				
+				
+				for i in range(0,len(scoreboard)):
+					username, points =  scoreboard[i][0], str(scoreboard[i][1])
+					numberOfVulns, date = str(scoreboard[i][2]), scoreboard[i][3]
+					
+					print(" "*10 + username + " " *(40-len(username)), end="")
+					print(" "*2 + points + " " *(10-len(points)), end="")
+					print(" "*10 + numberOfVulns + " " *(30-len(numberOfVulns)), end="")
+					print(  date, "  \n")
 
 
 			return "SCOREBOARD_MENU"
@@ -333,7 +346,7 @@ class Client_Socket:
 
 
 		elif (command=="4"):
-			command_as_string = "checkTeamVulnsandFingerprints"+"!-!"+username+"!-!"
+			command_as_string = "checkTeamVulnsandFingerprints"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 			
 			EOF = b"\n\r##"
@@ -347,6 +360,7 @@ class Client_Socket:
 					break
 				mess += packet
 			
+			mess = mess.replace(b"\n\r##", b"")
 			mess = self.client_ns.receive_message(mess)
 
 
@@ -354,7 +368,8 @@ class Client_Socket:
 				print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
 
 			else:
-				mess = pickle.loads(mess)
+				mess = json.loads(mess)
+				
 				# print in terminal : User ; Fingerprint ; Name_Vuln ;
 				print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*95 + "Name_Vuln  ;\n" )
 				
@@ -378,14 +393,14 @@ class Client_Socket:
 
 	def submitMenu(self):
 		print("\nPLEASE CHOOSE AN OPTION:")
-		print("1: BINARY AND VULNERABILITIES")
+		print("1: FINGERPRINT AND VULNERABILITIES")
 		print("0: LAST MENU")
 		
 		# ask user for input
 		command=input()
 		
 		if (command=="1"):
-			command_as_string = "submitVulnerability"+"!-!"+username+"!-!"
+			command_as_string = "submitVulnerability"+"!-!"+self.username+"!-!"
 			self.send_encrypted(command_as_string)
 		
 			EOF = b"\n\r##"
@@ -397,19 +412,13 @@ class Client_Socket:
 
 			if(mess=="SUBMITVULNERABILITY"):
 				
-				print("BINARY:", end="")
-				file = input()
+				fingerprint = input("FINGERPRINT:")
 				
-				# if it does not find file ...
-				while (not os.path.isfile(file)) or (not os.path.exists(file)):
-					print("NO SUCH FILE !!! TRY AGAIN \n\nBINARY:", end="")
-					file = input()
-				
-				# sending the binary file
-				self.sendFile(file)
-				
-				#EOF = b"\n\r##"
-				#ssl_sock.send(EOF)
+				# sending the fingerprint
+				self.send_encrypted(fingerprint)
+			
+				EOF = b"\n\r##"
+				self.ssl_sock.send(EOF)
 				
 				print("VULNERABILITIES:", end="")
 				file2 = input()
@@ -421,9 +430,6 @@ class Client_Socket:
 				
 				# sending the vulns file
 				self.sendFile(file2)
-
-				#EOF = b"\n\r##"
-				#ssl_sock.send(EOF)
 				
 				return "SUBMIT_MENU"
 			

@@ -1,5 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log, Server_NS, pickle, hashlib, sys
+import System_log, Server_NS, pickle, hashlib, sys, json
 from base64 import b64decode,b64encode
 from Server_NS import ServerNS
 from threading import Thread
@@ -109,6 +109,28 @@ class ServerSocket:
 			return 0
 
 
+	#
+	#
+	#
+	def toList(self, tuples):
+	
+		lista = []
+		for tup in tuples:
+			aux = []
+			for i in range(0, len(tup)):
+				if( isinstance(tup[i], int) or isinstance(tup[i], str) ):
+					aux.append(tup[i])
+				else:
+					aux.append(tup[i].strftime("%d/%m/%Y %H:%M:%S"))
+			
+			lista.append(aux)
+
+		return lista
+
+
+
+
+
 
 	def login(self, split_decoded):
 		
@@ -208,9 +230,13 @@ class ServerSocket:
 			self.getAuthorization(3, self.username)
 			
 			if(self.userAuthorized == True):
-				scoreboard = DB_Scoreboard.get_scoreboard()
+				group_id = DB_User.getUserGroupID(self.username)
+				scoreboard = DB_Scoreboard.get_scoreboard(group_id[0])
+				scoreboard = json.dumps(self.toList(scoreboard))
+				
 				print("SENDING SCOREBOARD \n")
-				self.send_encrypted(str(scoreboard))
+				
+				self.send_encrypted(scoreboard)
 				self.connssl.send(b"\n\r##")
 			
 			else:
@@ -235,10 +261,15 @@ class ServerSocket:
 			self.getAuthorization(5, self.username)
 			
 			if(self.userAuthorized == True):
-				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
+				group_id = DB_User.getUserGroupID(self.username)
+				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint(group_id[0])
+				teamVulnsandFing = json.dumps(self.toList(teamVulnsandFing))
+				
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
-				self.send_encrypted(str(teamVulnsandFing))
+				
+				self.send_encrypted(teamVulnsandFing)
 				self.connssl.send(b"\n\r##")
+			
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.send_encrypted("NO AUTHORIZATION")
@@ -261,46 +292,42 @@ class ServerSocket:
 			if(self.userAuthorized == True):
 				print("ASKING USER FOR VULNERABILITY\n")
 				self.send_encrypted("SUBMITVULNERABILITY")
-					
+				
+				
 				print (">>Transfering file")
 						
-				# receiving the binary file
-				binFile = b""
-				finalBinFile = ""
-				while (binFile[-4:] != b"\n\r##"):
-					binFile += self.connssl.recv(1024)
-					#finalBinFile = self.server_ns.receive_message(binFile)
+				# receiving the fingerprint
+				fingerprint = b""
+				while (fingerprint[-4:] != b"\n\r##"):
+					fingerprint += self.connssl.recv(1024)
 			
-				finalBinFile = binFile.replace(b"\n\r##", b"")
-				#print('TOTAL BIN FILE ',finalBinFile)
-				binFile = self.server_ns.receive_message(finalBinFile)
-				#print('TOTAL DECRYPTED BIN FILE ',finalBinFile)
+				fingerprint = fingerprint.replace(b"\n\r##", b"")
+				fingerprint = self.server_ns.receive_message(fingerprint)
 				
+				print("\nFINGERPRINT:",fingerprint, "\n\n")
 					
 				print (">>Transfer concluded \n\n>>Transfering file")
 				
 				# receiving the vulnerabilities file
-				vulnFile = b""
-				finalVulnFile = ""
+				vulnFile, finalVulnFile = b"", ""
 				while (vulnFile[-4:] != b"\n\r##"):
 					vulnFile += self.connssl.recv(1024)
-					#finalVulnFile = self.server_ns.receive_message(vulnFile)
+	
 
 				finalVulnFile = vulnFile.replace(b"\n\r##", b"")
 				vulnFile = self.server_ns.receive_message(finalVulnFile)
 				
-				
 				print (">>Transfer concluded")
 				
-				splitLines = vulnFile.split()
-				vulns = []
+				
+				splitLines, vulns = vulnFile.split(), []
 				
 				for i in range(len(splitLines)):
 					if( splitLines[i] == "Vulnerability:"):
 						vulns.append(str(splitLines[i+1], "utf-8"))
 				
 				# Adding vulnerabilities to DB
-				bool = DB_Scoreboard.add_score_vulnerability(binFile.encode(), vulns, self.username)
+				bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username)
 		
 				#TODO: Add filename on log
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
@@ -411,18 +438,13 @@ class ServerSocket:
 				
 				final_data = data.replace(b"\n\r##", b"")
 				data = self.server_ns.receive_message(final_data)
-				
-				print("\n\nDATA1:", data, "\n\n")
-				
 				data = b64decode(data.encode())
-
-				print("\n\nDATA2:", data, "\n\n")
 
 				# calculate the fingerprint of the file
 				hash_object = hashlib.sha512(data)
 				fingerprint = hash_object.hexdigest()
 	
-				print("\n\nFING:", fingerprint, "\n\n")
+				print("\n\nFINGERPRINT:", fingerprint, "\n\n")
 	
 				self.send_encrypted(str(fingerprint))
 				self.connssl.send(b"\n\r##")

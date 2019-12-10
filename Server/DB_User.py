@@ -38,8 +38,8 @@ def authenticate(user, password):
 		#print(result)
 		#print( hash.get_hashed_password() )
 		
-		#if( hash.check_password(bytes(result[1], "utf-8")) == True ):
-		if( hash.check_password(bytes(result[1])) == True ):
+		if( hash.check_password(bytes(result[1], "utf-8")) == True ):
+		#if( hash.check_password(bytes(result[1])) == True ):
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
 			return True;
@@ -164,7 +164,7 @@ def getUserGroupID(username):
 
 		# Username and Password coming from Server.py
 		username = str(username)
-		group_id ='group_id'
+		group_id = "group_id"
 		cursor = db.cursor()
 		query = "SELECT group_id FROM Users WHERE username=%s;"
 		parameters = [username]
@@ -192,6 +192,7 @@ def getUserGroupID(username):
 			cursor.close()
 			db.close()
 			System_log.writeSystemLog('Database Users','Connection closed','info')
+
 
 
 def getUserAuthType(username):

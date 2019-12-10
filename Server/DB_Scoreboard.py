@@ -1,4 +1,4 @@
-import mysql.connector, sys, hashlib
+import mysql.connector, sys, hashlib, json
 from datetime import datetime
 import System_log
 
@@ -9,7 +9,7 @@ def connect():
 			passwd="group26",
 			database="SIRS26SCOREBOARD"
 		)
-	System_log.writeSystemLog('Database Scoreboard','Connection attempt','info')
+	System_log.writeSystemLog("Database Scoreboard","Connection attempt","info")
 	return db
 
 
@@ -83,9 +83,9 @@ def get_scoreboard(group_id):
 		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 
-		print('RESULT SCOREBOARD:',result)
+		print("RESULT SCOREBOARD:",result)
 
-		return result;
+		return result
 	
 	
 	except Exception as e:
@@ -111,6 +111,8 @@ def get_team_vulnsAndfingerprint(group_id):
 		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 		
+		print("RESULT TEAM VULNS:",result)
+		
 		return result;
 	
 	
@@ -128,14 +130,10 @@ def get_team_vulnsAndfingerprint(group_id):
 
 
 
-def add_score_vulnerability(binFile, vulns, username):
-	# When private key system is done, use:  user_id+private_key+name_vul
-
-	# calculate the fingerprint of the file
-	hash_object = hashlib.sha512(binFile)
-	fingerprint = hash_object.hexdigest()
+def add_score_vulnerability(fingerprint, vulns, username, group_id):
 	
-	result = vulnerability_exist(fingerprint, binFile, vulns, username)
+
+	result = vulnerability_exist(fingerprint, vulns, username)
 
 	if(result == False):
 		return False
@@ -157,8 +155,8 @@ def add_score_vulnerability(binFile, vulns, username):
 			# Insert the new vulnerabilities
 			for nameVuln in result:
 				cursor = db.cursor(prepared=True)
-				query = "INSERT INTO Vulnerability (username,fingerprint,name_vul) VALUES (%s,%s,%s)"
-				parameters = [username,fingerprint,nameVuln]
+				query = "INSERT INTO Vulnerability (username,group_id,fingerprint,name_vul) VALUES (%s,%s,%s,%s)"
+				parameters = [username,group_id,fingerprint,nameVuln]
 				cursor.execute(query,parameters)
 				db.commit()
 			
@@ -179,7 +177,7 @@ def add_score_vulnerability(binFile, vulns, username):
 
 
 
-def vulnerability_exist(fingerprint, binFile, vulns, username):
+def vulnerability_exist(fingerprint, vulns, username):
 	try:
 		db = connect()
 		
