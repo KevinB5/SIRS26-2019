@@ -3,7 +3,7 @@ import DB_Scoreboard
 
 # Global Variables
 
-validOperations = [1,2,3,4]
+validOperations = [1,2,3,4,5]
 validUser=DB_User.getUsersList()
 validGroupID=DB_User.getGroupIDList()
 validGroupIDList=[]

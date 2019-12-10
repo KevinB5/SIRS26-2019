@@ -74,13 +74,16 @@ def get_user_vulnsAndfingerprint(username):
 
 
 
-def get_scoreboard():
+def get_scoreboard(group_id):
 	try:
 		db = connect()
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username, points, num_vul, last_update  FROM Scoreboard;"
-		cursor.execute(query)
+		query = "SELECT username, points, num_vul, last_update  FROM Scoreboard WHERE group_id=%s;"
+		parameters = [group_id]
+		cursor.execute(query,parameters)
 		result = cursor.fetchall()
+
+		print('RESULT SCOREBOARD:',result)
 
 		return result;
 	
@@ -99,12 +102,13 @@ def get_scoreboard():
 
 
 
-def get_team_vulnsAndfingerprint():
+def get_team_vulnsAndfingerprint(group_id):
 	try:
 		db = connect()
 		cursor = db.cursor(prepared=True)
-		query = "SELECT username, fingerprint, name_vul FROM Vulnerability;"
-		cursor.execute(query)
+		query = "SELECT username, fingerprint, name_vul FROM Vulnerability WHERE group_id=%s;"
+		parameters = [group_id]
+		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 		
 		return result;

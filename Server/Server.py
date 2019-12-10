@@ -211,7 +211,9 @@ class ServerSocket:
 			self.getAuthorization(3, self.username)
 			
 			if(self.userAuthorized == True):
-				scoreboard = DB_Scoreboard.get_scoreboard()
+				group_id = DB_User.getUserGroupID(self.username)
+				#print('GROUP ID ',group_id[0])
+				scoreboard = DB_Scoreboard.get_scoreboard(group_id[0])
 				print("SENDING SCOREBOARD \n")
 				self.send_encrypted(str(scoreboard))
 				self.connssl.send(b"\n\r##")
@@ -238,7 +240,8 @@ class ServerSocket:
 			self.getAuthorization(5, self.username)
 			
 			if(self.userAuthorized == True):
-				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
+				group_id = DB_User.getUserGroupID(self.username)
+				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint(group_id[0])
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
 				self.send_encrypted(str(teamVulnsandFing))
 				self.connssl.send(b"\n\r##")
@@ -560,7 +563,7 @@ def main():
 
 
 def signal_handler(signal, frame):
-	print('\n>>PROGRAM TERMINATED\n')
+	print('\n>>CONNECTION TERMINATED\n')
 	sys.exit(0)
 
 

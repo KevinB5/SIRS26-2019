@@ -341,13 +341,15 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
 
 		else:
-			mess = pickle.loads(mess)
+			#mess = pickle.loads(mess)
 			# print in terminal : User ; Fingerprint ; Name_Vuln ;
 			print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*95 + "Name_Vuln  ;\n" )
 			
-			for i in range(0, len(mess)):
-				user, fing, vuln = mess[i][0], mess[i][1], mess[i][2]
-				print(user + " "*(20) + fing + " "*(20) + vuln)
+			print(mess)
+
+			#for i in range(0, len(mess)):
+			#	user, fing, vuln = mess[i][0], mess[i][1], mess[i][2]
+			#	print(user + " "*(20) + fing + " "*(20) + vuln)
 		
 
 		return "SCOREBOARD_MENU"
