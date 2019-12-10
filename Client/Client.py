@@ -9,6 +9,7 @@ from Client_NS import ClientNS
 import signal
 import sys
 
+
 def signal_handler(signal, frame):
 	print('\n>>PROGRAM TERMINATED\n')
 	sys.exit(0)
@@ -16,13 +17,43 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
+
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 PORT2 = 65440
 
+
+
 def send_encrypted(ssl_sock,client_ns,message):
 		message = client_ns.send_message(message)
 		ssl_sock.send(message)
+
+
+#
+#
+#
+def menus():
+	
+	next = mainMenu(ssl_sock,username,client_ns)
+	
+	while(1):
+		if( next == "MAIN_MENU"):
+			next = mainMenu(ssl_sock,username,client_ns)
+		
+		elif( next == "SECOND_MENU"):
+			next = secondMenu(ssl_sock,username,client_ns)
+		
+		elif( next == "SCOREBOARD_MENU"):
+			next = scoreboardMenu(ssl_sock,username,client_ns)
+		
+		elif( next == "SUBMIT_MENU"):
+			next = submitMenu(ssl_sock,username,client_ns)
+		
+		elif( next == "COMPUTE_FINGERPRINT"):
+			next = computeFingerprint(ssl_sock,client_ns)
+
+
+
 
 def mainMenu(ssl_sock,username,client_ns):
 	print("\nPLEASE CHOOSE AN OPTION:")
@@ -33,17 +64,10 @@ def mainMenu(ssl_sock,username,client_ns):
 	command=input()
 	if (command=="1"):
 	
-		print('Insert your password:')
 		password=getpass.getpass()
 
 		command_as_string = "login"+"!-!"+username+"!-!"+password+"!-!"
 		send_encrypted(ssl_sock,client_ns,command_as_string)
-		
-		#username_as_string = username+"!-!"
-		#send_encrypted(ssl_sock,client_ns,username_as_string)
-		
-		#password_as_string = password+"!-!"
-		#send_encrypted(ssl_sock,client_ns,password_as_string)
 		
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
@@ -52,11 +76,14 @@ def mainMenu(ssl_sock,username,client_ns):
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
 		print( "\n>>", mess )
+		
 		if(mess=="USER AUTHENTICATED!!!"):
-			secondMenu(ssl_sock,username,client_ns)
+			#secondMenu(ssl_sock,username,client_ns)
+			return "SECOND_MENU"
 	
 		elif(mess =="USER NOT AUTHENTICATED!!!"):
-			mainMenu(ssl_sock,username,client_ns)
+			#mainMenu(ssl_sock,username,client_ns)
+			return "MAIN_MENU"
 		
 		else:
 			print("SOMETHING WENT WRONG\n")
@@ -69,10 +96,12 @@ def mainMenu(ssl_sock,username,client_ns):
 		ssl_sock.send(EOF)
 		ssl_sock.close()
 		print( "\n>> CONNECTION TERMINATED" )
+		exit()
 		
 	else:
 		print("WRONG COMMAND\n")
-		mainMenu(ssl_sock,username,client_ns)
+		#mainMenu(ssl_sock,username,client_ns)
+		return "MAIN_MENU"
 
 
 
@@ -99,11 +128,15 @@ def secondMenu(ssl_sock,username,client_ns):
 		mess = ssl_sock.recv(1024)
 		mess = client_ns.receive_message(mess)
 		print( "\n>>", mess )
+		
 		if(mess=="SCOREBOARDMENU"):
-			scoreboardMenu(ssl_sock,username,client_ns)
+			#scoreboardMenu(ssl_sock,username,client_ns)
+			return "SCOREBOARD_MENU"
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			secondMenu(ssl_sock,username,client_ns)
+			#secondMenu(ssl_sock,username,client_ns)
+			return "SECOND_MENU"
+
 
 	elif (command=="2"):
 		command_as_string = "submitMenu"+"!-!"+username+"!-!"
@@ -119,10 +152,13 @@ def secondMenu(ssl_sock,username,client_ns):
 		print( "\n>>", mess)
 		
 		if(mess=="SUBMITMENU"):
-			submitMenu(ssl_sock,username,client_ns)
+			#submitMenu(ssl_sock,username,client_ns)
+			return "SUBMIT_MENU"
 		else:
 			print("2-UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			secondMenu(ssl_sock,username,client_ns)
+			#secondMenu(ssl_sock,username,client_ns)
+			return "SECOND_MENU"
+
 
 	elif(command=="3"):
 			send = ""
@@ -144,18 +180,22 @@ def secondMenu(ssl_sock,username,client_ns):
 			print( "\n>>", mess )
 			
 			if(mess == "COMPUTEFINGERPRINT"):
-				computeFingerprint(ssl_sock,client_ns)
+				#computeFingerprint(ssl_sock,client_ns)
+				return "COMPUTE_FINGERPRINT"
 			
 			else:
 				print("3-UNKNOWN SERVER RESPONSE, TRY AGAIN")
 				return "SECOND_MENU"
 
+
 	elif (command=="0"):
-		mainMenu(ssl_sock,username,client_ns)
-		
+		#mainMenu(ssl_sock,username,client_ns)
+		return "MAIN_MENU"
+
 	else:
 		print("WRONG COMMAND\n")
-		secondMenu(ssl_sock,username,client_ns)
+		#secondMenu(ssl_sock,username,client_ns)
+		return "SECOND_MENU"
 
 
 
@@ -181,7 +221,8 @@ def computeFingerprint(ssl_sock,client_ns):
 	
 		print("\n\n FINGERPRINT:" , fingerprint, "\n\n")
 	
-		submitMenu(ssl_sock,username,client_ns)
+		#submitMenu(ssl_sock,username,client_ns)
+		return "SUBMIT_MENU"
 
 
 
@@ -189,8 +230,8 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 	print("\nPLEASE CHOOSE AN OPTION:")
 	print("1: CHECK SCORE")
 	print("2: CHECK VULNERABILITIES AND FINGERPRINTS")
-	print("3: CHECK SCOREBOARD")
-	print("4: CHECK TEAM VULNERABILITIES AND FINGERPRINTS")
+	print("3: CHECK TEAM SCOREBOARD ( ONLY ALLOWED FOR TEAM LEADERS ) ")
+	print("4: CHECK TEAM VULNERABILITIES AND FINGERPRINTS ( ONLY ALLOWED FOR TEAM LEADERS ) ")
 	print("0: LAST MENU")
 	# ask user for input
 	command=input()
@@ -208,8 +249,8 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 		mess = client_ns.receive_message(mess)
 
 		print("\n\nUSER SCORE IS", mess,"\n" )
-		scoreboardMenu(ssl_sock,username,client_ns)
-
+		#scoreboardMenu(ssl_sock,username,client_ns)
+		return "SCOREBOARD_MENU"
 
 
 	elif (command=="2"):
@@ -243,8 +284,8 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 			print(strAux + sep, end="")
 		print("\n\n")
 		
-		scoreboardMenu(ssl_sock,username,client_ns)
-
+		#scoreboardMenu(ssl_sock,username,client_ns)
+		return "SCOREBOARD_MENU"
 
 
 	elif (command=="3"):
@@ -259,43 +300,30 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 		scoreboard = b""
 		while True:
 			packet = ssl_sock.recv(1024)
-			#packet = client_ns.receive_message(mess)
 			if b"\n\r##" in packet:
 				break
 			scoreboard += packet
 
 		scoreboard = client_ns.receive_message(scoreboard)
-		
-		#scoreboard = pickle.loads(scoreboard)
-		
-		
-		#printing the scoreoboard
-		print("-" * 300 + "SCOREBOARD" + "-"*270)
-		print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
-		print(scoreboard)
-		
-		#for i in range(0,len(scoreboard)):
-		'''
-		i=0
-		while(i+3 < len(scoreboard)):
-			username, points =  str(scoreboard[i]), str(scoreboard[i+1])
-			numberOfVulns, date = str(scoreboard[i+2]), str(scoreboard[i+3])
-		
-			print(" "*10 + username + " " *(40-len(username)), end="")
-			print(" "*2 + points + " " *(10-len(points)), end="")
-			print(" "*10 + numberOfVulns + " " *(30-len(numberOfVulns)), end="")
-			print(  date, "  \n")
-			i+=4
-		'''
-		scoreboardMenu(ssl_sock,username,client_ns)
+
+		if( scoreboard == "NO AUTHORIZATION"):
+			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
+
+		else:
+			#printing the scoreoboard
+			print("-" * 300 + "SCOREBOARD" + "-"*270)
+			print("\n\n" + " "*10 + "User  ;" + " "*35 + "Points  ;" + " "*10 + "Number of Vulnerabilites;" + " "*10 + "Last_update;" + " "*30 + "\n" )
+			print(scoreboard)
+
+
+		return "SCOREBOARD_MENU"
 
 
 
 	elif (command=="4"):
 		command_as_string = "checkTeamVulnsandFingerprints"+"!-!"+username+"!-!"
 		send_encrypted(ssl_sock,client_ns,command_as_string)
-		#username_as_string = username+"!-!"
-		#send_encrypted(ssl_sock,client_ns,username_as_string.encode())
+		
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 		
@@ -307,6 +335,7 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 				break
 			mess += packet
 		mess = client_ns.receive_message(mess)
+
 
 		if(mess == "NO AUTHORIZATION"):
 			print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
@@ -321,17 +350,15 @@ def scoreboardMenu(ssl_sock,username,client_ns):
 				print(user + " "*(20) + fing + " "*(20) + vuln)
 		
 
-		scoreboardMenu(ssl_sock,username,client_ns)
+		return "SCOREBOARD_MENU"
 
 
 	elif (command=="0"):
-		secondMenu(ssl_sock,username,client_ns)
-
+		return "SECOND_MENU"
 		
 	else:
 		print("WRONG COMMAND\n")
-		scoreboardMenu(ssl_sock,username,client_ns)
-
+		return "SCOREBOARD_MENU"
 
 
 
@@ -347,8 +374,7 @@ def submitMenu(ssl_sock,username,client_ns):
 	if (command=="1"):
 		command_as_string = "submitVulnerability"+"!-!"+username+"!-!"
 		send_encrypted(ssl_sock,client_ns,command_as_string)
-		#username_as_string = username+"!-!"
-		#send_encrypted(ssl_sock,client_ns,username_as_string)
+	
 		EOF = b"\n\r##"
 		ssl_sock.send(EOF)
 
@@ -386,20 +412,23 @@ def submitMenu(ssl_sock,username,client_ns):
 			#EOF = b"\n\r##"
 			#ssl_sock.send(EOF)
 			
-			submitMenu(ssl_sock,username,client_ns)
+			return "SUBMIT_MENU"
 		
 
 		else:
 			print("UNKNOWN SERVER RESPONSE, TRY AGAIN")
-			submitMenu(ssl_sock,username,client_ns)
+			return "SUBMIT_MENU"
 
 
 	elif (command=="0"):
-		secondMenu(ssl_sock,username,client_ns)
-
+		#secondMenu(ssl_sock,username,client_ns)
+		return "SECOND_MENU"
+		
 	else:
 		print("WRONG COMMAND\n")
-		submitMenu(ssl_sock,username,client_ns)
+		#submitMenu(ssl_sock,username,client_ns)
+		return "SUBMIT_MENU"
+
 
 
 
@@ -429,9 +458,9 @@ def NS_Protocol_Client():
 	sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 	
-	print("\nPLEASE INSERT YOUR USERNAME:")
-	username=input("Username: ")
-	client_ns = ClientNS(username,username.lower()+'.key')
+	username=input("USERNAME: ")
+	client_ns = ClientNS(username,username.lower()+".key")
+	
 	# Alice sends her name "Alice" to server
 	print("\n\nSENDING STEP 1")
 	sockServer.connect((HOST, PORT))
@@ -490,7 +519,7 @@ def NS_Protocol_Client():
 #try:
 
 ssl_sock,username,client_ns = NS_Protocol_Client()
-mainMenu(ssl_sock,username,client_ns)
+menus()
 	#ssl_sock.connect((HOST, PORT))
 #print( "\n>> CONNECTION ESTABLISHED !" )
 

@@ -35,13 +35,11 @@ def authenticate(user, password):
 
 		System_log.writeSystemLog('Database Users','Connection successful','info')
 		
-		
 		#print(result)
 		#print( hash.get_hashed_password() )
 		
-		
-		#if( hash.check_password(bytes(result[1], "utf-8")) == True ):
-		if( hash.check_password(bytes(result[1])) == True ):
+		if( hash.check_password(bytes(result[1], "utf-8")) == True ):
+		#if( hash.check_password(bytes(result[1])) == True ):
 			# UNCOMENT FOR DATABASE LOGIN DEBUG
 			# print('Login Successful')
 			return True;
@@ -115,7 +113,8 @@ def getUsersList():
 		decodedresult=[]
 		System_log.writeSystemLog('Database Users','Connection successful','info')
 		for row in result:
-			decodedresult.append(row[0].decode('utf-8'))
+			#decodedresult.append(row[0].decode('utf-8'))
+			decodedresult.append(row[0])
 
 		return decodedresult;
 

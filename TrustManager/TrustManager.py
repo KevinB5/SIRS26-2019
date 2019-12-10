@@ -188,9 +188,9 @@ def NS_Protocol_TrustManager(sock):
 
 		print("RECEIVED STEP 3")
 		mess = pickle.loads(socketClient.recv(1024))
-		print( mess, "\n" )
+		#print( mess, "\n" )
 		result = trust.round2_client(mess)
-		print('result: ',result)
+		#print('result: ',result)
 
 		print("SENDING STEP 4")
 		socketClient.send( pickle.dumps(result) )

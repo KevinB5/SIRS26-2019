@@ -1,7 +1,7 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
 import System_log, Server_NS, pickle
 from Server_NS import ServerNS
-import hashlib
+import hashlib, sys
 
 from threading import Thread
 
@@ -75,7 +75,7 @@ class ServerSocket:
 		#self.sock.close()
 		print (">>FINALIZED SOCKET")
 		System_log.writeSystemLog('Server','Server closed','info')
-		exit()
+		signal_handler("I","I")
 
 
 
@@ -128,7 +128,7 @@ class ServerSocket:
 				
 		# sanitizing input ....
 		sanitizeOutput = self.sanitize_input_username(username)
-					
+	
 		self.userLogin(username,password, sanitizeOutput)
 
 
