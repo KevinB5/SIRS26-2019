@@ -213,7 +213,7 @@ def computeFingerprint(ssl_sock,client_ns):
 		
 		# receive the fingerprint
 		data, fingerprint = b"", b""
-		while (data != b"\n\r##"):
+		while (data[-4:] != b"\n\r##"):
 			data += ssl_sock.recv(1024)
 	
 		fingerprint = data.replace(b"\n\r##", b"")
@@ -455,62 +455,67 @@ def sendFile(ssl_sock,file,client_ns):
 
 def NS_Protocol_Client():
 
-	sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-	sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-	
-	username=input("USERNAME: ")
-	client_ns = ClientNS(username,username.lower()+".key")
-	
-	# Alice sends her name "Alice" to server
-	print("\n\nSENDING STEP 1")
-	sockServer.connect((HOST, PORT))
-	mess = client_ns.round1_server()
-	sockServer.send( pickle.dumps(mess) )
-	print( "\n" )
-
-	print("RECEIVING STEP 2")
-	mess = pickle.loads(sockServer.recv(1024))
-	print( mess, "\n" )
-	result = client_ns.round2_trustmanager(mess)
-	print('result: ',result)
-
-	print("SENDING STEP 3")
-	sockTrustManager.connect((HOST, PORT2))
-	sockTrustManager.send( pickle.dumps(result) )
-	print( "\n" )
-
-	print("RECEIVING STEP 4")
-	mess = pickle.loads(sockTrustManager.recv(1024))
-	print( mess, "\n" )
-	result = client_ns.round3_server(mess)
-	print('result: ',result)
-
-	print("SENDING STEP 5")
-	sockServer.send( pickle.dumps(result) )
-	print( "\n" )
-
-	print("\nRECEIVING STEP 6")
-	mess = pickle.loads(sockServer.recv(1024))
-	print( mess, "\n" )
-	result = client_ns.round4_server(mess)
-	print('result: ',result)
-
-	print("SENDING STEP 7")
-	sockServer.send( pickle.dumps(result) )
-	print( "\n" )
-	
-
-	#sockServer.close()
-	sockTrustManager.close()
-	print ("\n>>FINALIZED SOCKET\n\n")
 	try:
-		ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
+		sockServer = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+		sockTrustManager = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+		
+		username=input("USERNAME: ")
+		client_ns = ClientNS(username,username.lower()+".key")
+		
+		# Alice sends her name "Alice" to server
+		print("\n\nSENDING STEP 1")
+		sockServer.connect((HOST, PORT))
+		mess = client_ns.round1_server()
+		sockServer.send( pickle.dumps(mess) )
+		print( "\n" )
+
+		print("RECEIVING STEP 2")
+		mess = pickle.loads(sockServer.recv(1024))
+		print( mess, "\n" )
+		result = client_ns.round2_trustmanager(mess)
+		print('result: ',result)
+
+		print("SENDING STEP 3")
+		sockTrustManager.connect((HOST, PORT2))
+		sockTrustManager.send( pickle.dumps(result) )
+		print( "\n" )
+
+		print("RECEIVING STEP 4")
+		mess = pickle.loads(sockTrustManager.recv(1024))
+		print( mess, "\n" )
+		result = client_ns.round3_server(mess)
+		print('result: ',result)
+
+		print("SENDING STEP 5")
+		sockServer.send( pickle.dumps(result) )
+		print( "\n" )
+
+		print("\nRECEIVING STEP 6")
+		mess = pickle.loads(sockServer.recv(1024))
+		print( mess, "\n" )
+		result = client_ns.round4_server(mess)
+		print('result: ',result)
+
+		print("SENDING STEP 7")
+		sockServer.send( pickle.dumps(result) )
+		print( "\n" )
+		
+
+		#sockServer.close()
+		sockTrustManager.close()
+		print ("\n>>FINALIZED SOCKET\n\n")
+		try:
+			ssl_sock = ssl.wrap_socket(sockServer, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
+		except Exception as err:
+				print (">> !!INVALID CERTIFICATE!!\n")
+				print(err)
+		return ssl_sock,username,client_ns
+		#System_log.writeSystemLog('Server','Server closed','info')
+		#exit()
 	except Exception as err:
-			print (">> !!INVALID CERTIFICATE!!\n")
-			print(err)
-	return ssl_sock,username,client_ns
-	#System_log.writeSystemLog('Server','Server closed','info')
-	#exit()
+				print (">> !!CLIENT COULD NOT CONNECT!!\n")
+				#print(err)
+				#exit()
 
 
 
@@ -518,8 +523,8 @@ def NS_Protocol_Client():
 """ start the client side """
 #try:
 
-ssl_sock,username,client_ns = NS_Protocol_Client()
-menus()
+#ssl_sock,username,client_ns = NS_Protocol_Client()
+#menus()
 	#ssl_sock.connect((HOST, PORT))
 #print( "\n>> CONNECTION ESTABLISHED !" )
 
@@ -530,9 +535,7 @@ menus()
 
 
 
-
-'''
 if __name__ == "__main__":
+	ssl_sock,username,client_ns = NS_Protocol_Client()
+	menus()
 
-	start()
-'''

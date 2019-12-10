@@ -14,12 +14,6 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 #Global Variables
 
-
-
-
-
-
-
 class ServerSocket:
 	
 	def __init__(self,newsocket,server_ns):
@@ -544,13 +538,18 @@ def NS_Protocol_Server(sock):
 
 def main():
 	#incrementPort = 0
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind((HOST, PORT))
-	sock.listen(5)
-	
-	while True:
-		newSocket,server_ns = NS_Protocol_Server(sock)
-		Thread(target=ServerSocket, args=(newSocket, server_ns),daemon=True).start()
+	try:
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.bind((HOST, PORT))
+		sock.listen(5)
+		
+		while True:
+			newSocket,server_ns = NS_Protocol_Server(sock)
+			Thread(target=ServerSocket, args=(newSocket, server_ns),daemon=True).start()
+	except Exception as err:
+				print (">> !!SERVER COULD NOT START!!\n")
+				#print(err)
+				#exit()
 
 
 

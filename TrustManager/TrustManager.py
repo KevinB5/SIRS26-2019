@@ -220,7 +220,7 @@ def main():
 		sock.close()
 		print (">>FINALIZED SOCKET\n\n")
 	except Exception as err:
-				print (">> !!PORT IN USE!!\n")
+				print (">> !!TRUST MANAGER COULD NOT START!!\n")
 				#print(err)
 				#exit()
 
