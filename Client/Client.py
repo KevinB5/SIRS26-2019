@@ -1,7 +1,9 @@
 import socket, ssl, getpass, os, re, pickle, signal, sys
 from Crypto.Util.number import long_to_bytes
-from Crypto.PublicKey import RSA
+from base64 import b64decode,b64encode
 from Client_NS import ClientNS
+
+
 
 #sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 #ssl_sock = ssl.wrap_socket(sock, ca_certs="cert.pem", cert_reqs=ssl.CERT_REQUIRED)
@@ -41,12 +43,11 @@ class Client_Socket:
 		
 		# sending the vulns file
 		f = open( file, "rb" )
-		data = ""
-		data = f.read()
+		data = b64encode(f.read())
 		
 		print("FILE IS: ",data)
 		
-		self.send_encrypted(str(data))
+		self.send_encrypted(data.decode())
 		f.close()
 		
 		EOF = b"\n\r##"
@@ -225,7 +226,7 @@ class Client_Socket:
 			# if it does not find file ...
 			while (not os.path.isfile(file)) or (not os.path.exists(file)):
 				file = input("\nNO SUCH FILE !!! TRY AGAIN \n\nBINARY FILE:")
-			
+	
 			# sending the binary file
 			self.sendFile(file)
 			
@@ -299,7 +300,6 @@ class Client_Socket:
 			return "SCOREBOARD_MENU"
 
 
-
 		elif (command=="3"):
 			command_as_string = "checkScoreboard"+"!-!"+username+"!-!"
 			self.send_encrypted(command_as_string)
@@ -354,13 +354,13 @@ class Client_Socket:
 				print("\n\n" + "-"*20 + "ONLY THE TEAM LEADER IS AUTHORIZED TO SEE THE EXPLOITS OF THE TEAM" + "-"*20 + "\n")
 
 			else:
-				#mess = pickle.loads(mess)
+				mess = pickle.loads(mess)
 				# print in terminal : User ; Fingerprint ; Name_Vuln ;
 				print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*95 + "Name_Vuln  ;\n" )
-				print(mess)
-				#for i in range(0, len(mess)):
-					#user, fing, vuln = mess[i][0], mess[i][1], mess[i][2]
-					#print(user + " "*(20) + fing + " "*(20) + vuln)
+				
+				for i in range(0, len(mess)):
+					user, fing, vuln = mess[i][0], mess[i][1], mess[i][2]
+					print(user + " "*(20) + fing + " "*(20) + vuln)
 			
 
 			return "SCOREBOARD_MENU"

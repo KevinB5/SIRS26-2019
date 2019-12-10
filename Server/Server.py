@@ -1,8 +1,7 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log, Server_NS, pickle
+import System_log, Server_NS, pickle, hashlib, sys
+from base64 import b64decode,b64encode
 from Server_NS import ServerNS
-import hashlib, sys
-
 from threading import Thread
 
 
@@ -17,7 +16,7 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 class ServerSocket:
 	
 	def __init__(self, newsocket,server_ns):
-		self.newsocket = newsocket
+		self.connssl = newsocket
 		self.server_ns = server_ns
 		self.username = None
 		self.userAuthorized, self.userAuthenticated = False, False
@@ -41,10 +40,8 @@ class ServerSocket:
 		#
 		try:
 			System_log.writeSystemLog("Server","Connection attempt","info")
-				
-			#self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
-
-			self.connssl = self.newsocket
+			
+			#self.connssl = self.newsocket
 
 			while(1):
 				self.messageTransfer()
@@ -64,7 +61,7 @@ class ServerSocket:
 	#
 	def	socketClose(self):
 		
-		self.newsocket.close()
+		self.connssl.close()
 		#self.sock.close()
 		print (">>FINALIZED SOCKET")
 		System_log.writeSystemLog('Server','Server closed','info')
@@ -211,9 +208,7 @@ class ServerSocket:
 			self.getAuthorization(3, self.username)
 			
 			if(self.userAuthorized == True):
-				group_id = DB_User.getUserGroupID(self.username)
-				#print('GROUP ID ',group_id[0])
-				scoreboard = DB_Scoreboard.get_scoreboard(group_id[0])
+				scoreboard = DB_Scoreboard.get_scoreboard()
 				print("SENDING SCOREBOARD \n")
 				self.send_encrypted(str(scoreboard))
 				self.connssl.send(b"\n\r##")
@@ -240,8 +235,7 @@ class ServerSocket:
 			self.getAuthorization(5, self.username)
 			
 			if(self.userAuthorized == True):
-				group_id = DB_User.getUserGroupID(self.username)
-				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint(group_id[0])
+				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
 				self.send_encrypted(str(teamVulnsandFing))
 				self.connssl.send(b"\n\r##")
@@ -396,7 +390,9 @@ class ServerSocket:
 			print(">>!!FAILED THE TRANSFER!!!\n")
 			System_log.writeSystemLog('Server','Failed transfering message','error')
 			print(err)
-		
+
+
+
 	def computeFingerprint(self):
 	
 		if(self.userAuthenticated==True):
@@ -409,16 +405,21 @@ class ServerSocket:
 			
 				print("\n\nASKING USER FOR BINARY FILE\n\n")
 				
-				data = b""
-				final_data = ""
+				data, final_data = b"", ""
 				while (data[-4:] != b"\n\r##"):
 					data += self.connssl.recv(1024)
 				
 				final_data = data.replace(b"\n\r##", b"")
 				data = self.server_ns.receive_message(final_data)
+				
+				print("\n\nDATA1:", data, "\n\n")
+				
+				data = b64decode(data.encode())
+
+				print("\n\nDATA2:", data, "\n\n")
 
 				# calculate the fingerprint of the file
-				hash_object = hashlib.sha512(data.encode())
+				hash_object = hashlib.sha512(data)
 				fingerprint = hash_object.hexdigest()
 	
 				print("\n\nFING:", fingerprint, "\n\n")
@@ -535,6 +536,7 @@ def NS_Protocol_Server(sock):
 
 	
 	print ("\n>>FINALIZED TRUST MANAGER AUTHENTICATION\n\n")
+
 	return socketClient,server_ns
 	#System_log.writeSystemLog('Server','Server closed','info')
 	#exit()
@@ -563,7 +565,7 @@ def main():
 
 
 def signal_handler(signal, frame):
-	print('\n>>CONNECTION TERMINATED\n')
+	print('\n>>PROGRAM TERMINATED\n')
 	sys.exit(0)
 
 
