@@ -180,7 +180,7 @@ class TrustManagerNS:
 
 def NS_Protocol_TrustManager(sock):
 
-	#try:
+	try:
 		print ("\n\n>> WAITING CONNECTION\n")
 		
 		socketClient, clientSocket = sock.accept()
@@ -197,25 +197,32 @@ def NS_Protocol_TrustManager(sock):
 
 		print (">>FINALIZED CONNECTION\n\n")
 		
-		#System_log.writeSystemLog('Server','Server closed','info')
-	#except Exception as err:
-	#			print (">> !!CONNECTION INTERRUPTED!!\n")
+		trust.log.writeLog("","","",'Connection closed','REJECTED','warning')
+
+	except Exception as err:
+				print (">> !!CONNECTION INTERRUPTED!!\n")
+				trust.log.writeLog("","","",'Connection terminated','REJECTED','error')
 	#			print(err)
-	#			exit()
+				exit()
 
 	#exit()
 def main():
 	#incrementPort=0
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind((HOST, PORT2))
-	sock.listen(5)
-	while(1):
-		#Thread(target=NS_Protocol_TrustManager, args=(PORT2+incrementPort)).start()
-		NS_Protocol_TrustManager(sock)
-		#incrementPort+=1
-	socketClient.close()
-	sock.close()
-	print (">>FINALIZED SOCKET\n\n")
+	try:
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.bind((HOST, PORT2))
+		sock.listen(5)
+		while(1):
+			#Thread(target=NS_Protocol_TrustManager, args=(PORT2+incrementPort)).start()
+			NS_Protocol_TrustManager(sock)
+			#incrementPort+=1
+		socketClient.close()
+		sock.close()
+		print (">>FINALIZED SOCKET\n\n")
+	except Exception as err:
+				print (">> !!PORT IN USE!!\n")
+				#print(err)
+				#exit()
 
 if __name__== "__main__":
 	main()
