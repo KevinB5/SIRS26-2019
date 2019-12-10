@@ -39,15 +39,15 @@ class ClientNS:
 						self.trustmanager_iv= split[1].rstrip("\n")
 		except Exception as err:
 			print (">> !!USER DOESN'T HAS KEY!!\n")
-			print(err)
+			#print(err)
 			exit()
 		finally:
 			try:
 				fp.close()
 
 			except Exception as err:
-				print (">> !!USER DOESN'T HAS KEY!!\n")
-				print(err)
+				#print (">> !!USER DOESN'T HAS KEY!!\n")
+				#print(err)
 				exit()
 
 
