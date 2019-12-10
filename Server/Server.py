@@ -14,9 +14,9 @@ PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 #Global Variables
 
-userAuthenticated=False
-userAuthorized=False
-username=""
+
+
+
 
 
 
@@ -25,7 +25,10 @@ class ServerSocket:
 	def __init__(self,newsocket,server_ns):
 		self.newsocket = newsocket
 		self.server_ns = server_ns
+		self.username = None
+		self.userAuthorized, self.userAuthenticated = False, False
 		self.socketConnect()
+
 
 	def send_encrypted(self,message):
 		message = self.server_ns.send_message(message)
@@ -38,24 +41,18 @@ class ServerSocket:
 		
 		System_log.writeSystemLog('Server','Server started','info')
 		
-		#print (">> WAITING CONNECTION\n")
-		#self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#self.sock.bind((HOST, PORT))
-		#self.sock.listen(1)
 	
 		#
 		# Receive Connection
 		#
 		try:
 			System_log.writeSystemLog("Server","Connection attempt","info")
-			
-			#self.newsocket, self.clientSocket = self.sock.accept()
-			#print (">> ATTEMPT OF CONNECTION")
 				
 			self.connssl = ssl.wrap_socket(self.newsocket, server_side=True, certfile = "cert.pem", keyfile = "certkey.pem", ssl_version=ssl.PROTOCOL_TLSv1)
 
 			while(1):
 				self.messageTransfer()
+	
 		except Exception as err:
 			System_log.writeSystemLog('Server','Connection attempt failed','error')
 
@@ -88,7 +85,7 @@ class ServerSocket:
 				mess = self.server_ns.send_message("WRONG OPTION!!")
 				self.send(mess)
 			else:
-				username = self.server_ns.receive_message(user.connssl.recv(1024))
+				self.username = self.server_ns.receive_message(user.connssl.recv(1024))
 				password = self.server_ns.receive_message(pw.connssl.recv(1024))
 	
 		except Exception as err:
@@ -121,7 +118,6 @@ class ServerSocket:
 
 
 	def login(self, split_decoded):
-		global username
 		
 		username = split_decoded[1]
 		password = split_decoded[2]
@@ -134,25 +130,24 @@ class ServerSocket:
 
 
 	def scoreboardMenu(self):
-		global userAuthenticated
-		global username
 		
-		System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Request','info')
-		if(userAuthenticated==True):
-			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Accept','info')
+		System_log.writeUserLog('',self.username,'Scoreboard access','Scoreboard','Request','info')
+		
+		if(self.userAuthenticated==True):
+			System_log.writeUserLog('',self.username,'Scoreboard access','Scoreboard','Accept','info')
 			print("SENDING SCOREBOARDMENU TO USER\n")
 			self.send_encrypted("SCOREBOARDMENU")
+		
 		else:
-			System_log.writeUserLog('',username,'Scoreboard access','Scoreboard','Rejected','warning')
+			System_log.writeUserLog('',self.username,'Scoreboard access','Scoreboard','Rejected','warning')
 			print("USER NOT AUTHENTICATED\n")
 			self.send_encrypted("NO AUTH")
 
 
 
 	def submitMenu(self):
-		global userAuthenticated
 		
-		if(userAuthenticated==True):
+		if(self.userAuthenticated==True):
 			print("SENDING SUBMITMENU TO USER\n")
 			self.send_encrypted("SUBMITMENU")
 		else:
@@ -164,23 +159,25 @@ class ServerSocket:
 	#
 	#
 	def checkScore(self):
-		global userAuthenticated
-		global username
 		
-		if(userAuthenticated==True):
-			System_log.writeUserLog('',username,'User score access','Scoreboard','Request','info')
-			if(self.getAuthorization(1, username)):
+		if(self.userAuthenticated == True):
+			
+			System_log.writeUserLog('',self.username,'User score access','Scoreboard','Request','info')
+			self.getAuthorization(1, self.username)
+			
+			if(self.userAuthorized == True):
 				print("SENDING USER SCORE\n")
-				points = DB_Scoreboard.get_user_score(username)
-				System_log.writeUserLog('',username,'User score access','Scoreboard','Accepted','info')
+				points = DB_Scoreboard.get_user_score(self.username)
+				System_log.writeUserLog('',self.username,'User score access','Scoreboard','Accepted','info')
 				self.send_encrypted(str(points))
+			
 			else:
-				System_log.writeUserLog('',username,'User score access','Scoreboard','Rejected','warning')
+				System_log.writeUserLog('',self.username,'User score access','Scoreboard','Rejected','warning')
 				print("USER NOT AUTHORIZED\n")
 				self.send_encrypted("NO AUTHORIZATION")
 
 		else:
-			System_log.writeUserLog('',username,'User score access, user not authenticated','Scoreboard','Rejected','error')
+			System_log.writeUserLog('',self.username,'User score access, user not authenticated','Scoreboard','Rejected','error')
 			print("USER NOT AUTHENTICATED\n")
 			self.send_encrypted("NO AUTHENTICATION")
 
@@ -190,12 +187,13 @@ class ServerSocket:
 	#
 	#
 	def checkVulnerabilityandFingerprint(self):
-		global userAuthenticated
-		global username
 		
-		if(userAuthenticated==True):
-			if(self.getAuthorization(2, username)):
-				result = DB_Scoreboard.get_user_vulnsAndfingerprint(username)
+		if(self.userAuthenticated == True):
+			
+			self.getAuthorization(2, self.username)
+			
+			if(self.userAuthorized == True):
+				result = DB_Scoreboard.get_user_vulnsAndfingerprint(self.username)
 				print("SENDING USER VULNS AND FINGERPRINTS \n")
 				self.send_encrypted(str(result))
 			else:
@@ -211,16 +209,17 @@ class ServerSocket:
 	#
 	#
 	def checkScoreboard(self):
-		global userAuthenticated
-		global username
 		
-		if(userAuthenticated==True):
+		if(self.userAuthenticated==True):
 			
-			if(self.getAuthorization(3, username)):
+			self.getAuthorization(3, self.username)
+			
+			if(self.userAuthorized == True):
 				scoreboard = DB_Scoreboard.get_scoreboard()
 				print("SENDING SCOREBOARD \n")
 				self.send_encrypted(str(scoreboard))
 				self.connssl.send(b"\n\r##")
+			
 			else:
 				print("USER NOT AUTHORIZED\n")
 				self.send_encrypted("NO AUTHORIZATION")
@@ -237,12 +236,12 @@ class ServerSocket:
 	#
 	#
 	def checkTeamVulnsandFingerprints(self):
-		global userAuthenticated
-		global username
 		
-		if(userAuthenticated==True):
+		if(self.userAuthenticated == True):
 			
-			if(self.getAuthorization(5, username)):
+			self.getAuthorization(5, self.username)
+			
+			if(self.userAuthorized == True):
 				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint()
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
 				self.send_encrypted(str(teamVulnsandFing))
@@ -261,14 +260,12 @@ class ServerSocket:
 
 
 	def submitVulnerability(self):
-		global userAuthenticated
-		global username
 
-		if(userAuthenticated==True):
+		if(self.userAuthenticated == True):
 			
-			self.getAuthorization(2, username)
+			self.getAuthorization(2, self.username)
 
-			if(userAuthorized==True):
+			if(self.userAuthorized == True):
 				print("ASKING USER FOR VULNERABILITY\n")
 				self.send_encrypted("SUBMITVULNERABILITY")
 					
@@ -284,7 +281,6 @@ class ServerSocket:
 				finalBinFile = binFile.replace(b"\n\r##", b"")
 				#print('TOTAL BIN FILE ',finalBinFile)
 				binFile = self.server_ns.receive_message(finalBinFile)
-				#print('')
 				#print('TOTAL DECRYPTED BIN FILE ',finalBinFile)
 				
 					
@@ -311,23 +307,23 @@ class ServerSocket:
 						vulns.append(str(splitLines[i+1], "utf-8"))
 				
 				# Adding vulnerabilities to DB
-				bool = DB_Scoreboard.add_score_vulnerability(binFile.encode(), vulns, username)
+				bool = DB_Scoreboard.add_score_vulnerability(binFile.encode(), vulns, self.username)
 		
 				#TODO: Add filename on log
-				System_log.writeUserLog('',username,'Submited vulnerability attempt','Vulnerability','Request','info')
+				System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
 				if( bool ):
 					#TODO: Add filename on log
-					System_log.writeUserLog('',username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
+					System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
 					print("ADDED NEW VULNERABILITY")
 		
 				else:
 					#TODO: Add filename on log
-					System_log.writeUserLog('',username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
+					System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
 					print("THIS VULNERABILITY ALREADY EXIST")
 					
 					
 			else:
-				System_log.writeUserLog('',username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
+				System_log.writeUserLog('',self.username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
 				print("USER NOT AUTHENTICATED\n")
 				self.send_encrypted("NO AUTH")
 
@@ -339,15 +335,10 @@ class ServerSocket:
 	# Receive Message
 	#
 	def messageTransfer(self, command="default"):
-		global userAuthenticated
-		global username
-		global userAuthorized
 		
 		try:
 		#if(True):
-			self.data = b""
-			string_data=""
-			final_data = ""
+			self.data, string_data, final_data = b"", "", ""
 			while (self.data[-4:] != b"\n\r##"):
 				self.data += self.connssl.recv(1024)
 				#print('self.data ',self.data)
@@ -370,25 +361,25 @@ class ServerSocket:
 				elif(command == "scoreboardMenu"):
 					self.scoreboardMenu()
 
-				elif(command == "submitMenu" and userAuthenticated==True ):
+				elif(command == "submitMenu" and self.userAuthenticated == True ):
 					self.submitMenu()
 
-				elif(command == "checkScore" and userAuthenticated==True ):
+				elif(command == "checkScore" and self.userAuthenticated == True ):
 					self.checkScore()
 
-				elif(command == "checkVulnsandFingerprints" and userAuthenticated==True ):
+				elif(command == "checkVulnsandFingerprints" and self.userAuthenticated==True ):
 					self.checkVulnerabilityandFingerprint()
 				
-				elif(command == "checkScoreboard" and userAuthenticated==True ):
+				elif(command == "checkScoreboard" and self.userAuthenticated==True ):
 					self.checkScoreboard()
 
-				elif(command == "checkTeamVulnsandFingerprints" and userAuthenticated==True ):
+				elif(command == "checkTeamVulnsandFingerprints" and self.userAuthenticated==True ):
 					self.checkTeamVulnsandFingerprints()
 
-				elif(command == "submitVulnerability" and userAuthenticated==True ):
+				elif(command == "submitVulnerability" and self.userAuthenticated==True ):
 					self.submitVulnerability()
 
-				elif(command== "computeFingerprint" and userAuthenticated==True):
+				elif(command== "computeFingerprint" and self.userAuthenticated==True):
 					self.computeFingerprint()
 
 				elif(command == "exit"):
@@ -408,12 +399,12 @@ class ServerSocket:
 			print(err)
 		
 	def computeFingerprint(self):
-		global userAuthenticated
-		global username
-		global userAuthorized
 	
-		if(userAuthenticated==True):
-			if(self.getAuthorization(4, username)):
+		if(self.userAuthenticated==True):
+			
+			self.getAuthorization(4, self.username)
+			
+			if(self.userAuthorized == True):
 			
 				self.send_encrypted("COMPUTEFINGERPRINT")
 			
@@ -438,13 +429,13 @@ class ServerSocket:
 
 
 			else:
-				System_log.writeUserLog("", username, "Compute fingerprint attempt, user not authorized", "Compute Fingerprint", "Rejected", "error")
+				System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authorized", "Compute Fingerprint", "Rejected", "error")
 				print("USER NOT AUTHORIZED\n")
 				self.send_encrypted("NO AUTHORIZATION")
 				self.connssl.send(b"\n\r##")
 	
 		else:
-			System_log.writeUserLog("", username, "Compute fingerprint attempt, user not authenticated", "Compute Fingerprint", "Rejected", "error")
+			System_log.writeUserLog("", self.username, "Compute fingerprint attempt, user not authenticated", "Compute Fingerprint", "Rejected", "error")
 			print("USER NOT AUTHENTICATED\n")
 			self.send_encrypted("NO AUTH")
 			self.connssl.send(b"\n\r##")
@@ -453,21 +444,23 @@ class ServerSocket:
 	# Autenticar user
 	#
 	def userLogin(self, user, pw, goodInput):
-		global userAuthenticated
 		
 		if( goodInput ):
+			
 			System_log.writeUserLog('',user,'Authentication','Users','Request','info')
+			
 			if(DB_User.authenticate(user,pw)):
 				System_log.writeUserLog('',user,'Authentication','Users','Accepted','info')
 				print("USER AUTHENTICATED!!!\n")
 				self.send_encrypted("USER AUTHENTICATED!!!")
-				userAuthenticated=True
+				self.userAuthenticated = True
+				self.username = user
 	
 			else:
 				System_log.writeUserLog('',user,'Authentication','Users','Rejected','info')
 				print("USER NOT AUTHENTICATED!!!\n")
 				self.send_encrypted("USER NOT AUTHENTICATED!!!")
-				userAuthenticated=False
+				self.userAuthenticated = False
 		else:
 			System_log.writeUserLog('',user,'Authentication, wrong input','Users','Rejected','error')
 			print(">> USERNAME CAN ONLY CONTAIN NUMBERS, LETTERS AND _   \n")
@@ -476,16 +469,16 @@ class ServerSocket:
 
 
 	def getAuthorization(self, operation, user):
-		global userAuthorized
 		
 		if(AuthManager.getAuthorizationValues(operation, user)):
-			userAuthorized=True
+			
+			self.userAuthorized = True
 			System_log.writeUserLog("",user,"Authorization - operation:" + str(operation),"Users","Accepted","info")
-			return userAuthorized
+	
 		else:
 			System_log.writeUserLog("",user,"Authorization - operation:"+ str(operation),"Users","False","info")
-			userAuthorized=False
-			return userAuthorized
+			self.userAuthorized=False
+
 
 
 
@@ -538,11 +531,7 @@ def NS_Protocol_Server(sock):
 				print(err)
 				exit()
 
-
-
-
-	#socketClient.close()
-	#sock.close()
+	
 	print ("\n>>FINALIZED TRUST MANAGER AUTHENTICATION\n\n")
 	return socketClient,server_ns
 	#System_log.writeSystemLog('Server','Server closed','info')
@@ -558,16 +547,11 @@ def main():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind((HOST, PORT))
 	sock.listen(5)
+	
 	while True:
 		newSocket,server_ns = NS_Protocol_Server(sock)
-
-		#x = ServerSocket(newSocket,server_ns)
-		#x.socketConnect()
 		Thread(target=ServerSocket, args=(newSocket, server_ns),daemon=True).start()
-		#while(1):
-		#	x.messageTransfer()
-		#incrementPort+=1
-		#print('PORT: ',incrementPort)
+
 
 
 def signal_handler(signal, frame):
