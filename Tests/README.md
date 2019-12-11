@@ -1,6 +1,6 @@
 # SIRS26-2019
 
-How to use:
+
 	
 	All tests assume that "How to Use" was read and setup is properly done.
 	All tests assume that all 3 VM's are running and program is launched.
@@ -9,6 +9,6 @@ How to use:
 
 		"Entity">
 
-				"Request":
-						"User input"
+			"Request":
+				 "User input"
 	
