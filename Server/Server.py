@@ -3,7 +3,7 @@ import System_log, Server_NS, pickle, hashlib, sys, json
 from base64 import b64decode,b64encode
 from Server_NS import ServerNS
 from threading import Thread
-
+from datetime import datetime
 
 import signal
 import sys
@@ -117,11 +117,14 @@ class ServerSocket:
 		lista = []
 		for tup in tuples:
 			aux = []
-			for i in range(0, len(tup)):
-				if( isinstance(tup[i], int) or isinstance(tup[i], str) ):
-					aux.append(tup[i])
-				else:
+			for i in range(0, len(tup)):				
+				if( isinstance(tup[i], datetime)):
 					aux.append(tup[i].strftime("%d/%m/%Y %H:%M:%S"))
+				elif (isinstance(tup[i], bytes) or isinstance(tup[i], bytearray)):
+					aux.append(tup[i].decode())		
+				else:
+					aux.append(tup[i])
+					
 			
 			lista.append(aux)
 
@@ -303,52 +306,52 @@ class ServerSocket:
 				while (fingerprint[-4:] != b"\n\r##"):
 					fingerprint += self.connssl.recv(1024)
 			
+
 				fingerprint = fingerprint.replace(b"\n\r##", b"")
 				fingerprint = self.server_ns.receive_message(fingerprint)
 				
 				print("\nFINGERPRINT:",fingerprint, "\n\n")
 					
 				print (">>Transfer concluded \n\n>>Transfering file")
-				
-				# receiving the vulnerabilities file
-				vulnFile = b""
-				while (vulnFile[-4:] != b"\n\r##"):
-					vulnFile += self.connssl.recv(1024)
-			
-				vulnFile = vulnFile.replace(b"\n\r##", b"")
-				vulnFile = self.server_ns.receive_message(vulnFile)
-				vulnFile = b64decode(vulnFile.encode())
 
-				print (">>Transfer concluded")
-				
-				
-				splitLines, vulns = vulnFile.split(), []
 
-				print("\n\nSPLIT:", splitLines, "\n\n")
+				if (vulnFile != b"\n\r##"):
 
-				for i in range(len(splitLines)):
-					if( splitLines[i] == b"Vulnerability:"):
-						vulns.append(str(splitLines[i+1], "utf-8"))
-			
-			
-				print("\n\nVULNS123:", vulns, "\n\n")
-			
-				# Adding vulnerabilities to DB
-				group_id = DB_User.getUserGroupID(self.username)
-				bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0])
-		
-				#TODO: Add filename on log
-				System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
-				if( bool ):
-					#TODO: Add filename on log
-					System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
-					print("ADDED NEW VULNERABILITY")
-		
-				else:
-					#TODO: Add filename on log
-					System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
-					print("THIS VULNERABILITY ALREADY EXIST")
+					# receiving the vulnerabilities file
+					vulnFile = b""
+					while (vulnFile[-4:] != b"\n\r##"):
+						vulnFile += self.connssl.recv(1024)
+
+				
+					vulnFile = vulnFile.replace(b"\n\r##", b"")
+					vulnFile = self.server_ns.receive_message(vulnFile)
+					vulnFile = b64decode(vulnFile.encode())
+
+					print (">>Transfer concluded")
 					
+					
+					splitLines, vulns = vulnFile.split(), []
+
+					for i in range(len(splitLines)):
+						if( splitLines[i] == b"Vulnerability:"):
+							vulns.append(str(splitLines[i+1], "utf-8"))
+				
+					# Adding vulnerabilities to DB
+					group_id = DB_User.getUserGroupID(self.username)
+					bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0])
+			
+					#TODO: Add filename on log
+					System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
+					if( bool ):
+						#TODO: Add filename on log
+						System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
+						print("ADDED NEW VULNERABILITY")
+			
+					else:
+						#TODO: Add filename on log
+						System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
+						print("THIS VULNERABILITY ALREADY EXIST")
+						
 					
 			else:
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
@@ -444,18 +447,22 @@ class ServerSocket:
 				while (data[-4:] != b"\n\r##"):
 					data += self.connssl.recv(1024)
 				
-				final_data = data.replace(b"\n\r##", b"")
-				data = self.server_ns.receive_message(final_data)
-				data = b64decode(data.encode())
+				#
+				if ( data != b"\n\r##"):
+				#
 
-				# calculate the fingerprint of the file
-				hash_object = hashlib.sha512(data)
-				fingerprint = hash_object.hexdigest()
-	
-				print("\n\nFINGERPRINT:", fingerprint, "\n\n")
-	
-				self.send_encrypted(str(fingerprint))
-				self.connssl.send(b"\n\r##")
+					final_data = data.replace(b"\n\r##", b"")
+					data = self.server_ns.receive_message(final_data)
+					data = b64decode(data.encode())
+
+					# calculate the fingerprint of the file
+					hash_object = hashlib.sha512(data)
+					fingerprint = hash_object.hexdigest()
+		
+					print("\n\nFINGERPRINT:", fingerprint, "\n\n")
+		
+					self.send_encrypted(str(fingerprint))
+					self.connssl.send(b"\n\r##")
 
 
 			else:
@@ -561,7 +568,7 @@ def NS_Protocol_Server(sock):
 
 	except Exception as err:
 				print (">> !!CONNECTION INTERRUPTED!!\n")
-				print(err)
+				#print(err)
 				exit()
 
 	
@@ -595,7 +602,7 @@ def main():
 
 
 def signal_handler(signal, frame):
-	print('\n>>PROGRAM TERMINATED\n')
+	print('\n>>CONNECTION CLOSED\n')
 	sys.exit(0)
 
 
