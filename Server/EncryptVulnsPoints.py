@@ -35,13 +35,13 @@ def Server_NS_Encrypt_Points_File(key, iv):
 
 	aes = AES.new(key[:32], AES.MODE_CBC, iv[:16])
 
-	with open("vulns-points-2.txt", "rb") as file:
+	with open("vulns-points-plain.txt", "rb") as file:
 		message = file.read()
 		
 	file.close()
 	
 
-	with open("vulns-points-2.txt", "wb") as file:
+	with open("vulns-points", "wb") as file:
 		message = b64encode(message).decode()
 		encrypted_message = aes.encrypt(pad(message))
 		file.write(encrypted_message)
@@ -56,13 +56,13 @@ def Server_NS_Decrypt_Points_File(key, iv):
 	
 	aes = AES.new(key[:32], AES.MODE_CBC, iv[:16])
 	
-	with open("vulns-points-2.txt", "rb") as file:
+	with open("vulns-points", "rb") as file:
 		message = file.read()
 		
 	file.close()
 		
 		
-	with open("vulns-points-2.txt", "wb") as file:
+	with open("vulns-points-plain.txt", "wb") as file:
 		encrypted_message = b64decode(unpad(aes.decrypt(message)))
 		
 		file.write(encrypted_message)
@@ -76,7 +76,7 @@ def Server_NS_Decrypt_Points_File(key, iv):
 #
 def read_file(str):
 
-	with open("vulns-points-2.txt", "rb") as file:
+	with open("vulns-points-plain.txt", "rb") as file:
 		print("\n\n" + str, file.read(), "\n\n")
 	
 	file.close()
@@ -92,7 +92,7 @@ if __name__== "__main__":
 	Server_NS_Encrypt_Points_File(key, iv)
 
 	read_file("SECOND: ")
-	Server_NS_Decrypt_Points_File(key, iv)
+	#Server_NS_Decrypt_Points_File(key, iv)
 
 	read_file("LAST: ")
 

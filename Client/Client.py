@@ -1,4 +1,4 @@
-import socket, ssl, getpass, os, re, pickle, signal, sys, json
+import socket, ssl, getpass, os, re, signal, sys, json
 from Crypto.Util.number import long_to_bytes
 from base64 import b64decode,b64encode
 from Client_NS import ClientNS
@@ -10,10 +10,14 @@ from Client_NS import ClientNS
 
 
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-PORT2 = 65440
+#HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+#PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+#PORT2 = 65440
 
+HOST = "192.168.1.20"
+PORT = 65433
+HOST2 = "192.168.1.100"
+PORT2 = 65432
 
 
 
@@ -473,38 +477,38 @@ def NS_Protocol_Client():
 		print("\n\nSENDING STEP 1")
 		sockServer.connect((HOST, PORT))
 		mess = client_ns.round1_server()
-		sockServer.send( pickle.dumps(mess) )
+		sockServer.send( json.dumps(mess).encode() )
 		print( "\n" )
 
 		print("RECEIVING STEP 2")
-		mess = pickle.loads(sockServer.recv(1024))
+		mess = json.loads(sockServer.recv(1024).decode())
 		print( mess, "\n" )
 		result = client_ns.round2_trustmanager(mess)
 		print('result: ',result)
 
 		print("SENDING STEP 3")
-		sockTrustManager.connect((HOST, PORT2))
-		sockTrustManager.send( pickle.dumps(result) )
+		sockTrustManager.connect((HOST2, PORT2))
+		sockTrustManager.send( json.dumps(result).encode() )
 		print( "\n" )
 
 		print("RECEIVING STEP 4")
-		mess = pickle.loads(sockTrustManager.recv(1024))
+		mess = sockTrustManager.recv(1024)
 		print( mess, "\n" )
 		result = client_ns.round3_server(mess)
 		print('result: ',result)
 
 		print("SENDING STEP 5")
-		sockServer.send( pickle.dumps(result) )
+		sockServer.send( json.dumps(result).encode() )
 		print( "\n" )
 
 		print("\nRECEIVING STEP 6")
-		mess = pickle.loads(sockServer.recv(1024))
+		mess = sockServer.recv(1024)
 		print( mess, "\n" )
 		result = client_ns.round4_server(mess)
 		print('result: ',result)
 
 		print("SENDING STEP 7")
-		sockServer.send( pickle.dumps(result) )
+		sockServer.send( result )
 		print( "\n" )
 		
 

@@ -4,12 +4,19 @@ from base64 import b64decode,b64encode
 from Server_NS import ServerNS
 from threading import Thread
 from datetime import datetime
+from Crypto.Cipher import AES
 
 import signal
 import sys
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+#HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+#PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+HOST = "192.168.1.20"
+PORT = 65433
+
+BS = 16
+pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
+unpad = lambda s : s[0:-ord(s[-1:])]
 
 #Global Variables
 
@@ -297,12 +304,20 @@ class ServerSocket:
 			self.connssl.send(b"\n\r##")
 
 
+
+
 	def checkVulnerabilityPoints(self,fingerprint,vulns):
 		points=0
+		aes = AES.new(self.server_ns.trustmanager_key[:32], AES.MODE_CBC, self.server_ns.trustmanager_iv[:16])
 		try:
-			with open('vulns-points','r') as fp:
-				for line in fp:
-					linesplit = line.split(';')
+			with open('vulns-points','rb') as fp:
+				message = fp.read()
+				message = str(b64decode(unpad(aes.decrypt(message))),'utf-8')
+				print('MESSAGE ',message)
+				lines = message.split('\n')
+				for split in lines:
+					linesplit = split.split(';')
+					#for i in range(0,len(linesplit),3):
 					if(linesplit[0]==fingerprint and linesplit[1] in vulns):
 						points=points+int(linesplit[2])
 			return points

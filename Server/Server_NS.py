@@ -1,6 +1,5 @@
 import os, pickle, json
 from Crypto.Cipher import AES
-from Crypto.PublicKey import RSA
 from Crypto import Random
 from Crypto.Cipher import PKCS1_OAEP
 from base64 import b64decode,b64encode
@@ -24,7 +23,6 @@ class ServerNS:
         self.server = None
         self.read_trustmanager_key()
         self.nonce = None
-
 
 
     def read_trustmanager_key(self):

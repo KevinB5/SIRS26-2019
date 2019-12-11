@@ -30,10 +30,11 @@ BS = 16
 pad = lambda s: s + (BS-len(s) % BS) *chr(BS - len(s) % BS)
 unpad = lambda s : s[0:-ord(s[-1:])]
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 65433       # Port to listen on (non-privileged ports are > 1023)
-PORT2 = 65440
-
+#HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+#PORT = 65433       # Port to listen on (non-privileged ports are > 1023)
+#PORT2 = 65440
+HOST = "192.168.1.100"
+PORT = 65432
 
 class TrustManagerNS:
 	

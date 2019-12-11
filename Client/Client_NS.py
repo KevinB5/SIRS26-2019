@@ -2,7 +2,6 @@ import json
 import uuid
 import os
 from Crypto.Cipher import AES
-from Crypto.PublicKey import RSA
 from Crypto import Random
 from base64 import b64decode,b64encode
 import base64
