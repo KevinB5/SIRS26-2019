@@ -1,0 +1,24 @@
+Client> 
+	Username:
+		Admin
+
+	PLEASE CHOOSE AN OPTION:
+		1
+	
+	Password:
+		admin
+
+	PLEASE CHOOSE AN OPTION:
+		1
+
+	PLEASE CHOOSE AN OPTION:
+		3
+
+	PLEASE CHOOSE AN OPTION:
+		0
+	
+	PLEASE CHOOSE AN OPTION:
+		0
+
+	PLEASE CHOOSE AN OPTION:
+		0
