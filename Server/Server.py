@@ -3,7 +3,7 @@ import System_log, Server_NS, pickle, hashlib, sys, json
 from base64 import b64decode,b64encode
 from Server_NS import ServerNS
 from threading import Thread
-
+from datetime import datetime
 
 import signal
 import sys
@@ -117,11 +117,14 @@ class ServerSocket:
 		lista = []
 		for tup in tuples:
 			aux = []
-			for i in range(0, len(tup)):
-				if( isinstance(tup[i], int) or isinstance(tup[i], str) ):
-					aux.append(tup[i])
-				else:
+			for i in range(0, len(tup)):				
+				if( isinstance(tup[i], datetime)):
 					aux.append(tup[i].strftime("%d/%m/%Y %H:%M:%S"))
+				elif (isinstance(tup[i], bytes) or isinstance(tup[i], bytearray)):
+					aux.append(tup[i].decode())		
+				else:
+					aux.append(tup[i])
+					
 			
 			lista.append(aux)
 
