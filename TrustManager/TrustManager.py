@@ -8,7 +8,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 
 #from Crypto.Util.Padding import pad, unpad
-import socket, ssl, pickle
+import socket, ssl
 from base64 import b64decode,b64encode
 import random
 import hashlib
@@ -128,6 +128,7 @@ class TrustManagerNS:
 			destination = message['destination']
 			nonce = message['nonce']
 			response = message['response']
+			response = base64.b64decode(response)
 
 			self.log.writeLog(source,destination,nonce,'Received connection request','REQUEST','info')
 			
@@ -187,13 +188,13 @@ def NS_Protocol_TrustManager(sock):
 		trust = TrustManagerNS()
 
 		print("RECEIVED STEP 3")
-		mess = pickle.loads(socketClient.recv(1024))
+		mess = json.loads(socketClient.recv(1024).decode())
 		#print( mess, "\n" )
 		result = trust.round2_client(mess)
 		#print('result: ',result)
 
 		print("SENDING STEP 4")
-		socketClient.send( pickle.dumps(result) )
+		socketClient.send( result )
 
 		print (">>FINALIZED CONNECTION\n\n")
 		

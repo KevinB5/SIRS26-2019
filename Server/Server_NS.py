@@ -57,7 +57,7 @@ class ServerNS:
 
         content_bytes = json.dumps(content)
         encrypted_content = trustmanager_session.encrypt(bytes(pad(content_bytes),'utf-8'))
-        response = {'source':self.id,'response':encrypted_content}
+        response = {'source':self.id,'response':str(b64encode(encrypted_content),'utf-8')}
         return response
 
 

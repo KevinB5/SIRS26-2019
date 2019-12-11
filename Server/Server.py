@@ -1,5 +1,5 @@
 import socket, ssl, DB_User, DB_Scoreboard, re, AuthManager
-import System_log, Server_NS, pickle, hashlib, sys, json
+import System_log, Server_NS, hashlib, sys, json
 from base64 import b64decode,b64encode
 from Server_NS import ServerNS
 from threading import Thread
@@ -372,22 +372,22 @@ class ServerSocket:
 						bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0],vulnerabilityPoints)
 				
 						#TODO: Add filename on log
-						System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
+						System_log.writeUserLog('',self.username,'Submited vulnerabilities attempt','Vulnerability','Request','info')
 						if( bool ):
 							#TODO: Add filename on log
-							System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
-							print("ADDED NEW VULNERABILITY")
-							self.send_encrypted("ADDED NEW VULNERABILITY")
+							System_log.writeUserLog('',self.username,'Submited vulnerabilities successfull','Vulnerability','Accepted','info')
+							print("ADDED NEW VULNERABILITIES")
+							self.send_encrypted("ADDED NEW VULNERABILITIES")
 				
 						else:
 							#TODO: Add filename on log
-							System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
-							print("THIS VULNERABILITY ALREADY EXIST")
-							self.send_encrypted("THIS VULNERABILITY ALREADY EXIST")
+							System_log.writeUserLog('',self.username,'Submited vulnerabilities already exists','Vulnerability','Rejected','warning')
+							print("THIS VULNERABILITIES HAS ALREADY BEEN SUBMITED")
+							self.send_encrypted("THIS VULNERABILITIES HAS ALREADY BEEN SUBMITED")
 					else:
 						System_log.writeUserLog('',self.username,'Submited vulnerability does not exists','Vulnerability','Rejected','warning')
-						print("THIS VULNERABILITY DOES NOT EXIST")
-						self.send_encrypted("THIS VULNERABILITY DOES NOT EXIST")
+						print("THIS FINGERPRINT OR VULNERABILITIES DOES NOT EXIST")
+						self.send_encrypted("THIS FINGERPRINT OR VULNERABILITIES DOES NOT EXIST")
 					
 			else:
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
@@ -568,29 +568,29 @@ def NS_Protocol_Server(sock):
 		print('\n>>STARTED TRUST MANAGER AUTHENTICATION\n\n')
 		
 		print("RECEIVED STEP 1")
-		mess = pickle.loads(socketClient.recv(1024))
+		mess=socketClient.recv(1024)
+		mess = json.loads(mess.decode())
 		print( mess, "\n" )
 		result = server_ns.round1_client(mess)
 		print('result: ',result)
 
 		print("SENDING STEP 3")
-		socketClient.send( pickle.dumps(result) )
+		socketClient.send( json.dumps(result).encode() )
 		print( "\n" )
 
 
 		print("RECEIVED STEP 5")
-		mess = pickle.loads(socketClient.recv(1024))
+		mess = json.loads(socketClient.recv(1024).decode())
 		print( mess, "\n" )
 		result = server_ns.round3_client(mess)
 		print('result: ',result)
 
 		print("SENDING STEP 6")
-		socketClient.send( pickle.dumps(result) )
+		socketClient.send( result )
 		print( "\n" )
 
 		print("RECEIVED STEP 7")
-		mess = pickle.loads(socketClient.recv(1024))
-		print( mess, "\n" )
+		mess = socketClient.recv(1024)
 		print( mess, "\n" )
 		result = server_ns.round4_client(mess)
 		print('result: ',result)
@@ -604,7 +604,7 @@ def NS_Protocol_Server(sock):
 
 	except Exception as err:
 				print (">> !!CONNECTION INTERRUPTED!!\n")
-				#print(err)
+				print(err)
 				exit()
 
 	
