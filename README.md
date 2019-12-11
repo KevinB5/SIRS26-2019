@@ -94,3 +94,82 @@ Virtual Machine Setup:
 			VM3(TrustManager):
 			
 				- $ sudo ufw allow from 192.168.1.10 to any port 65432
+				
+How to use:
+	
+	After setup we can start the program.
+	For that we need to have all 3 VMs running, and then follow the next steps for each one:
+		
+		- Open New Terminal (CTRL+ALT+T)
+		- $ cd ~/Documents/SIRS26-2019/(VM NAME)
+			example: $ cd ~/Documents/SIRS26-2019/Client
+		- $ python3 (VM NAME).py
+			example: $ python3 Client.py
+		The step above should look like the image at Screenshots/1_Startup.JPG .
+	Now we have Client, Server and TrustManager running.
+	After everything running we can use our program.
+		
+	Now we only interact with Client Interface (Client VM):
+	
+	First, you need to identify yourself to TrustManager like show at Screenshots/2_NS.JPG ;
+		Input your Username;
+	You will be prompted to Login Menu, choose option 1 ;
+		Input your password;
+	If everything went fine, it should look like Screenshots/4_User_Login.JPG and you're logged in the program.
+	
+	Now it's time to navigate between menus and explore the program;
+	Remember to navigate between menus we allways need to input the number of the option we want;
+	
+	At this point we're at the Main Menu;
+	
+	 	We have 4 options : 
+	 		1. Scoreboard (Takes us to Scoreboard Menu)
+			2. Submit     (Takes us to Submit Menu)
+			3. Compute Fingerprint (Takes us to Compute Fingerprint )
+			0. Last Menu (Takes us back to the last Menu)
+		
+		Input the number of the option to follow;
+		Example: 1
+	
+	A briefly explanation of each option and it's following ones:
+	
+		Scoreboard Menu:
+	
+			1. Check Score 
+			2. Check Vulnerabilities and Fingerprints
+			3. Check Team ScoreBoard 
+			4. Check Team Vulnerabilities and Fingerprints
+			0. Last Menu (Takes us back to the last Menu)
+		
+			Check score shows your current score;
+			Check Vulnerabilities and Fingerprints shows Vulnerabilities and Fingerprints you have submited;
+			
+			Team Leader Options Only:
+			
+			Check Team ScoreBoard shows the team ScoreBoard;
+			Check Team Vulnerabilities and Fingerprints shows all submited Vulnerabilities and Fingerprints 
+			from members of your team;
+			
+		Submit Menu:
+				
+ 			1. Fingerprint and Vulnerabilities
+			0. Last Menu (Takes us back to the last Menu)
+		
+			Fingerprint and Vulnerabilities option will ask for the fingerprint and vulnerabilities:
+				The input for fingerprint is the computed fingerprint we can get for the option Compute Fingerprint 					explained further ahead,
+				The input for vulnerabilities is the name of the file containing the vulnerabilities;
+				
+		Compute Fingerprint:
+			
+			This option will ask for the Binary:
+				The input to give to Binary is the name of the file of which we want to generate the corresponding 					Fingerprint;
+	
+	To exit the program we just need to go to Login Menu again and choose option 0.Exit ;
+	
+	For more examples of the interactions go to folder Screenshots ,
+	
+	That's it, now we know how to use the program,
+	Explore it and enjoy.
+	Stay safe.
+	
+			
