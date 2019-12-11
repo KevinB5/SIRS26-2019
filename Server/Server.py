@@ -265,6 +265,8 @@ class ServerSocket:
 				teamVulnsandFing = DB_Scoreboard.get_team_vulnsAndfingerprint(group_id[0])
 				teamVulnsandFing = json.dumps(self.toList(teamVulnsandFing))
 				
+				print("\n\nTEAM:", teamVulnsandFing, "\n\n")
+				
 				print("SENDING TEAM VULNS AND FINGERPRINTS \n")
 				
 				self.send_encrypted(teamVulnsandFing)
@@ -309,25 +311,31 @@ class ServerSocket:
 				print (">>Transfer concluded \n\n>>Transfering file")
 				
 				# receiving the vulnerabilities file
-				vulnFile, finalVulnFile = b"", ""
+				vulnFile = b""
 				while (vulnFile[-4:] != b"\n\r##"):
 					vulnFile += self.connssl.recv(1024)
-	
+			
+				vulnFile = vulnFile.replace(b"\n\r##", b"")
+				vulnFile = self.server_ns.receive_message(vulnFile)
+				vulnFile = b64decode(vulnFile.encode())
 
-				finalVulnFile = vulnFile.replace(b"\n\r##", b"")
-				vulnFile = self.server_ns.receive_message(finalVulnFile)
-				
 				print (">>Transfer concluded")
 				
 				
 				splitLines, vulns = vulnFile.split(), []
-				
+
+				print("\n\nSPLIT:", splitLines, "\n\n")
+
 				for i in range(len(splitLines)):
-					if( splitLines[i] == "Vulnerability:"):
+					if( splitLines[i] == b"Vulnerability:"):
 						vulns.append(str(splitLines[i+1], "utf-8"))
-				
+			
+			
+				print("\n\nVULNS123:", vulns, "\n\n")
+			
 				# Adding vulnerabilities to DB
-				bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username)
+				group_id = DB_User.getUserGroupID(self.username)
+				bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0])
 		
 				#TODO: Add filename on log
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')

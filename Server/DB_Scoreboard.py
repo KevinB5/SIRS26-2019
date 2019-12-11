@@ -141,8 +141,9 @@ def add_score_vulnerability(fingerprint, vulns, username, group_id):
 	else:
 		try:
 			db = connect()
-
+			
 			# Updated Points and Number of Vulnerabilities
+			
 			updated_points = len(result)*10
 			updated_numVul = len(result)
 			
@@ -188,6 +189,10 @@ def vulnerability_exist(fingerprint, vulns, username):
 		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 
+		if( result == [] ):
+			return vulns
+
+
 		notRepeated = []
 		
 		for vuln in vulns:
@@ -200,6 +205,7 @@ def vulnerability_exist(fingerprint, vulns, username):
 	
 			if( not repeated ):
 				notRepeated.append(vuln)
+	
 	
 		System_log.writeSystemLog('Database Scoreboard','Connection successful','info')
 		# Return the vulns to be added to DB , else return False
