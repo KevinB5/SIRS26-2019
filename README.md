@@ -6,17 +6,19 @@ Virtual Machine Setup:
 - execute:
 	- $ sudo apt get update
 	- $ sudo apt get upgrade
-- Clone 4 times the virtual machine to have Server (VM1), Client(VM2), Trust Manager(VM3) and Switch(VM4) versions.
+- Clone 2 times (Full Clone) the virtual machine to have Server (VM1), Client(VM2), Trust Manager(VM3) versions.
 
 - Global config (for VM 1,2 and 3):
 	- Install python3:
 		- $ sudo apt install python3
 		- $ sudo apt install python3-pip
 	- Install apache2:
-		- $ sudo pip3 install mysql-connector
-		- $ sudo /etc/init.d/mysql start (may need to start apache2 also)
+		- $ sudo apt-get install apache2
+		- $ sudo /etc/init.d/apache2 start
 	- Install mySQL-server:
+		- $ sudo pip3 install mysql-connector
 		- $ sudo apt-get install mysql-server
+		- $ sudo /etc/init.d/mysql start
 	- Install pycrypto and pycryptodome:
 		- $ pip install pycrypto
 		- $ pip install pycryptodome
@@ -24,42 +26,33 @@ Virtual Machine Setup:
 		- $ pip install bcrypt
 		- $ pip install datetime
 	- Install firewall:
-		- $ apt-get install ufw
-		- Setup default policies (must be done):
-			- $ sudo ufw default deny incoming
-			- $ sudo ufw default allow outgoing
+		- $ sudo apt-get install ufw
 
-- VM 1 - Server: (192.168.1.1):
-	- VirtualBoxSettings:
-		- Network - Adapter 2 - Internal Network (sirs_switchServer)
-		- $ sudo hostnamectl set-hostname server
-		- $ sudo vi /etc/hosts
-		- In the hosts file, change the name for 127.0.1.1 to server
-		- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
-- VM 2 - Client: (192.168.2.1)
-	- VirtualBoxSettings:
-		- Network - Adapter 2 - Internal Network (sirs_switchClient)
-		- $ sudo hostnamectl set-hostname client
-		- $ sudo vi /etc/hosts
-		- In the hosts file, change the name for 127.0.1.1 to client
-		- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
-- VM 3 - TrustManager: (192.168.3.1)
-	- VirtualBoxSettings:
-		- Network - Adapter 2 - Internal Network (sirs_switchTrustManager)
-		- $ sudo hostnamectl set-hostname trustmanager
-		- $ sudo vi /etc/hosts
-		- In the hosts file, change the name for 127.0.1.1 to trustmanager
-		- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
-- VM 4 - Switch/Firewall: (192.168.1.254 , 192.168.2.254 , 192.168.3.254)
-	- VirtualBoxSettings:
-		- Network - Adapter 2 - Internal Network (sirs_switchServer)
-		- Network - Adapter 3 - Internal Network (sirs_switchClient)
-		- Network - Adapter 4 - Internal Network (sirs_switchTrustManager)
-		- $ sudo hostnamectl set-hostname switch
-		- $ sudo vi /etc/hosts
-		- In the hosts file, change the name for 127.0.1.1 to switch
-		- Edit /etc/sysctl.conf :
-			- Uncoment net.ipv4.ip_forward=1
+
+- VM 1 - Server: (192.168.1.20):
+	- VirtualBox Settings:
+		- Network - Adapter 2 - Internal Network (sirs_switchServerClient)
+	- $ sudo hostnamectl set-hostname server
+	- $ sudo vi /etc/hosts
+	- In the hosts file, change the name for 127.0.1.1 to server
+	- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
+	
+- VM 2 - Client: (192.168.1.10)
+	- VirtualBox Settings:
+		- Network - Adapter 2 - Internal Network (sirs_switchServerClient)
+	- $ sudo hostnamectl set-hostname client
+	- $ sudo vi /etc/hosts
+	- In the hosts file, change the name for 127.0.1.1 to client
+	- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
+	
+- VM 3 - TrustManager: (192.168.1.100)
+	- VirtualBox Settings:
+		- Network - Adapter 2 - Internal Network (sirs_switchServerClient)
+	- $ sudo hostnamectl set-hostname trustmanager
+	- $ sudo vi /etc/hosts
+	- In the hosts file, change the name for 127.0.1.1 to trustmanager
+	- Edit /etc/network/interfaces  - (Follow interfaces picture on Screenshots/interfaces_settings.JPG)
+
 
 - MySQL Setup:
 	- Import Database:
@@ -86,6 +79,18 @@ Virtual Machine Setup:
 
 - FIREWALL DEPLOYMENT
 	
-
-
-
+		- Setup default policies (must be done for each VM):
+			- $ sudo ufw default deny incoming
+			- $ sudo ufw default allow outgoing
+		- Setup specific rules:
+		
+			VM1(Server):
+				- $ sudo ufw allow from 192.168.1.10 to any port 65433
+			
+			VM2(Client):
+				- $ sudo ufw allow from 192.168.1.20 to any port 65433
+				- $ sudo ufw allow from 192.168.1.100 to any port 65432
+				
+			VM3(TrustManager):
+			
+				- $ sudo ufw allow from 192.168.1.10 to any port 65432
