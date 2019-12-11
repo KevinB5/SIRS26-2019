@@ -11,6 +11,7 @@ from Client_NS import ClientNS
 
 
 #HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+#HOST2 = "127.0.0.1"  # Standard loopback interface address (localhost)
 #PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 #PORT2 = 65440
 
@@ -488,6 +489,7 @@ def NS_Protocol_Client():
 
 		print("SENDING STEP 3")
 		sockTrustManager.connect((HOST2, PORT2))
+		#sockTrustManager.connect((HOST, PORT2))
 		sockTrustManager.send( json.dumps(result).encode() )
 		print( "\n" )
 

@@ -109,6 +109,8 @@ class ClientNS:
 		decrypted_response = json.loads(message)
 		nonce = base64.b64decode(decrypted_response['nonce'])
 		self.current_nonce = nonce
+		new_iv = base64.b64decode(decrypted_response['session_iv'])
+		self.session_iv = new_iv
 		message = decrypted_response['content']
 		return message
 		

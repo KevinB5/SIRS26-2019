@@ -110,7 +110,9 @@ class TrustManagerNS:
 						key= split[1].rstrip("\n")
 					elif split[0]=='iv ':
 						iv= split[1].rstrip("\n")
-		finally:
+					elif split[0]=='validation'
+						validation= split[1].rstrip("\n")
+		finally:	
 			try:
 				f.close()
 			except Exception as err:

@@ -103,9 +103,11 @@ class ServerNS:
         aes = AES.new(self.session_key[:32], AES.MODE_CBC, self.session_iv[:16])
         nonce = os.urandom(16)
         self.nonce = nonce
-        message = {'nonce':str(b64encode(nonce),'utf-8'),'content':content}
+        new_iv = os.urandom(16)
+        message = {'nonce':str(b64encode(nonce),'utf-8'),'content':content,'session_iv':str(b64encode(new_iv),'utf-8')}
         message = json.dumps(message)
         encrypted_message = aes.encrypt(bytes(pad(message),'utf-8'))
+        self.session_iv = new_iv
         return encrypted_message
 
     def receive_message(self,message):
