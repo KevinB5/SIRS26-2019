@@ -156,13 +156,13 @@ How to use:
 			0. Last Menu (Takes us back to the last Menu)
 		
 			Fingerprint and Vulnerabilities option will ask for the fingerprint and vulnerabilities:
-				The input for fingerprint is the computed fingerprint we can get for the option Compute Fingerprint 					explained further ahead,
+				The input for fingerprint is the computed fingerprint we can get for the option Compute Fingerprint explained further ahead,
 				The input for vulnerabilities is the name of the file containing the vulnerabilities;
 				
 		Compute Fingerprint:
 			
 			This option will ask for the Binary:
-				The input to give to Binary is the name of the file of which we want to generate the corresponding 					Fingerprint;
+				The input to give to Binary is the name of the file of which we want to generate the corresponding Fingerprint;
 	
 	To exit the program we just need to go to Login Menu again and choose option 0.Exit ;
 	
