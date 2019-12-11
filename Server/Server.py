@@ -212,7 +212,13 @@ class ServerSocket:
 			
 			if(self.userAuthorized == True):
 				result = DB_Scoreboard.get_user_vulnsAndfingerprint(self.username)
-				result = json.dumps(result)
+				complete_list = []
+				#print('OLD RESULT',result)
+				for i in range(len(result)):
+					complete_list.append([result[i][0].decode(),result[i][1].decode()])
+
+				#print('RESULT ',complete_list)
+				result = json.dumps(complete_list)
 				
 				print("SENDING USER VULNS AND FINGERPRINTS \n")
 				
@@ -342,7 +348,9 @@ class ServerSocket:
 					for i in range(len(splitLines)):
 						if( splitLines[i] == b"Vulnerability:"):
 							vulns.append(str(splitLines[i+1], "utf-8"))
-				
+
+
+					#TODO
 					# Adding vulnerabilities to DB
 					group_id = DB_User.getUserGroupID(self.username)
 					bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0])
