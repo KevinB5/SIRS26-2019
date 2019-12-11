@@ -21117,3 +21117,9 @@
 12/11/2019 10:16:41 AM - root - INFO - TOPIC:Database Users; EVENT:Connection successful;
 12/11/2019 10:16:43 AM - root - INFO - TOPIC:Database Users; EVENT:Connection closed;
 12/11/2019 10:17:37 AM - root - INFO - TOPIC:Server; EVENT:Server closed;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection attemp;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection successful;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection closed;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection attemp;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection successful;
+12/11/2019 10:25:49 AM - root - INFO - TOPIC:Database Users; EVENT:Connection closed;
