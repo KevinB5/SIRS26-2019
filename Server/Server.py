@@ -200,7 +200,6 @@ class ServerSocket:
 			self.send_encrypted("NO AUTHENTICATION")
 
 
-
 	#
 	#
 	#
@@ -298,7 +297,22 @@ class ServerSocket:
 			self.connssl.send(b"\n\r##")
 
 
-
+	def checkVulnerabilityPoints(self,fingerprint,vulns):
+		points=0
+		try:
+			with open('vulns-points','r') as fp:
+				for line in fp:
+					linesplit = line.split(';')
+					if(linesplit[0]==fingerprint and linesplit[1] in vulns):
+						points=points+int(linesplit[2])
+			return points
+		finally:
+			try:
+				fp.close()
+			except Exception as err:
+				print (">> !!VULNERABILITY FINGERPRINTS FILE DOES NOT EXIST!!\n")
+				#print(err)
+				exit()
 
 
 	def submitVulnerability(self):
@@ -328,12 +342,13 @@ class ServerSocket:
 				print (">>Transfer concluded \n\n>>Transfering file")
 
 
-				if (vulnFile != b"\n\r##"):
+				
 
 					# receiving the vulnerabilities file
-					vulnFile = b""
-					while (vulnFile[-4:] != b"\n\r##"):
-						vulnFile += self.connssl.recv(1024)
+				vulnFile = b""
+				while (vulnFile[-4:] != b"\n\r##"):
+					vulnFile += self.connssl.recv(1024)
+				if (vulnFile != b"\n\r##"):
 
 				
 					vulnFile = vulnFile.replace(b"\n\r##", b"")
@@ -350,23 +365,29 @@ class ServerSocket:
 							vulns.append(str(splitLines[i+1], "utf-8"))
 
 
-					#TODO
-					# Adding vulnerabilities to DB
-					group_id = DB_User.getUserGroupID(self.username)
-					bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0])
-			
-					#TODO: Add filename on log
-					System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
-					if( bool ):
+					vulnerabilityPoints = self.checkVulnerabilityPoints(fingerprint,vulns)
+						# Adding vulnerabilities to DB
+					if(vulnerabilityPoints>0):
+						group_id = DB_User.getUserGroupID(self.username)
+						bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username, group_id[0],vulnerabilityPoints)
+				
 						#TODO: Add filename on log
-						System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
-						print("ADDED NEW VULNERABILITY")
-			
+						System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
+						if( bool ):
+							#TODO: Add filename on log
+							System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
+							print("ADDED NEW VULNERABILITY")
+							self.send_encrypted("ADDED NEW VULNERABILITY")
+				
+						else:
+							#TODO: Add filename on log
+							System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
+							print("THIS VULNERABILITY ALREADY EXIST")
+							self.send_encrypted("THIS VULNERABILITY ALREADY EXIST")
 					else:
-						#TODO: Add filename on log
-						System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
-						print("THIS VULNERABILITY ALREADY EXIST")
-						
+						System_log.writeUserLog('',self.username,'Submited vulnerability does not exists','Vulnerability','Rejected','warning')
+						print("THIS VULNERABILITY DOES NOT EXIST")
+						self.send_encrypted("THIS VULNERABILITY DOES NOT EXIST")
 					
 			else:
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')

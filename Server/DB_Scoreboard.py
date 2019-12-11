@@ -130,7 +130,7 @@ def get_team_vulnsAndfingerprint(group_id):
 
 
 
-def add_score_vulnerability(fingerprint, vulns, username, group_id):
+def add_score_vulnerability(fingerprint, vulns, username, group_id,updated_points):
 	
 
 	result = vulnerability_exist(fingerprint, vulns, username)
@@ -144,7 +144,7 @@ def add_score_vulnerability(fingerprint, vulns, username, group_id):
 			
 			# Updated Points and Number of Vulnerabilities
 			
-			updated_points = len(result)*10
+			#updated_points = len(result)*10
 			updated_numVul = len(result)
 			
 			cursor = db.cursor(prepared=True)
@@ -189,6 +189,7 @@ def vulnerability_exist(fingerprint, vulns, username):
 		cursor.execute(query,parameters)
 		result = cursor.fetchall()
 
+		print('RESULT EXIST',result)
 		if( result == [] ):
 			return vulns
 
@@ -199,7 +200,7 @@ def vulnerability_exist(fingerprint, vulns, username):
 			repeated = False
 			
 			for storedVuln in result:
-				if( storedVuln[0] == vuln ):
+				if( storedVuln[0].decode() == vuln ):
 					repeated = True
 					break
 	

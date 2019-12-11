@@ -439,6 +439,9 @@ class Client_Socket:
 				
 				# sending the vulns file
 				self.sendFile(file2)
+
+				mess = self.client_ns.receive_message(self.ssl_sock.recv(1024))
+				print( "\n>>", mess)
 				
 				return "SUBMIT_MENU"
 			
