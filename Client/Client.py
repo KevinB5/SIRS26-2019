@@ -281,25 +281,27 @@ class Client_Socket:
 			self.ssl_sock.send(EOF)
 
 			# message received from server
-			mess = client_ns.receive_message(self.ssl_sock.recv(1024))
+			mess = b""
+			while True:
+				packet = self.ssl_sock.recv(1024)
+				if(b"\n\r##" in packet):
+					break
+				mess += packet
 			
+			mess = mess.replace(b"\n\r##", b"")
+			mess = self.client_ns.receive_message(mess)
+			mess = json.loads(mess)
+
 			# print in terminal : User ; Fingerprint ; Name_Vuln ;
-			newAux = re.findall("[^(),]+", mess[1:-1])
 			print("\n\nUser  ;" + " "*60 + "Fingerprint  ;" + " "*70 + "Name_Vuln  ;\n" )
 
 			k = 0
-			for name in newAux:
-				strAux = name[1:-1]
-				strAux = strAux.replace("'","")
-			
-				k = k + 1
-				sep = "    ;    "
-				
-				if( k % 4 == 0):
-					print("\n")
-					sep = ""
-			
-				print(strAux + sep, end="")
+			sep = "    ;    "
+			for lista in mess:
+				for name in lista:
+					print(name + sep, end="")
+				print("\n")
+
 			print("\n\n")
 			
 			return "SCOREBOARD_MENU"
@@ -429,9 +431,6 @@ class Client_Socket:
 				file2 = input()
 				
 				# if it does not find file ...
-				#while (not os.path.isfile(file2)) or (not os.path.exists(file2)):
-				#	print("NO SUCH FILE !!! TRY AGAIN \n\nVULNERABILITIES:", end="")
-				#	file2 = input()
 				if(not os.path.isfile(file2)) or (not os.path.exists(file2)):
 					print("\nNO SUCH FILE !!! TRY AGAIN")
 					EOF = b"\n\r##"

@@ -212,15 +212,22 @@ class ServerSocket:
 			
 			if(self.userAuthorized == True):
 				result = DB_Scoreboard.get_user_vulnsAndfingerprint(self.username)
+				result = json.dumps(result)
+				
 				print("SENDING USER VULNS AND FINGERPRINTS \n")
-				self.send_encrypted(str(result))
+				
+				self.send_encrypted(result)
+				self.connssl.send(b"\n\r##")
 			else:
 				print("USER NOT AUTHORIZED\n")
+				
 				self.send_encrypted("NO AUTHORIZATION")
+				self.connssl.send(b"\n\r##")
 		else:
 			print("USER NOT AUTHENTICATED\n")
+			
 			self.send_encrypted("NO AUTH")
-
+			self.connssl.send(b"\n\r##")
 
 
 	#
