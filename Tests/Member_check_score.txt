@@ -1,0 +1,24 @@
+Client> 
+	Username:
+		TiagoS
+
+	PLEASE CHOOSE AN OPTION:
+		1
+	
+	Password:
+		tiagos
+
+	PLEASE CHOOSE AN OPTION:
+		1
+
+	PLEASE CHOOSE AN OPTION:
+		1
+
+	PLEASE CHOOSE AN OPTION:
+		0
+	
+	PLEASE CHOOSE AN OPTION:
+		0
+
+	PLEASE CHOOSE AN OPTION:
+		0
