@@ -224,8 +224,13 @@ class Client_Socket:
 			file = input("\n\nBINARY FILE:")
 			
 			# if it does not find file ...
-			while (not os.path.isfile(file)) or (not os.path.exists(file)):
-				file = input("\nNO SUCH FILE !!! TRY AGAIN \n\nBINARY FILE:")
+			#while (not os.path.isfile(file)) or (not os.path.exists(file)):
+				#file = input("\nNO SUCH FILE !!! TRY AGAIN \n\nBINARY FILE:")
+			if(not os.path.isfile(file)) or (not os.path.exists(file)):
+				print("\nNO SUCH FILE !!! TRY AGAIN \n\n")
+				EOF = b"\n\r##"
+				self.ssl_sock.send(EOF)
+				return "SECOND_MENU"
 	
 			# sending the binary file
 			self.sendFile(file)
@@ -424,9 +429,14 @@ class Client_Socket:
 				file2 = input()
 				
 				# if it does not find file ...
-				while (not os.path.isfile(file2)) or (not os.path.exists(file2)):
-					print("NO SUCH FILE !!! TRY AGAIN \n\nVULNERABILITIES:", end="")
-					file2 = input()
+				#while (not os.path.isfile(file2)) or (not os.path.exists(file2)):
+				#	print("NO SUCH FILE !!! TRY AGAIN \n\nVULNERABILITIES:", end="")
+				#	file2 = input()
+				if(not os.path.isfile(file2)) or (not os.path.exists(file2)):
+					print("\nNO SUCH FILE !!! TRY AGAIN")
+					EOF = b"\n\r##"
+					self.ssl_sock.send(EOF)
+					return "SUBMIT_MENU"
 				
 				# sending the vulns file
 				self.sendFile(file2)

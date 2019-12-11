@@ -304,6 +304,7 @@ class ServerSocket:
 				while (fingerprint[-4:] != b"\n\r##"):
 					fingerprint += self.connssl.recv(1024)
 			
+
 				fingerprint = fingerprint.replace(b"\n\r##", b"")
 				fingerprint = self.server_ns.receive_message(fingerprint)
 				
@@ -315,35 +316,37 @@ class ServerSocket:
 				vulnFile, finalVulnFile = b"", ""
 				while (vulnFile[-4:] != b"\n\r##"):
 					vulnFile += self.connssl.recv(1024)
-	
-
-				finalVulnFile = vulnFile.replace(b"\n\r##", b"")
-				vulnFile = self.server_ns.receive_message(finalVulnFile)
-				
-				print (">>Transfer concluded")
-				
-				
-				splitLines, vulns = vulnFile.split(), []
-				
-				for i in range(len(splitLines)):
-					if( splitLines[i] == "Vulnerability:"):
-						vulns.append(str(splitLines[i+1], "utf-8"))
-				
-				# Adding vulnerabilities to DB
-				bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username)
 		
-				#TODO: Add filename on log
-				System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
-				if( bool ):
-					#TODO: Add filename on log
-					System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
-					print("ADDED NEW VULNERABILITY")
-		
-				else:
-					#TODO: Add filename on log
-					System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
-					print("THIS VULNERABILITY ALREADY EXIST")
+				#
+				if ( vulnFile != b"\n\r##"):
+				#
+					finalVulnFile = vulnFile.replace(b"\n\r##", b"")
+					vulnFile = self.server_ns.receive_message(finalVulnFile)
 					
+					print (">>Transfer concluded")
+					
+					
+					splitLines, vulns = vulnFile.split(), []
+					
+					for i in range(len(splitLines)):
+						if( splitLines[i] == "Vulnerability:"):
+							vulns.append(str(splitLines[i+1], "utf-8"))
+					
+					# Adding vulnerabilities to DB
+					bool = DB_Scoreboard.add_score_vulnerability(fingerprint, vulns, self.username)
+			
+					#TODO: Add filename on log
+					System_log.writeUserLog('',self.username,'Submited vulnerability attempt','Vulnerability','Request','info')
+					if( bool ):
+						#TODO: Add filename on log
+						System_log.writeUserLog('',self.username,'Submited vulnerability successfull','Vulnerability','Accepted','info')
+						print("ADDED NEW VULNERABILITY")
+			
+					else:
+						#TODO: Add filename on log
+						System_log.writeUserLog('',self.username,'Submited vulnerability already exists','Vulnerability','Rejected','warning')
+						print("THIS VULNERABILITY ALREADY EXIST")
+						
 					
 			else:
 				System_log.writeUserLog('',self.username,'Submited vulnerability attempt, user not authenticated','Vulnerability','Rejected','error')
@@ -439,18 +442,22 @@ class ServerSocket:
 				while (data[-4:] != b"\n\r##"):
 					data += self.connssl.recv(1024)
 				
-				final_data = data.replace(b"\n\r##", b"")
-				data = self.server_ns.receive_message(final_data)
-				data = b64decode(data.encode())
+				#
+				if ( data != b"\n\r##"):
+				#
 
-				# calculate the fingerprint of the file
-				hash_object = hashlib.sha512(data)
-				fingerprint = hash_object.hexdigest()
-	
-				print("\n\nFINGERPRINT:", fingerprint, "\n\n")
-	
-				self.send_encrypted(str(fingerprint))
-				self.connssl.send(b"\n\r##")
+					final_data = data.replace(b"\n\r##", b"")
+					data = self.server_ns.receive_message(final_data)
+					data = b64decode(data.encode())
+
+					# calculate the fingerprint of the file
+					hash_object = hashlib.sha512(data)
+					fingerprint = hash_object.hexdigest()
+		
+					print("\n\nFINGERPRINT:", fingerprint, "\n\n")
+		
+					self.send_encrypted(str(fingerprint))
+					self.connssl.send(b"\n\r##")
 
 
 			else:
